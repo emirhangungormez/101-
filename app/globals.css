@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+.tile-red{color:#e11d48!important}.tile-blue{color:#2563eb!important}.tile-black{color:#171717!important}.tile-yellow{color:#d97706!important}.tile-joker{color:#7c3aed!important}.rack-grid{background:#fff!important;border:0!important}.sort{height:38px!important}
+
 @font-face{font-family:DM Sans;src:url('/fonts/dm-sans/DMSans-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:DM Sans;src:url('/fonts/dm-sans/DMSans-Medium.ttf') format('truetype');font-weight:500;font-style:normal;font-display:swap}
 @font-face{font-family:DM Sans;src:url('/fonts/dm-sans/DMSans-SemiBold.ttf') format('truetype');font-weight:600;font-style:normal;font-display:swap}
