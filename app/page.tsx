@@ -41,7 +41,7 @@ export default function Home() {
   const [notice, setNotice] = useState("Sıra sizde");
   const [hasDrawn, setHasDrawn] = useState(false);
   const [socket, setSocket] = useState<Socket | null>(null);
-  useEffect(() => { const s = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:4000", { transports: ["websocket"] }); setSocket(s); const mapRooms = (list: any[]) => setRooms(list.map(d => ({ id: d.odaId, name: d.odaAdi, owner: d.oyuncular[0]?.socketId === s.id ? "Siz" : "Oyuncu", players: d.oyuncular.length, max: 4, status: "" }))); s.on("connect", () => s.emit("oda-listesi-iste")); s.on("oda-listesi", mapRooms); s.on("oda-durum", () => s.emit("oda-listesi-iste")); s.on("oda-olusturuldu", ({ odaId }) => { setSelectedRoom(odaId); setScreen("room"); }); return () => { s.disconnect(); }; }, []);
+  useEffect(() => { const s = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:4000", { transports: ["websocket"] }); setSocket(s); const mapRooms = (list: any[]) => setRooms(list.map(d => ({ id: d.odaId, name: d.odaAdi, owner: d.kurucuSocketId === s.id ? "Siz" : "Oyuncu", players: d.oyuncular.length, max: 4, status: "" }))); s.on("connect", () => s.emit("oda-listesi-iste")); s.on("oda-listesi", mapRooms); s.on("oda-durum", () => s.emit("oda-listesi-iste")); s.on("oda-olusturuldu", ({ odaId }) => { setSelectedRoom(odaId); setScreen("room"); }); return () => { s.disconnect(); }; }, []);
   useEffect(() => {
     const path = window.location.pathname.replace(/^\//, "");
     if (["lobby", "room", "game", "settings"].includes(path)) setScreen(path as "lobby" | "room" | "game" | "settings");
