@@ -89,10 +89,12 @@ export default function Home() {
   };
 
   const dropRack = (e: React.DragEvent, index: number) => {
-    e.preventDefault(); const data = dragData(e); if (!data) return;
-    if (data.source === "rack") { if (data.index === index) return; setRack(old => { const next=[...old]; [next[index],next[data.index]]=[next[data.index],next[index]]; return next; }); return; }
-    if (rack[index]) return;
-    if (data.source === "deck" || data.source === "discard") return drawTile(data.source, index);
+    e.preventDefault(); const grid = e.currentTarget.parentElement?.getBoundingClientRect(); let targetIndex=index;
+    if (grid) { const col=Math.max(0,Math.min(15,Math.round((e.clientX-grid.left)/(grid.width/16)-.5))); const row=Math.max(0,Math.min(1,Math.round((e.clientY-grid.top)/(grid.height/2)-.5))); targetIndex=row*16+col; }
+    const data = dragData(e); if (!data) return;
+    if (data.source === "rack") { if (data.index === targetIndex) return; setRack(old => { const next=[...old]; [next[targetIndex],next[data.index]]=[next[data.index],next[targetIndex]]; return next; }); return; }
+    if (rack[targetIndex]) return;
+    if (data.source === "deck" || data.source === "discard") return drawTile(data.source, targetIndex);
   };
   const moveRackByClick = (index: number) => { if (rack[index]) return setSelectedRackIndex(index); if (selectedRackIndex === null) return; setRack(old => { const next=[...old]; next[index]=next[selectedRackIndex]; next[selectedRackIndex]=null; return next; }); setSelectedRackIndex(null); };
 
