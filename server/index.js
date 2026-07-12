@@ -1,0 +1,21 @@
+import express from "express";
+import { createServer } from "node:http";
+import { Server } from "socket.io";
+import { aktifOdalar, yeniOda, genelDurum, elDagit, seriElDogrula } from "./game.js";
+
+const app = express(); const httpServer = createServer(app); const io = new Server(httpServer, { cors: { origin: true, credentials: true } });
+const odaBul = (socket) => Object.values(aktifOdalar).find(o => o.oyuncular.some(p => p.socketId === socket.id) || o.izleyiciler.includes(socket.id));
+const yayinla = (oda) => io.to(oda.odaId).emit("oda-durum", genelDurum(oda));
+const hata = (socket, message) => socket.emit("hata", { message });
+
+io.on("connection", socket => {
+  socket.on("oda-olustur", odaAdi => { try { const odaId = `oda-${Math.random().toString(36).slice(2, 8)}`; const oda = yeniOda(odaId, String(odaAdi || "Yeni Masa").slice(0, 40), { socketId: socket.id, isim: "Oyuncu" }); aktifOdalar[odaId] = oda; socket.join(odaId); socket.data.odaId = odaId; socket.emit("oda-olusturuldu", { odaId }); yayinla(oda); } catch (e) { hata(socket, "Oda olusturulamadi"); } });
+  socket.on("oda-katil", odaId => { const oda = aktifOdalar[odaId]; if (!oda) return hata(socket, "Oda bulunamadi"); socket.join(odaId); socket.data.odaId = odaId; if (oda.oyuncular.length < 4) oda.oyuncular.push({ socketId: socket.id, isim: "Oyuncu", koltukNo: oda.oyuncular.length, eldekiTaslar: [] }); else oda.izleyiciler.push(socket.id); yayinla(oda); });
+  socket.on("oyun-baslat", () => { const oda = odaBul(socket); if (!oda || oda.oyuncular.length !== 4 || oda.oyuncular[0].socketId !== socket.id) return hata(socket, "Oyun 4 oyuncu ve kurucu ile baslatilabilir"); elDagit(oda); oda.oyuncular.forEach(p => io.to(p.socketId).emit("el-guncelle", p.eldekiTaslar)); yayinla(oda); });
+  socket.on("tas-cek", kaynak => { const oda = odaBul(socket); const p = oda?.oyuncular.find(x => x.socketId === socket.id); if (!oda || !p || !oda.gameState.oyunBasladi || p.koltukNo !== oda.gameState.siradakiOyuncu) return hata(socket, "Sira sizde degil"); const tas = kaynak === "iskarta" ? oda.gameState.iskartaKutusu.shift() : oda.gameState.deste.pop(); if (!tas) return hata(socket, "Tas kalmadi"); p.eldekiTaslar.push(tas); socket.emit("el-guncelle", p.eldekiTaslar); yayinla(oda); });
+  socket.on("tas-at", tasId => { const oda = odaBul(socket); const p = oda?.oyuncular.find(x => x.socketId === socket.id); if (!oda || !p || p.koltukNo !== oda.gameState.siradakiOyuncu) return hata(socket, "Sira sizde degil"); const i = p.eldekiTaslar.findIndex(t => t.id === tasId); if (i < 0) return hata(socket, "Tas elinizde degil"); oda.gameState.iskartaKutusu.unshift(p.eldekiTaslar.splice(i, 1)[0]); oda.gameState.siradakiOyuncu = (oda.gameState.siradakiOyuncu + 1) % oda.oyuncular.length; socket.emit("el-guncelle", p.eldekiTaslar); yayinla(oda); });
+  socket.on("seri-el-ac", perler => { try { const oda = odaBul(socket); if (!oda) throw new Error("Oda bulunamadi"); const toplam = seriElDogrula(oda, socket.id, perler); io.to(oda.odaId).emit("el-acildi", { socketId: socket.id, toplam, masaZemini: oda.gameState.masaZemini, mevcutBaraj: oda.gameState.mevcutBaraj }); const p = oda.oyuncular.find(x => x.socketId === socket.id); socket.emit("el-guncelle", p.eldekiTaslar); } catch (e) { hata(socket, e.message || "El acilamadi"); } });
+  socket.on("disconnect", () => { const oda = odaBul(socket); if (!oda) return; oda.oyuncular = oda.oyuncular.filter(p => p.socketId !== socket.id); oda.izleyiciler = oda.izleyiciler.filter(id => id !== socket.id); if (!oda.oyuncular.length && !oda.izleyiciler.length) delete aktifOdalar[oda.odaId]; else yayinla(oda); });
+});
+app.get("/health", (_, res) => res.json({ ok: true, rooms: Object.keys(aktifOdalar).length }));
+const port = Number(process.env.PORT || 4000); httpServer.listen(port, () => console.log(`101 backend listening on :${port}`));
