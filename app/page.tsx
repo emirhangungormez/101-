@@ -95,7 +95,10 @@ export default function Home() {
   const discardTile = (e: React.DragEvent) => { e.preventDefault(); const d=dragData(e); if (!isMyTurn || !hasDrawn || d?.source !== "rack") return reject(); const tile=rack[d.index]; if(!tile)return; setRack(r=>r.map((v,i)=>i===d.index?null:v)); setDiscard(s=>[...s,tile]); setHasDrawn(false); setGame(g=>({...g,siradakiOyuncu:1,tur:g.tur+1})); setNotice("Taş atıldı — sıra Kuzen_1'de"); setTimeout(()=>{setGame(g=>({...g,siradakiOyuncu:0}));setNotice("Sıra yeniden sizde");},1200); };
   const sortRack = (mode:"series"|"pairs") => { const tiles=rack.filter(Boolean) as Tile[]; tiles.sort(mode==="series" ? (a,b)=>colors.indexOf(a.color)-colors.indexOf(b.color)||(Number(a.value)||99)-(Number(b.value)||99) : (a,b)=>(Number(a.value)||99)-(Number(b.value)||99)||colors.indexOf(a.color)-colors.indexOf(b.color)); setRack([...tiles,...Array(44-tiles.length).fill(null)]); setNotice(mode==="series"?"Taşlar serilere göre dizildi":"Taşlar çiftlere göre dizildi"); };
 
-  const players = [{name:"Siz",count:rack.filter(Boolean).length},{name:bots > 0 ? "Bilgisayar_1" : "Kuzen_1",count:21},{name:bots > 1 ? "Bilgisayar_2" : "Zeynep",count:20},{name:bots > 2 ? "Bilgisayar_3" : "Mert",count:19}];
+  const activeRoom = roomSnapshots.find(room => room.odaId === selectedRoom);
+  const roomPlayers = [...(activeRoom?.oyuncular ?? [])].sort((a:any,b:any) => a.koltukNo - b.koltukNo);
+  const me = roomPlayers.find((player:any) => player.socketId === socket?.id);
+  const players = [me, ...roomPlayers.filter((player:any) => player.socketId !== socket?.id)].filter(Boolean).map((player:any, index:number) => ({ name: player.isim || (player.bot ? "Robot" : "Oyuncu"), count: index === 0 ? rack.filter(Boolean).length : 21 })).concat(Array.from({ length: Math.max(0, 4 - roomPlayers.length) }, () => ({ name: "", count: 0 })));
   const createRoom = () => { setJoinedRoom(false); if (socket?.connected) { socket.emit("oda-olustur", { odaAdi: roomName || "Yeni Masa", maksimum: roomSize, kullaniciId: userId }); return; } const id = Date.now(); setRooms(old => [...old, { id, name: roomName || "Yeni Masa", owner: "Siz", players: 0, max: roomSize, status: "" }]); setSelectedRoom(id); setBots(0); setScreen("room"); };
   const deleteRoom = (id: number) => { socket?.emit("oda-sil", { odaId: id, kullaniciId: userId }); setRooms(old => old.filter(room => !(room.id === id && room.owner === "Siz"))); };
   const joinRoom = (id: number) => { socket?.emit("oda-izle", id); setSelectedRoom(id); setScreen("room"); };
@@ -133,7 +136,7 @@ export default function Home() {
 }
 
 function Grid({cells,zone,onDrop}:{cells:(TableTile|null)[];zone:Zone;onDrop:(e:React.DragEvent,z:Zone,i:number)=>void}) { return <div className={`grid ${zone}`}>{cells.map((tile,i)=><div className="grid-cell" key={i} onDragOver={e=>e.preventDefault()} onDrop={e=>onDrop(e,zone,i)}>{tile&&<TileView tile={tile} compact/>}</div>)}</div>; }
-function Opponent({p,active,className}:{p:{name:string;count:number};active:boolean;className:string}) { return <div className={`${className} ${active?"active":""}`}><span/><b>{p.name}</b><small>{p.count} TAŞ</small></div>; }
+function Opponent({p,active,className}:{p:{name:string;count:number};active:boolean;className:string}) { if (!p?.name) return null; return <div className={`${className} ${active?"active":""}`}><span/><b>{p.name}</b><small>{p.count} TAŞ</small></div>; }
 
 function StartMenu({onStart,onSettings}:{onStart:()=>void;onSettings:()=>void;notice:string}) { return <main className="start-screen"><div className="start-menu-content"><div className="start-mark"><div className="start-number" aria-hidden="true">101</div><span className="start-plus" aria-hidden="true">+</span></div><nav className="menu-actions" aria-label="Ana menü"><button className="primary-action" onClick={onStart}>Başla</button><button className="ghost-action" onClick={onSettings}>Ayarlar</button></nav></div></main>; }
 
