@@ -25,6 +25,7 @@ function TileView({ tile, compact = false, draggable = false, onDragStart, onDou
 
 export default function Home() {
   const [screen, setScreen] = useState<"menu" | "lobby" | "room" | "game" | "settings">("menu");
+  const [userId] = useState(() => { if (typeof window === "undefined") return "server"; const saved = window.localStorage.getItem("okey-user-id"); if (saved) return saved; const id = crypto.randomUUID(); window.localStorage.setItem("okey-user-id", id); return id; });
   const [profileName, setProfileName] = useState(() => profileNames[Math.floor(Math.random() * profileNames.length)]);
   const [profileEmoji, setProfileEmoji] = useState(() => profileEmojis[Math.floor(Math.random() * profileEmojis.length)]);
   const [soundOn, setSoundOn] = useState(true);
@@ -45,7 +46,7 @@ export default function Home() {
   const [notice, setNotice] = useState("Sıra sizde");
   const [hasDrawn, setHasDrawn] = useState(false);
   const [socket, setSocket] = useState<Socket | null>(null);
-  useEffect(() => { const s = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:4000", { transports: ["websocket"] }); setSocket(s); const mapRooms = (list: any[]) => { setRoomSnapshots(list); const joined = list.find(d => d.oyuncular.some((p: any) => p.socketId === s.id)); setJoinedRoomId(joined?.odaId ?? null); setRooms(list.map(d => ({ id: d.odaId, name: d.odaAdi, owner: d.kurucuSocketId === s.id ? "Siz" : "Oyuncu", players: d.oyuncular.length, max: d.maksimum || 4, status: "" }))); }; s.on("connect", () => s.emit("oda-listesi-iste")); s.on("oda-listesi", mapRooms); s.on("oda-durum", () => s.emit("oda-listesi-iste")); s.on("oyun-baslatildi", () => setScreen("game")); s.on("oda-katildi", ({ odaId }) => setJoinedRoomId(odaId)); s.on("oda-olusturuldu", ({ odaId }) => { setSelectedRoom(odaId); setScreen("room"); }); return () => { s.disconnect(); }; }, []);
+  useEffect(() => { const s = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:4000", { transports: ["websocket"] }); setSocket(s); const mapRooms = (list: any[]) => { setRoomSnapshots(list); const joined = list.find(d => d.oyuncular.some((p: any) => p.socketId === s.id)); setJoinedRoomId(joined?.odaId ?? null); setRooms(list.map(d => ({ id: d.odaId, name: d.odaAdi, owner: d.kurucuId === userId ? "Siz" : "Oyuncu", players: d.oyuncular.length, max: d.maksimum || 4, status: "" }))); }; s.on("connect", () => s.emit("oda-listesi-iste")); s.on("oda-listesi", mapRooms); s.on("oda-durum", () => s.emit("oda-listesi-iste")); s.on("oyun-baslatildi", () => setScreen("game")); s.on("oda-katildi", ({ odaId }) => setJoinedRoomId(odaId)); s.on("oda-olusturuldu", ({ odaId }) => { setSelectedRoom(odaId); setScreen("room"); }); return () => { s.disconnect(); }; }, [userId]);
   useEffect(() => {
     const path = window.location.pathname.replace(/^\//, "");
     if (["lobby", "room", "game", "settings"].includes(path)) setScreen(path as "lobby" | "room" | "game" | "settings");
@@ -95,11 +96,11 @@ export default function Home() {
   const sortRack = (mode:"series"|"pairs") => { const tiles=rack.filter(Boolean) as Tile[]; tiles.sort(mode==="series" ? (a,b)=>colors.indexOf(a.color)-colors.indexOf(b.color)||(Number(a.value)||99)-(Number(b.value)||99) : (a,b)=>(Number(a.value)||99)-(Number(b.value)||99)||colors.indexOf(a.color)-colors.indexOf(b.color)); setRack([...tiles,...Array(44-tiles.length).fill(null)]); setNotice(mode==="series"?"Taşlar serilere göre dizildi":"Taşlar çiftlere göre dizildi"); };
 
   const players = [{name:"Siz",count:rack.filter(Boolean).length},{name:bots > 0 ? "Bilgisayar_1" : "Kuzen_1",count:21},{name:bots > 1 ? "Bilgisayar_2" : "Zeynep",count:20},{name:bots > 2 ? "Bilgisayar_3" : "Mert",count:19}];
-  const createRoom = () => { setJoinedRoom(false); if (socket?.connected) { socket.emit("oda-olustur", { odaAdi: roomName || "Yeni Masa", maksimum: roomSize }); return; } const id = Date.now(); setRooms(old => [...old, { id, name: roomName || "Yeni Masa", owner: "Siz", players: 0, max: roomSize, status: "" }]); setSelectedRoom(id); setBots(0); setScreen("room"); };
-  const deleteRoom = (id: number) => { socket?.emit("oda-sil", id); setRooms(old => old.filter(room => !(room.id === id && room.owner === "Siz"))); };
+  const createRoom = () => { setJoinedRoom(false); if (socket?.connected) { socket.emit("oda-olustur", { odaAdi: roomName || "Yeni Masa", maksimum: roomSize, kullaniciId: userId }); return; } const id = Date.now(); setRooms(old => [...old, { id, name: roomName || "Yeni Masa", owner: "Siz", players: 0, max: roomSize, status: "" }]); setSelectedRoom(id); setBots(0); setScreen("room"); };
+  const deleteRoom = (id: number) => { socket?.emit("oda-sil", { odaId: id, kullaniciId: userId }); setRooms(old => old.filter(room => !(room.id === id && room.owner === "Siz"))); };
   const joinRoom = (id: number) => { socket?.emit("oda-izle", id); setSelectedRoom(id); setScreen("room"); };
-  const addComputer = (seat = 0) => socket?.emit("robot-ekle", { odaId: selectedRoom, koltukNo: seat });
-  const removeComputer = (seat = 0) => socket?.emit("robot-sil", { odaId: selectedRoom, koltukNo: seat });
+  const addComputer = (seat = 0) => socket?.emit("robot-ekle", { odaId: selectedRoom, koltukNo: seat, kullaniciId: userId });
+  const removeComputer = (seat = 0) => socket?.emit("robot-sil", { odaId: selectedRoom, koltukNo: seat, kullaniciId: userId });
   const joinSeat = (seat = 0) => socket?.emit("oda-katil", { odaId: selectedRoom, koltukNo: seat, isim: profileName, avatar: profileEmoji });
   const leaveSeat = () => socket?.emit("oda-ayril", selectedRoom);
   if (screen === "menu") return <StartMenu onStart={() => setScreen("lobby")} onSettings={() => setScreen("settings")} notice={notice} />;
