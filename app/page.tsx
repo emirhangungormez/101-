@@ -97,8 +97,8 @@ export default function Home() {
   const createRoom = () => { setJoinedRoom(false); if (socket?.connected) { socket.emit("oda-olustur", { odaAdi: roomName || "Yeni Masa", maksimum: roomSize }); return; } const id = Date.now(); setRooms(old => [...old, { id, name: roomName || "Yeni Masa", owner: "Siz", players: 0, max: roomSize, status: "" }]); setSelectedRoom(id); setBots(0); setScreen("room"); };
   const deleteRoom = (id: number) => setRooms(old => old.filter(room => !(room.id === id && room.owner === "Siz")));
   const joinRoom = (id: number) => { setJoinedRoom(true); setJoinedRoomId(id); if (socket?.connected) socket.emit("oda-katil", id); setSelectedRoom(id); setScreen("room"); };
-  const addComputer = (seat = 0) => setBotSeats(old => { if (old.includes(seat) || old.length >= roomSize) return old; setRooms(rooms => rooms.map(room => room.id === selectedRoom ? { ...room, players: room.players + 1 } : room)); return [...old, seat]; });
-  const removeComputer = (seat = 0) => setBotSeats(old => { if (!old.includes(seat)) return old; setRooms(rooms => rooms.map(room => room.id === selectedRoom ? { ...room, players: Math.max(0, room.players - 1) } : room)); return old.filter(s => s !== seat); });
+  const addComputer = (seat = 0) => setBotSeats(old => { if (old.includes(seat) || old.length >= roomSize) return old; socket?.emit("robot-ekle", selectedRoom); setRooms(rooms => rooms.map(room => room.id === selectedRoom ? { ...room, players: room.players + 1 } : room)); return [...old, seat]; });
+  const removeComputer = (seat = 0) => setBotSeats(old => { if (!old.includes(seat)) return old; socket?.emit("robot-sil", selectedRoom); setRooms(rooms => rooms.map(room => room.id === selectedRoom ? { ...room, players: Math.max(0, room.players - 1) } : room)); return old.filter(s => s !== seat); });
   const joinSeat = (seat = 0) => setJoinedSeat(seat);
   const leaveSeat = () => setJoinedSeat(null);
   if (screen === "menu") return <StartMenu onStart={() => setScreen("lobby")} onSettings={() => setScreen("settings")} notice={notice} />;
