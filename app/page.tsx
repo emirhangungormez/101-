@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { io, type Socket } from "socket.io-client";
 
 type Color = "red" | "blue" | "black" | "yellow" | "joker";
 type Tile = { id: number; value: number | "J"; color: Color };
@@ -33,6 +34,8 @@ export default function Home() {
   const [game, setGame] = useState({ siradakiOyuncu: 0, mevcutBaraj: 101, gostergeTas: { id: 99, value: 5, color: "yellow" } as Tile, kalanTasSayisi: 42, tur: 49, opened: false });
   const [notice, setNotice] = useState("Sıra sizde");
   const [hasDrawn, setHasDrawn] = useState(false);
+  const [socket, setSocket] = useState<Socket | null>(null);
+  useEffect(() => { const s = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:4000", { transports: ["websocket"] }); setSocket(s); s.on("oda-durum", d => setRooms(d.oyuncular ? [{ id: d.odaId, name: d.odaAdi, owner: d.oyuncular[0]?.socketId === s.id ? "Siz" : "Oyuncu", players: d.oyuncular.length, max: 4, status: "" }] : [])); s.on("oda-olusturuldu", ({ odaId }) => { setSelectedRoom(odaId); setScreen("room"); }); return () => { s.disconnect(); }; }, []);
   useEffect(() => {
     const path = window.location.pathname.replace(/^\//, "");
     if (["lobby", "room", "game"].includes(path)) setScreen(path as "lobby" | "room" | "game");
@@ -82,9 +85,9 @@ export default function Home() {
   const sortRack = (mode:"series"|"pairs") => { const tiles=rack.filter(Boolean) as Tile[]; tiles.sort(mode==="series" ? (a,b)=>colors.indexOf(a.color)-colors.indexOf(b.color)||(Number(a.value)||99)-(Number(b.value)||99) : (a,b)=>(Number(a.value)||99)-(Number(b.value)||99)||colors.indexOf(a.color)-colors.indexOf(b.color)); setRack([...tiles,...Array(44-tiles.length).fill(null)]); setNotice(mode==="series"?"Taşlar serilere göre dizildi":"Taşlar çiftlere göre dizildi"); };
 
   const players = [{name:"Siz",count:rack.filter(Boolean).length},{name:bots > 0 ? "Bilgisayar_1" : "Kuzen_1",count:21},{name:bots > 1 ? "Bilgisayar_2" : "Zeynep",count:20},{name:bots > 2 ? "Bilgisayar_3" : "Mert",count:19}];
-  const createRoom = () => { const id = Date.now(); setRooms(old => [...old, { id, name: roomName || "Yeni Masa", owner: "Siz", players: 1, max: roomSize, status: "SİZİN ODA" }]); setSelectedRoom(id); setBots(0); setScreen("room"); };
+  const createRoom = () => { if (socket?.connected) { socket.emit("oda-olustur", roomName || "Yeni Masa"); return; } const id = Date.now(); setRooms(old => [...old, { id, name: roomName || "Yeni Masa", owner: "Siz", players: 1, max: roomSize, status: "SİZİN ODA" }]); setSelectedRoom(id); setBots(0); setScreen("room"); };
   const deleteRoom = (id: number) => setRooms(old => old.filter(room => !(room.id === id && room.owner === "Siz")));
-  const joinRoom = (id: number) => { setSelectedRoom(id); setScreen("room"); };
+  const joinRoom = (id: number) => { if (socket?.connected) socket.emit("oda-katil", id); setSelectedRoom(id); setScreen("room"); };
   const addComputer = () => setBots(old => Math.min(roomSize - 1, old + 1));
   if (screen === "menu") return <StartMenu onStart={() => setScreen("lobby")} onSettings={() => setNotice("Ayarlar yakında eklenecek")} notice={notice} />;
   if (screen === "lobby") return <Lobby rooms={rooms} roomName={roomName} setRoomName={setRoomName} roomSize={roomSize} setRoomSize={setRoomSize} onCreate={createRoom} onDelete={deleteRoom} onJoin={joinRoom} onBack={() => setScreen("menu")} />;
