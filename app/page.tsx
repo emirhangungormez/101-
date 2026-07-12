@@ -22,7 +22,10 @@ function TileView({ tile, compact = false, draggable = false, onDragStart, onDou
 }
 
 export default function Home() {
-  const [screen, setScreen] = useState<"menu" | "lobby" | "room" | "game">("menu");
+  const [screen, setScreen] = useState<"menu" | "lobby" | "room" | "game" | "settings">("menu");
+  const [profileName, setProfileName] = useState("Siz");
+  const [profileEmoji, setProfileEmoji] = useState("🙂");
+  const [soundOn, setSoundOn] = useState(true);
   const [roomSize, setRoomSize] = useState<2 | 3 | 4>(4);
   const [roomName, setRoomName] = useState("101 Masası");
   const [rooms, setRooms] = useState<{ id: number; name: string; owner: string; players: number; max: number; status: string }[]>(() => { if (typeof window === "undefined") return []; try { return JSON.parse(window.localStorage.getItem("okey-rooms") || "[]"); } catch { return []; } });
@@ -41,8 +44,8 @@ export default function Home() {
   useEffect(() => { const s = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:4000", { transports: ["websocket"] }); setSocket(s); const mapRooms = (list: any[]) => setRooms(list.map(d => ({ id: d.odaId, name: d.odaAdi, owner: d.oyuncular[0]?.socketId === s.id ? "Siz" : "Oyuncu", players: d.oyuncular.length, max: 4, status: "" }))); s.on("connect", () => s.emit("oda-listesi-iste")); s.on("oda-listesi", mapRooms); s.on("oda-durum", () => s.emit("oda-listesi-iste")); s.on("oda-olusturuldu", ({ odaId }) => { setSelectedRoom(odaId); setScreen("room"); }); return () => { s.disconnect(); }; }, []);
   useEffect(() => {
     const path = window.location.pathname.replace(/^\//, "");
-    if (["lobby", "room", "game"].includes(path)) setScreen(path as "lobby" | "room" | "game");
-    const onPopState = () => { const next = window.location.pathname.replace(/^\//, ""); setScreen(["lobby", "room", "game"].includes(next) ? next as "lobby" | "room" | "game" : "menu"); };
+    if (["lobby", "room", "game", "settings"].includes(path)) setScreen(path as "lobby" | "room" | "game" | "settings");
+    const onPopState = () => { const next = window.location.pathname.replace(/^\//, ""); setScreen(["lobby", "room", "game", "settings"].includes(next) ? next as "lobby" | "room" | "game" | "settings" : "menu"); };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
@@ -95,7 +98,8 @@ export default function Home() {
   const removeComputer = (seat = 0) => setBotSeats(old => old.filter(s => s !== seat));
   const joinSeat = (seat = 0) => setJoinedSeat(seat);
   const leaveSeat = () => setJoinedSeat(null);
-  if (screen === "menu") return <StartMenu onStart={() => setScreen("lobby")} onSettings={() => setNotice("Ayarlar yakında eklenecek")} notice={notice} />;
+  if (screen === "menu") return <StartMenu onStart={() => setScreen("lobby")} onSettings={() => setScreen("settings")} notice={notice} />;
+  if (screen === "settings") return <SettingsView name={profileName} emoji={profileEmoji} soundOn={soundOn} onNameChange={setProfileName} onEmojiChange={setProfileEmoji} onSoundChange={setSoundOn} onBack={() => setScreen("menu")} />;
   if (screen === "lobby") return <Lobby rooms={rooms} roomName={roomName} setRoomName={setRoomName} roomSize={roomSize} setRoomSize={setRoomSize} onCreate={createRoom} onDelete={deleteRoom} onJoin={joinRoom} onBack={() => setScreen("menu")} />;
   if (screen === "room") { const room = rooms.find(r => r.id === selectedRoom) ?? rooms[0]; return <RoomView room={room} botSeats={botSeats} joinedSeat={joinedSeat} onAddComputer={addComputer} onRemoveComputer={removeComputer} onJoinSeat={joinSeat} onLeaveSeat={leaveSeat} onStart={() => setScreen("game")} onBack={() => setScreen("lobby")} />; }
   return <main className="game-shell">
@@ -127,6 +131,8 @@ function Grid({cells,zone,onDrop}:{cells:(TableTile|null)[];zone:Zone;onDrop:(e:
 function Opponent({p,active,className}:{p:{name:string;count:number};active:boolean;className:string}) { return <div className={`${className} ${active?"active":""}`}><span/><b>{p.name}</b><small>{p.count} TAŞ</small></div>; }
 
 function StartMenu({onStart,onSettings}:{onStart:()=>void;onSettings:()=>void;notice:string}) { return <main className="start-screen"><div className="start-menu-content"><div className="start-mark"><div className="start-number" aria-hidden="true">101</div><span className="start-plus" aria-hidden="true">+</span></div><nav className="menu-actions" aria-label="Ana menü"><button className="primary-action" onClick={onStart}>Başla</button><button className="ghost-action" onClick={onSettings}>Ayarlar</button></nav></div></main>; }
+
+function SettingsView({name,emoji,soundOn,onNameChange,onEmojiChange,onSoundChange,onBack}:{name:string;emoji:string;soundOn:boolean;onNameChange:(value:string)=>void;onEmojiChange:(value:string)=>void;onSoundChange:(value:boolean)=>void;onBack:()=>void}) { const emojis=["🙂","😎","🤖","🐱","🦊","👾"]; return <main className="settings-screen"><section className="settings-content"><div className="settings-avatar">{emoji}</div><label className="settings-name"><span>İsmi düzenle</span><input value={name} maxLength={20} onChange={e=>onNameChange(e.target.value)} /></label><div className="emoji-picker" aria-label="Profil resmi seç"><span>Emoji seç</span><div>{emojis.map(item=><button key={item} className={item===emoji?"selected":""} onClick={()=>onEmojiChange(item)}>{item}</button>)}</div></div><label className="sound-toggle"><span>Sesleri aç</span><button aria-pressed={soundOn} onClick={()=>onSoundChange(!soundOn)}>{soundOn?"Açık":"Kapalı"}</button></label></section><button className="back-link settings-back" onClick={onBack} aria-label="Geri"><span className="back-arrow">‹</span> Geri</button></main>; }
 
 function Lobby({rooms,roomName,setRoomName,roomSize,setRoomSize,onCreate,onDelete,onJoin,onBack}:{rooms:{id:number;name:string;owner:string;players:number;max:number;status:string;owner:string}[];roomName:string;setRoomName:(v:string)=>void;roomSize:2|3|4;setRoomSize:(v:2|3|4)=>void;onCreate:()=>void;onDelete:(id:number)=>void;onJoin:(id:number)=>void;onBack:()=>void}) { return <main className="lobby-screen"><button className="back-link lobby-back" onClick={onBack} aria-label="Geri"><span className="back-arrow">‹</span> Geri</button><section className="lobby-content"><div className="create-panel"><h1>Oyun oluştur</h1><input aria-label="Oda adı" value={roomName} onChange={e=>setRoomName(e.target.value)} /><div className="tile-picker" aria-label="Oyuncu sayısı">{[2,3,4].map(value=><button key={value} className={`player-tile tile-choice-${value} ${roomSize===value?"selected":""}`} onClick={()=>setRoomSize(value as 2|3|4)}><span className="tile-pips">{Array.from({length:value},(_,i)=><i key={i}/>)}</span><b>{value}</b></button>)}</div><button className="create-button" onClick={onCreate}>Oluştur</button></div><div className="lobby-divider"/><div className="rooms-panel"><h1>Odalar</h1><div className="room-list">{rooms.length === 0 ? <p className="rooms-footnote">Henüz oda yok.</p> : rooms.map(room=><div className="room-row" key={room.id}><button className="room-join" onClick={()=>onJoin(room.id)}><span className="room-main"><b>{room.name}</b></span><span className="room-count">{room.players}/{room.max}</span><span className="room-status">Katıl</span></button>{room.owner === "Siz" && <button className="room-delete" aria-label={`${room.name} odasını sil`} onClick={()=>onDelete(room.id)}>Sil</button>}</div>)}</div></div></section></main>; }
 
