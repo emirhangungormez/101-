@@ -37,7 +37,7 @@ io.on("connection", socket => {
     const istenenKoltuk = Number.isInteger(veri?.koltukNo) ? veri.koltukNo : bosKoltuk(oda);
     if (istenenKoltuk < 0 || istenenKoltuk >= oda.maksimum || oda.oyuncular.some(p => p.koltukNo === istenenKoltuk)) return hata(socket, "Koltuk dolu");
     oda.izleyiciler = oda.izleyiciler.filter(id => id !== socket.id); socket.join(odaId); socket.data.oynadigiOdaId = odaId;
-    oda.oyuncular.push({ socketId: socket.id, isim: String(veri?.isim || "Oyuncu").slice(0, 20), avatar: String(veri?.avatar || "🙂"), koltukNo: istenenKoltuk, eldekiTaslar: [] });
+    oda.oyuncular.push({ socketId: socket.id, kullaniciId: String(veri?.kullaniciId || socket.id), isim: String(veri?.isim || "Oyuncu").slice(0, 20), avatar: String(veri?.avatar || "🙂"), koltukNo: istenenKoltuk, eldekiTaslar: [] });
     socket.emit("oda-katildi", { odaId }); odaDurumu(oda); odaListesi();
   });
   socket.on("oda-ayril", odaId => { const oda = odaBul(odaId); if (!oda) return; odadanCikar(oda, socket.id); if (!oda.izleyiciler.includes(socket.id)) oda.izleyiciler.push(socket.id); socket.data.oynadigiOdaId = null; odaDurumu(oda); odaListesi(); });

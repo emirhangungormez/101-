@@ -97,14 +97,14 @@ export default function Home() {
 
   const activeRoom = roomSnapshots.find(room => room.odaId === selectedRoom);
   const roomPlayers = [...(activeRoom?.oyuncular ?? [])].sort((a:any,b:any) => a.koltukNo - b.koltukNo);
-  const me = roomPlayers.find((player:any) => player.socketId === socket?.id);
-  const players = [me, ...roomPlayers.filter((player:any) => player.socketId !== socket?.id)].filter(Boolean).map((player:any, index:number) => ({ name: player.isim || (player.bot ? "Robot" : "Oyuncu"), count: index === 0 ? rack.filter(Boolean).length : 21 })).concat(Array.from({ length: Math.max(0, 4 - roomPlayers.length) }, () => ({ name: "", count: 0 })));
+  const me = roomPlayers.find((player:any) => player.kullaniciId === userId || player.socketId === socket?.id);
+  const players = [me, ...roomPlayers.filter((player:any) => player.kullaniciId !== userId && player.socketId !== socket?.id)].filter(Boolean).map((player:any, index:number) => ({ name: player.isim || (player.bot ? "Robot" : "Oyuncu"), count: index === 0 ? rack.filter(Boolean).length : 21 })).concat(Array.from({ length: Math.max(0, 4 - roomPlayers.length) }, () => ({ name: "", count: 0 })));
   const createRoom = () => { setJoinedRoom(false); if (socket?.connected) { socket.emit("oda-olustur", { odaAdi: roomName || "Yeni Masa", maksimum: roomSize, kullaniciId: userId }); return; } const id = Date.now(); setRooms(old => [...old, { id, name: roomName || "Yeni Masa", owner: "Siz", players: 0, max: roomSize, status: "" }]); setSelectedRoom(id); setBots(0); setScreen("room"); };
   const deleteRoom = (id: number) => { socket?.emit("oda-sil", { odaId: id, kullaniciId: userId }); setRooms(old => old.filter(room => !(room.id === id && room.owner === "Siz"))); };
   const joinRoom = (id: number) => { socket?.emit("oda-izle", id); setSelectedRoom(id); setScreen("room"); };
   const addComputer = (seat = 0) => socket?.emit("robot-ekle", { odaId: selectedRoom, koltukNo: seat, kullaniciId: userId });
   const removeComputer = (seat = 0) => socket?.emit("robot-sil", { odaId: selectedRoom, koltukNo: seat, kullaniciId: userId });
-  const joinSeat = (seat = 0) => socket?.emit("oda-katil", { odaId: selectedRoom, koltukNo: seat, isim: profileName, avatar: profileEmoji });
+  const joinSeat = (seat = 0) => socket?.emit("oda-katil", { odaId: selectedRoom, koltukNo: seat, isim: profileName, avatar: profileEmoji, kullaniciId: userId });
   const leaveSeat = () => socket?.emit("oda-ayril", selectedRoom);
   if (screen === "menu") return <StartMenu onStart={() => setScreen("lobby")} onSettings={() => setScreen("settings")} notice={notice} />;
   if (screen === "settings") return <SettingsView name={profileName} emoji={profileEmoji} soundOn={soundOn} onNameChange={setProfileName} onEmojiChange={setProfileEmoji} onSoundChange={setSoundOn} onBack={() => setScreen("menu")} />;
