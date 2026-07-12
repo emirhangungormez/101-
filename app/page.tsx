@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Color = "red" | "blue" | "black" | "yellow" | "joker";
 type Tile = { id: number; value: number | "J"; color: Color };
@@ -24,7 +24,7 @@ export default function Home() {
   const [screen, setScreen] = useState<"menu" | "lobby" | "room" | "game">("menu");
   const [roomSize, setRoomSize] = useState<2 | 3 | 4>(4);
   const [roomName, setRoomName] = useState("101 Masası");
-  const [rooms, setRooms] = useState<{ id: number; name: string; owner: string; players: number; max: number; status: string }[]>([]);
+  const [rooms, setRooms] = useState<{ id: number; name: string; owner: string; players: number; max: number; status: string }[]>(() => { if (typeof window === "undefined") return []; try { return JSON.parse(window.localStorage.getItem("okey-rooms") || "[]"); } catch { return []; } });
   const [selectedRoom, setSelectedRoom] = useState(1);
   const [bots, setBots] = useState(0);
   const [rack, setRack] = useState<RackCell[]>(blankRack);
@@ -33,6 +33,15 @@ export default function Home() {
   const [game, setGame] = useState({ siradakiOyuncu: 0, mevcutBaraj: 101, gostergeTas: { id: 99, value: 5, color: "yellow" } as Tile, kalanTasSayisi: 42, tur: 49, opened: false });
   const [notice, setNotice] = useState("Sıra sizde");
   const [hasDrawn, setHasDrawn] = useState(false);
+  useEffect(() => {
+    const path = window.location.pathname.replace(/^\//, "");
+    if (["lobby", "room", "game"].includes(path)) setScreen(path as "lobby" | "room" | "game");
+    const onPopState = () => { const next = window.location.pathname.replace(/^\//, ""); setScreen(["lobby", "room", "game"].includes(next) ? next as "lobby" | "room" | "game" : "menu"); };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+  useEffect(() => { window.localStorage.setItem("okey-rooms", JSON.stringify(rooms)); }, [rooms]);
+  useEffect(() => { const path = screen === "menu" ? "/" : `/${screen}`; if (window.location.pathname !== path) window.history.pushState({}, "", path); }, [screen]);
   const isMyTurn = game.siradakiOyuncu === 0;
   const pending = [...table.series, ...table.pairs].filter(Boolean) as TableTile[];
   const score = pending.reduce((sum, tile) => sum + (typeof tile.value === "number" ? tile.value : 0), 0);
