@@ -33,7 +33,7 @@ export default function Home() {
   const [roomName, setRoomName] = useState("101 Masası");
   const [rooms, setRooms] = useState<{ id: number; name: string; owner: string; players: number; max: number; status: string }[]>(() => { if (typeof window === "undefined") return []; try { return JSON.parse(window.localStorage.getItem("okey-rooms") || "[]"); } catch { return []; } });
   const [roomSnapshots, setRoomSnapshots] = useState<any[]>([]);
-  const [selectedRoom, setSelectedRoom] = useState(1);
+  const [selectedRoom, setSelectedRoom] = useState<number | string>(() => { if (typeof window === "undefined") return 1; return window.localStorage.getItem("okey-selected-room") || 1; });
   const [joinedRoomId, setJoinedRoomId] = useState<number | string | null>(null);
   const [bots, setBots] = useState(0);
   const [botSeats, setBotSeats] = useState<number[]>([]);
@@ -56,6 +56,7 @@ export default function Home() {
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
   useEffect(() => { window.localStorage.setItem("okey-rooms", JSON.stringify(rooms)); }, [rooms]);
+  useEffect(() => { window.localStorage.setItem("okey-selected-room", String(selectedRoom)); }, [selectedRoom]);
   useEffect(() => { const path = screen === "menu" ? "/" : `/${screen}`; if (window.location.pathname !== path) window.history.pushState({}, "", path); }, [screen]);
   const isMyTurn = game.siradakiOyuncu === 0;
   const pending = [...table.series, ...table.pairs].filter(Boolean) as TableTile[];
