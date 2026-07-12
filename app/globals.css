@@ -1,4 +1,5 @@
 @import "tailwindcss";
+.lobby-screen{position:relative}.lobby-back{position:absolute;top:28px;left:32px}.lobby-content{grid-template-columns:minmax(0,1fr) 1px minmax(0,1fr)!important;align-items:start!important;padding-top:180px!important}.lobby-divider{height:280px!important}
 .start-menu-content{display:flex;flex-direction:column;align-items:center;gap:28px}.start-mark{display:flex;align-items:flex-start}.start-number{font-size:clamp(96px,15vw,220px);font-weight:600;line-height:.8;letter-spacing:-.1em;color:#171717}.start-plus{display:block;margin:0 0 0 14px;color:#2563eb;font-size:clamp(28px,4vw,56px);font-weight:500;line-height:1}
 .lobby-content{height:100vh!important}.rooms-panel>h1{margin:0 0 20px;font-size:28px;font-weight:500;letter-spacing:-.04em}
 
