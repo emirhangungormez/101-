@@ -77,4 +77,3 @@
 .game-shell .rack-grid{width:998px!important;grid-template-columns:repeat(16,56px)!important;column-gap:6px!important;row-gap:12px!important;padding:6px!important}.game-shell .rack-cell .tile i{margin-top:auto!important;margin-bottom:5px!important}.game-shell .rack-discard .tile i{margin-top:auto!important;margin-bottom:5px!important}
 .game-shell .rack-grid::after{top:50%!important;transform:translateY(-50%)!important}
 .game-shell .rack-grid,.game-shell .rack-discard-right{cursor:pointer!important}.game-shell .rack-cell.selected .tile{box-shadow:0 0 0 2px #2563eb!important}
-.game-shell .rack-grid.dragging .tile{pointer-events:none!important}
