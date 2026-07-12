@@ -116,15 +116,7 @@ export default function Home() {
   if (screen === "room") { const room = roomSnapshots.find(r => r.odaId === selectedRoom) ?? rooms.find(r => r.id === selectedRoom) ?? rooms[0]; return <RoomView room={room} currentSocketId={socket?.id ?? ""} onAddComputer={addComputer} onRemoveComputer={removeComputer} onJoinSeat={joinSeat} onLeaveSeat={leaveSeat} onStart={() => socket?.emit("oyun-baslat")} onBack={() => setScreen("lobby")} />; }
   return <main className="game-shell">
     <section className="game-player-strip">{roomPlayers.filter((player:any)=>player!==me).map((player:any)=><div className="game-player" key={player.socketId}><span className="game-player-avatar">{player.avatar||"🙂"}</span><div><b>{player.isim}</b><small>{player.bot?"Robot":"21 taş"}</small></div>{playerDiscards[player.socketId]&&<div className="player-last-discard"><TileView tile={playerDiscards[player.socketId]} compact/></div>}</div>)}</section>
-    <section className="game-area">
-      <div className="board-toolbar"><button disabled={!buttonActivity.canSeriAc} onClick={()=>openHand("series")}>Seri aç</button><button disabled={!buttonActivity.canCiftAc} onClick={()=>openHand("pairs")}>Çift aç</button></div>
-      <div className="board-layout">
-        <div className="board-discard board-discard-left" onDragOver={e=>e.preventDefault()}><small>Son taş</small>{discard.at(-1)&&<TileView tile={discard.at(-1)!} compact draggable onDragStart={e=>beginDrag(e,"discard",discard.length-1)} onDoubleClick={()=>drawTile("discard")}/>}</div>
-        <div className="board-stage"><div className="table-head"><div><span>Seri</span></div><div><span>Çift</span></div></div><div className="table-matrix"><Grid cells={table.series} zone="series" onDrop={dropTable} /><Grid cells={table.pairs} zone="pairs" onDrop={dropTable} /></div></div>
-        <div className="board-discard board-discard-right" onDragOver={e=>e.preventDefault()} onDrop={discardTile}><small>Taş at</small><span>+</span></div>
-      </div>
-      <div className="status-line"><span className={isMyTurn?"pulse":""}/>{notice}</div>
-    </section>
+    <section className="game-area"><div className="board-stage"><div className="table-head"><div><span>Seri</span></div><div><span>Çift</span></div></div><div className="table-matrix"><Grid cells={table.series} zone="series" onDrop={dropTable} /><Grid cells={table.pairs} zone="pairs" onDrop={dropTable} /></div></div></section>
     <aside className="sidebar">
       <div className="rules"><span>Eşli</span><span>Yardımlı</span><span>Katlamalı</span></div>
       <div className="side-content">
@@ -133,7 +125,7 @@ export default function Home() {
         <div className="actions"><button disabled={!buttonActivity.canSeriAc} onClick={()=>openHand("series")}><b>Seri</b><span>{score || "—"}</span></button><button disabled={!buttonActivity.canCiftAc} onClick={()=>openHand("pairs")}><b>Çift</b><span>{table.pairs.filter(Boolean).length}/5</span></button><button aria-label="Geri topla" disabled={!buttonActivity.canGeriTopla} onClick={collect}><b>↶</b></button><button disabled={!buttonActivity.canTasIsle}><b>İşle</b></button></div>
       </div>
     </aside>
-    <section className="rack-area"><div className="self"><span className="active-line"/><b>Siz</b><small>{players[0].count}</small></div><button className="sort" onClick={()=>sortRack("pairs")}>Çift</button><div className="rack-grid">{rack.map((tile,i)=><div className="rack-cell" key={i} onDragOver={e=>e.preventDefault()} onDrop={e=>dropRack(e,i)}>{tile&&<TileView tile={tile} draggable={isMyTurn} onDragStart={e=>beginDrag(e,"rack",i)}/>}</div>)}</div><button className="sort" onClick={()=>sortRack("series")}>Seri</button></section>
+    <section className="rack-area"><div className="rack-toolbar"><button onClick={()=>sortRack("pairs")}>Çift diz</button><button onClick={()=>sortRack("series")}>Seri diz</button></div><div className="rack-board"><div className="rack-discard rack-discard-left"><small>Son taş</small>{discard.at(-1)&&<TileView tile={discard.at(-1)!} compact draggable onDragStart={e=>beginDrag(e,"discard",discard.length-1)} onDoubleClick={()=>drawTile("discard")}/>}</div><div className="rack-grid">{rack.map((tile,i)=><div className="rack-cell" key={i} onDragOver={e=>e.preventDefault()} onDrop={e=>dropRack(e,i)}>{tile&&<TileView tile={tile} draggable={isMyTurn} onDragStart={e=>beginDrag(e,"rack",i)}/>}</div>)}</div><div className="rack-discard rack-discard-right" onDragOver={e=>e.preventDefault()} onDrop={discardTile}><small>Taş at</small><span>+</span></div></div><p className="rack-status"><span className={isMyTurn?"pulse":""}/>{notice}</p></section>
   </main>;
 }
 
