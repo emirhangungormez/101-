@@ -89,9 +89,10 @@ export default function Home() {
   };
 
   const dropRack = (e: React.DragEvent, index: number) => {
-    e.preventDefault(); const data = dragData(e); if (!data || rack[index]) return;
+    e.preventDefault(); const data = dragData(e); if (!data) return;
+    if (data.source === "rack") { if (data.index === index) return; setRack(old => { const next=[...old]; [next[index],next[data.index]]=[next[data.index],next[index]]; return next; }); return; }
+    if (rack[index]) return;
     if (data.source === "deck" || data.source === "discard") return drawTile(data.source, index);
-    if (data.source === "rack") { setRack(old => { const n=[...old]; n[index]=n[data.index]; n[data.index]=null; return n; }); }
   };
   const moveRackByClick = (index: number) => { if (rack[index]) return setSelectedRackIndex(index); if (selectedRackIndex === null) return; setRack(old => { const next=[...old]; next[index]=next[selectedRackIndex]; next[selectedRackIndex]=null; return next; }); setSelectedRackIndex(null); };
 
