@@ -111,7 +111,7 @@ export default function Home() {
   if (screen === "lobby") return <Lobby rooms={rooms} joinedRoomId={joinedRoomId} roomName={roomName} setRoomName={setRoomName} roomSize={roomSize} setRoomSize={setRoomSize} onCreate={createRoom} onDelete={deleteRoom} onJoin={joinRoom} onBack={() => setScreen("menu")} />;
   if (screen === "room") { const room = roomSnapshots.find(r => r.odaId === selectedRoom) ?? rooms.find(r => r.id === selectedRoom) ?? rooms[0]; return <RoomView room={room} currentSocketId={socket?.id ?? ""} onAddComputer={addComputer} onRemoveComputer={removeComputer} onJoinSeat={joinSeat} onLeaveSeat={leaveSeat} onStart={() => socket?.emit("oyun-baslat")} onBack={() => setScreen("lobby")} />; }
   return <main className="game-shell">
-    <header className="topbar"><div><b>101</b></div><p>07 <em>·</em> {players.length}</p><button aria-label="Ayarlar">•••</button></header>
+    <section className="game-player-strip">{players.slice(1).filter(player=>player.name).map((player,index)=><div className="game-player" key={`${player.name}-${index}`}><span className="game-player-avatar">{player.name === "Robot" ? "🤖" : "●"}</span><div><b>{player.name}</b><small>{player.count} taş</small></div></div>)}<div className="top-discard" onDragOver={e=>e.preventDefault()} onDrop={discardTile}><small>Son taş</small>{discard.at(-1)&&<TileView tile={discard.at(-1)!} compact draggable onDragStart={e=>beginDrag(e,"discard",discard.length-1)} onDoubleClick={()=>drawTile("discard")}/>}</div></section>
     <section className="game-area">
       <Opponent p={players[1]} active={game.siradakiOyuncu===1} className="opponent top-left" />
       <Opponent p={players[2]} active={game.siradakiOyuncu===2} className="opponent top-right" />
