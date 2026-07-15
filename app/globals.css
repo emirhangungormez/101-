@@ -1510,30 +1510,6 @@ input:focus-visible {
 .rack-cell .tile span {
   font-size: 20px;
 }
-@media (max-width: 1488px) {
-  .game-shell {
-    margin-left: 24px;
-    margin-right: 24px;
-  }
-}
-@media (max-width: 780px) {
-  .lobby-content {
-    width: auto;
-    margin: 0 24px;
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-  .lobby-divider {
-    display: none;
-  }
-  .room-content {
-    width: auto;
-    margin: 0 24px;
-  }
-  .seat-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 .room-delete {
   font-size: 0 !important;
   width: 34px;
@@ -6562,7 +6538,7 @@ html.game-fit-viewport body {
 
 html.game-fit-viewport .game-shell {
   position: fixed !important;
-  top: 50% !important;
+  top: calc(50% + var(--game-center-offset-y, 0px)) !important;
   left: 50% !important;
   width: 1600px !important;
   min-width: 1600px !important;
@@ -6848,7 +6824,7 @@ body > .rack-drag-ghost {
 /* Seri ve çift ızgaralarının arasındaki gerçek orta eksen. */
 .game-shell .game-center-info,
 .game-shell .game-center-info:has(.deal-button) {
-  left: calc(50% + 200px) !important;
+  left: calc(50% + 170px) !important;
   right: auto !important;
   transform: translateX(-50%) !important;
 }
@@ -6907,4 +6883,98 @@ body > .rack-drag-ghost {
   max-width: none !important;
   white-space: nowrap !important;
   justify-self: center !important;
+}
+
+/* Profil metinleri her konumda ayni tipografiyle gosterilir. */
+.game-shell > .game-player-strip .game-player :is(
+  .game-player-order,
+  .game-player-name > b,
+  .game-player-name > small,
+  .game-player-name > .player-opening,
+  .game-player-name > .player-penalty,
+  .game-player-status
+) {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 16px !important;
+}
+
+/* Yan profillerde tum bilgiler duzenli bir bicimde alt alta durur. */
+.game-shell > .game-player-strip > :is(
+  .game-player-position-left,
+  .game-player-position-right,
+  .game-player:first-child:not(:only-child),
+  .game-player:nth-child(2):last-child,
+  .game-player:nth-child(3)
+) .game-player-name {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-auto-rows: auto !important;
+  justify-items: center !important;
+  gap: 4px !important;
+  width: 100% !important;
+}
+
+.game-shell > .game-player-strip > :is(
+  .game-player-position-left,
+  .game-player-position-right,
+  .game-player:first-child:not(:only-child),
+  .game-player:nth-child(2):last-child,
+  .game-player:nth-child(3)
+) .game-player-name > * {
+  grid-column: 1 !important;
+  grid-row: auto !important;
+  width: auto !important;
+  max-width: 100% !important;
+  justify-self: center !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+
+/* Ust profilde acilis varsa puan ve acilis, ismin yaninda tek sutundur. */
+.game-shell > .game-player-strip > :is(
+  .game-player-position-top,
+  .game-player:only-child:not(.game-player-position-left):not(.game-player-position-right),
+  .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right)
+) .game-player-name:has(> .player-opening) {
+  display: grid !important;
+  grid-template-columns: max-content max-content !important;
+  grid-template-rows: 16px 16px !important;
+  align-items: center !important;
+  justify-items: center !important;
+  column-gap: 8px !important;
+  width: auto !important;
+}
+
+.game-shell > .game-player-strip > :is(
+  .game-player-position-top,
+  .game-player:only-child:not(.game-player-position-left):not(.game-player-position-right),
+  .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right)
+) .game-player-name:has(> .player-opening) > b {
+  grid-column: 1 !important;
+  grid-row: 1 / span 2 !important;
+  align-self: center !important;
+}
+
+.game-shell > .game-player-strip > :is(
+  .game-player-position-top,
+  .game-player:only-child:not(.game-player-position-left):not(.game-player-position-right),
+  .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right)
+) .game-player-name:has(> .player-opening) > small {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+}
+
+.game-shell > .game-player-strip > :is(
+  .game-player-position-top,
+  .game-player:only-child:not(.game-player-position-left):not(.game-player-position-right),
+  .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right)
+) .game-player-name:has(> .player-opening) > .player-opening {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  width: auto !important;
+  max-width: none !important;
+  justify-self: center !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
 }

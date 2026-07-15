@@ -472,35 +472,39 @@ export default function Home() {
   useEffect(() => {
     const root = document.documentElement;
     const updateGameViewport = () => {
-      const isMobile = Math.min(window.innerWidth, window.innerHeight) <= 900;
-      const isPortrait = window.innerHeight > window.innerWidth;
-      root.classList.toggle("app-mobile-portrait", isMobile && isPortrait);
-      root.classList.toggle(
+      root.classList.remove(
+        "app-mobile-portrait",
         "game-mobile-portrait",
-        screen === "game" && isMobile && isPortrait,
-      );
-      root.classList.toggle(
         "game-mobile-landscape",
-        screen === "game" && isMobile && !isPortrait,
       );
-      const fitGame = screen === "game" && !(isMobile && isPortrait);
+      const fitGame = screen === "game";
       root.classList.toggle("game-fit-viewport", fitGame);
       if (!fitGame) {
         root.style.removeProperty("--game-scale");
         root.style.removeProperty("--game-mobile-scale");
+        root.style.removeProperty("--game-center-offset-x");
+        root.style.removeProperty("--game-center-offset-y");
         return;
       }
-      const availableHeight = window.innerHeight;
-      const scale = availableHeight / 900;
+      const viewport = window.visualViewport;
+      const availableWidth = viewport?.width ?? window.innerWidth;
+      const availableHeight = viewport?.height ?? window.innerHeight;
+      // 1600x900 tuvalin bos kenarlari yerine gorunen oyun sinirini olcekle.
+      // Yerlesim degismez; sahne tek parca halinde buyur veya kuculur.
+      const scale = Math.min(availableWidth / 1240, availableHeight / 800);
+      const centerOffsetY = -44 * scale;
       root.style.setProperty("--game-scale", String(scale));
       root.style.setProperty("--game-mobile-scale", String(scale));
+      root.style.setProperty("--game-center-offset-y", `${centerOffsetY}px`);
     };
     updateGameViewport();
     window.addEventListener("resize", updateGameViewport);
     window.addEventListener("orientationchange", updateGameViewport);
+    window.visualViewport?.addEventListener("resize", updateGameViewport);
     return () => {
       window.removeEventListener("resize", updateGameViewport);
       window.removeEventListener("orientationchange", updateGameViewport);
+      window.visualViewport?.removeEventListener("resize", updateGameViewport);
       root.classList.remove(
         "app-mobile-portrait",
         "game-mobile-portrait",
@@ -509,6 +513,8 @@ export default function Home() {
       );
       root.style.removeProperty("--game-scale");
       root.style.removeProperty("--game-mobile-scale");
+      root.style.removeProperty("--game-center-offset-x");
+      root.style.removeProperty("--game-center-offset-y");
     };
   }, [screen]);
   useEffect(() => {
