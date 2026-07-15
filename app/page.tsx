@@ -2146,6 +2146,14 @@ export default function Home() {
           <i aria-hidden="true" />
           Tema
         </button>
+        {onlineGame && game.toplamEl > 0 && (
+          <span className="game-top-round">
+            <b>{Math.min(game.tamamlananEl + 1, game.toplamEl)}. el</b>
+            <span>
+              {game.tamamlananEl}/{game.toplamEl} tamamlandı
+            </span>
+          </span>
+        )}
       </div>
       {isSpectator && (
         <div className="spectator-badge" role="status">
@@ -2297,24 +2305,11 @@ export default function Home() {
         ) : (
           onlineGame && (
             <>
-              {(game.elNo > 0 || game.tamamlananEl > 0) && (
-                <div className="match-progress" aria-label="Maç ilerlemesi">
-                  <b>
-                    {Math.min(game.tamamlananEl + 1, game.toplamEl)}. el
-                  </b>
-                  <span>
-                    {game.tamamlananEl}/{game.toplamEl} tamamlandı
-                  </span>
-                </div>
-              )}
               <div className="indicator-tile">
                 <small>Gösterge</small>
                 <TileView tile={game.gostergeTas} />
               </div>
               <div className="deck-info">
-                <small>
-                  {game.kalanTasSayisi === 0 ? "Taş kalmadı" : "Ortadan çek"}
-                </small>
                 {game.kalanTasSayisi > 0 ? (
                   <>
                     <div
@@ -2333,7 +2328,9 @@ export default function Home() {
                     >
                       <i />
                       <i />
-                      <div className="center-deck-tile">?</div>
+                      <div className="center-deck-tile">
+                        {game.kalanTasSayisi}
+                      </div>
                       {drawAnimation?.source === "deste" && (
                         <div
                           className="draw-fly draw-from-deste"
@@ -2347,8 +2344,6 @@ export default function Home() {
                         </div>
                       )}
                     </div>
-                    <strong>{game.kalanTasSayisi}</strong>
-                    <span>taş kaldı</span>
                   </>
                 ) : (
                   game.eliBitirecekKoltukNo === mySeat && !isSpectator ? (
@@ -2556,15 +2551,17 @@ export default function Home() {
             Seri diz
           </button>
         </div>
-        {onlineGame && game.hamleSonZaman ? (
-          <TurnTimer
-            limit={game.hamleSuresi ?? turnLimit}
-            deadline={game.hamleSonZaman}
-            phase={turnPhase}
-            running
-            resetKey={`${game.elNo}:${game.siradakiOyuncu}:${turnPhase}:${game.hamleSonZaman}`}
-          />
-        ) : null}
+        <div className="turn-timer-slot">
+          {onlineGame && game.hamleSonZaman ? (
+            <TurnTimer
+              limit={game.hamleSuresi ?? turnLimit}
+              deadline={game.hamleSonZaman}
+              phase={turnPhase}
+              running
+              resetKey={`${game.elNo}:${game.siradakiOyuncu}:${turnPhase}:${game.hamleSonZaman}`}
+            />
+          ) : null}
+        </div>
         <div className="rack-board">
           <div className="rack-discard rack-discard-left">
             <small>Yandan taş çek</small>

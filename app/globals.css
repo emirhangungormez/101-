@@ -6159,3 +6159,115 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
   left: auto !important;
   right: var(--discard-corner-inset) !important;
 }
+
+/* Sure gorunmese de ayni satiri ayirir; istaka hicbir durumda yer degistirmez. */
+.game-shell > .rack-area {
+  grid-template-rows: 180px 14px 24px !important;
+}
+
+.game-shell .turn-timer-slot {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  width: 998px !important;
+  max-width: 100% !important;
+  height: 14px !important;
+  min-height: 14px !important;
+}
+
+.game-shell .turn-timer-slot .turn-timer {
+  width: 100% !important;
+  height: 14px !important;
+  margin: 0 !important;
+}
+
+/* Oyun yonlendirmesi uzaktan da rahat okunur. */
+.game-shell .rack-status {
+  top: -31px !important;
+  min-height: 22px !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 22px !important;
+}
+
+.game-shell .rack-status .pulse {
+  width: 7px !important;
+  height: 7px !important;
+  margin-right: 9px !important;
+}
+
+/* Profilin normal bilgileri beyaz, oyun durumlari ise parlak vurgu rengidir. */
+.game-shell .game-player-order,
+.game-shell .game-player-name,
+.game-shell .game-player-name b,
+.game-shell .game-player-name > small,
+.game-shell .game-player-status {
+  color: #fff !important;
+}
+
+.game-shell .game-player .game-player-name > .player-opening-series {
+  color: #4de7ff !important;
+  text-shadow: 0 0 10px rgb(77 231 255 / 34%) !important;
+}
+
+.game-shell .game-player .game-player-name > .player-opening-pairs {
+  color: #f0a5ff !important;
+  text-shadow: 0 0 10px rgb(240 165 255 / 34%) !important;
+}
+
+.game-shell .game-player .game-player-name > .player-penalty {
+  color: #ff6078 !important;
+  text-shadow: 0 0 10px rgb(255 96 120 / 30%) !important;
+}
+
+/* Merkez destede yalniz kalan tas sayisi gorunur. */
+.game-shell .deck-info {
+  min-height: 96px !important;
+  height: 96px !important;
+  padding: 4px 0 0 !important;
+  border: 0 !important;
+}
+
+.game-shell .center-deck-tile {
+  font-size: 25px !important;
+  line-height: 1 !important;
+  text-align: center !important;
+}
+
+/* Ust bilgiler tek satirda; ust profil iki iskarta alaninin tam ortasindadir. */
+.game-shell .game-top-actions {
+  top: 8px !important;
+  left: 50% !important;
+  width: 620px !important;
+  transform: translateX(-50%) !important;
+  justify-content: center !important;
+  gap: 20px !important;
+}
+
+.game-shell .game-top-round {
+  display: inline-flex !important;
+  align-items: baseline !important;
+  gap: 7px !important;
+  color: #fff !important;
+  font: 650 12px/1 "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+  white-space: nowrap !important;
+}
+
+.game-shell .game-top-round span {
+  color: rgb(255 255 255 / 72%) !important;
+  font-size: 11px !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-top.game-player-position-top {
+  top: 42px !important;
+  left: 50% !important;
+  right: auto !important;
+  width: 240px !important;
+  min-width: 240px !important;
+  max-width: 240px !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+  transform: translateX(-50%) !important;
+}
