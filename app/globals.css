@@ -1634,6 +1634,127 @@ input:focus-visible {
   min-height: 38px !important;
   aspect-ratio: 1 !important;
 }
+
+.room-edit-profile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.room-edit-profile:not(:disabled) {
+  cursor: pointer;
+}
+
+.room-edit-profile:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.room-edit-pencil {
+  position: absolute;
+  top: -4px;
+  right: -20px;
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: transparent !important;
+  font-size: 0 !important;
+  background: #737373;
+  opacity: 0.72;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm17.71-10.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.96 1.96 3.75 3.75 2.13-1.79Z'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm17.71-10.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.96 1.96 3.75 3.75 2.13-1.79Z'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+.room-profile-editor {
+  position: absolute;
+  z-index: 20;
+  top: 50%;
+  left: 50%;
+  width: 238px;
+  height: 154px;
+  box-sizing: border-box;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 12%);
+}
+
+.room-emoji-picker {
+  display: grid;
+  grid-template-columns: repeat(7, 26px);
+  justify-content: center;
+  gap: 4px;
+}
+
+.room-emoji-picker button {
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: #fafafa;
+  font-size: 15px;
+}
+
+.room-emoji-picker button.selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.room-profile-editor input {
+  width: 100%;
+  height: 28px;
+  box-sizing: border-box;
+  padding: 0 8px;
+  border: 1px solid #d4d4d4;
+  border-radius: 6px;
+  outline: none;
+  font: 12px "DM Sans", sans-serif;
+  text-align: center;
+}
+
+.room-profile-editor input:focus {
+  border-color: #2563eb;
+}
+
+.room-profile-editor-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+.room-profile-editor-actions button {
+  height: 26px;
+  padding: 0;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  background: #fff;
+  color: #737373;
+  font-size: 11px;
+}
+
+.room-profile-editor-actions .save {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #fff;
+}
 .room-delete::before {
   display: block !important;
   width: 18px !important;
@@ -1661,6 +1782,272 @@ input:focus-visible {
   height: 140px !important;
   min-width: 140px !important;
   aspect-ratio: 1 !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+.room-screen .room-profile:has(.room-profile-editor) {
+  position: relative !important;
+  z-index: 30 !important;
+}
+
+/* Isim kartin uzerinde, emoji ise genis bir acilir secicide duzenlenir. */
+.room-profile-identity {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.room-emoji-edit,
+.room-name-edit {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  appearance: none;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit;
+  font: inherit;
+}
+
+.room-emoji-edit:not(:disabled),
+.room-name-edit:not(:disabled) {
+  cursor: pointer;
+}
+
+.room-emoji-edit:disabled,
+.room-name-edit:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.room-emoji-edit .room-edit-pencil {
+  top: 1px;
+  right: -5px;
+}
+
+.room-name-edit {
+  width: 104px;
+  height: 25px;
+  min-width: 104px;
+  box-sizing: border-box;
+}
+
+.room-name-edit b {
+  width: auto;
+  max-width: 82px;
+  line-height: 25px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.room-name-edit .room-edit-pencil {
+  position: static;
+  flex: 0 0 10px;
+  width: 10px;
+  height: 10px;
+  margin-left: 5px;
+  transform: none;
+}
+
+.room-name-input {
+  width: 104px;
+  height: 25px;
+  box-sizing: border-box;
+  padding: 0 7px;
+  appearance: none !important;
+  border: 0 !important;
+  border-radius: 0;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #171717;
+  font: 500 13px "DM Sans", sans-serif;
+  text-align: center;
+}
+
+.room-name-input:hover,
+.room-name-input:focus,
+.room-name-input:focus-visible,
+.room-name-input:active {
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.room-emoji-popover {
+  position: absolute;
+  z-index: 50;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  display: grid;
+  grid-template-columns: repeat(7, 40px);
+  gap: 6px;
+  width: max-content;
+  padding: 12px;
+  transform: translateX(-50%);
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgb(0 0 0 / 14%);
+  pointer-events: auto;
+}
+
+.room-emoji-popover::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translateX(-50%) rotate(45deg);
+  border-right: 1px solid #e5e5e5;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fff;
+}
+
+.room-emoji-popover button {
+  position: relative;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: #f7f7f7;
+  font-size: 23px;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.room-emoji-popover button:hover {
+  background: #f0f4ff;
+}
+
+.room-emoji-popover button.selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.room-screen .room-profile:has(.room-emoji-popover) {
+  position: relative !important;
+  z-index: 40 !important;
+}
+
+/* Oda sahnesi tek parca halinde buyur; ic yerlesim ve isim satiri sabit kalir. */
+.room-screen .room-content {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 760px !important;
+  min-width: 760px !important;
+  height: 420px !important;
+  min-height: 420px !important;
+  margin: 0 !important;
+  transform: translate(-50%, -50%) scale(var(--room-scale, 2)) !important;
+  transform-origin: center center !important;
+}
+
+.room-screen .room-back {
+  bottom: 44px !important;
+  transform: translateX(-50%) scale(var(--room-scale, 2)) !important;
+  transform-origin: center center !important;
+}
+
+/* Oda olusturma formu da oda sahnesiyle ayni oranda buyur. */
+.lobby-screen .lobby-content {
+  width: 1420px !important;
+  grid-template-columns: 720px 1px 600px !important;
+  gap: 48px !important;
+  align-items: start !important;
+  align-content: start !important;
+  box-sizing: border-box !important;
+  padding-top: 72px !important;
+}
+
+.lobby-screen .create-panel {
+  width: 350px !important;
+  justify-self: start !important;
+  transform: scale(var(--lobby-create-scale, 2)) !important;
+  transform-origin: left top !important;
+}
+
+.lobby-screen .create-panel > h1 {
+  margin-bottom: 10px !important;
+}
+
+.lobby-screen .create-panel > .create-field-label,
+.lobby-screen .create-panel > h1 + .create-field-label {
+  margin-top: 9px !important;
+  margin-bottom: 5px !important;
+}
+
+.lobby-screen .create-panel > .create-button {
+  margin-top: 12px !important;
+}
+
+.lobby-screen .lobby-divider {
+  height: 720px !important;
+}
+
+.lobby-screen .rooms-panel {
+  width: 290px !important;
+  justify-self: end !important;
+  transform: scale(var(--lobby-create-scale, 2)) !important;
+  align-self: start !important;
+  transform-origin: right top !important;
+}
+
+.lobby-screen .create-panel > h1,
+.lobby-screen .rooms-panel > h1 {
+  height: 34px !important;
+  margin: 0 0 10px !important;
+  line-height: 34px !important;
+}
+
+.lobby-screen .rooms-panel .room-list {
+  margin-top: 0 !important;
+}
+
+.start-screen .start-menu-content {
+  transform: scale(var(--menu-scale, 2)) !important;
+  transform-origin: center center !important;
+}
+
+/* Tum sayfalardaki geri denetimi ayni boyut ve alt-merkez konumundadir. */
+.lobby-screen .lobby-back,
+.room-screen .room-back {
+  position: fixed !important;
+  z-index: 100 !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: 34px !important;
+  left: 50% !important;
+  min-width: 58px !important;
+  height: 24px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #525252 !important;
+  font: 500 13px/24px "DM Sans", sans-serif !important;
+  letter-spacing: 0 !important;
+  transform: translateX(-50%) scale(var(--page-ui-scale, 2)) !important;
+  transform-origin: center center !important;
+}
+
+.lobby-screen .lobby-back .back-arrow,
+.room-screen .room-back .back-arrow {
+  font-size: 20px !important;
+  line-height: 1 !important;
 }
 .room-screen .room-profile {
   align-items: center !important;
@@ -6538,7 +6925,7 @@ html.game-fit-viewport body {
 
 html.game-fit-viewport .game-shell {
   position: fixed !important;
-  top: calc(50% + var(--game-center-offset-y, 0px)) !important;
+  top: calc(50% + var(--game-center-offset-y, 0px) - 10px) !important;
   left: 50% !important;
   width: 1600px !important;
   min-width: 1600px !important;

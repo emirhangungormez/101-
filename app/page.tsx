@@ -267,7 +267,7 @@ function TileView({
 
 export default function Home() {
   const [screen, setScreen] = useState<
-    "menu" | "lobby" | "room" | "game" | "settings"
+    "menu" | "lobby" | "room" | "game"
   >("menu");
   const [routeReady, setRouteReady] = useState(false);
   const [userId] = useState(() => {
@@ -284,7 +284,6 @@ export default function Home() {
   const [profileEmoji, setProfileEmoji] = useState(
     () => profileEmojis[Math.floor(Math.random() * profileEmojis.length)],
   );
-  const [soundOn, setSoundOn] = useState(true);
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [mobileInstallTarget, setMobileInstallTarget] = useState(false);
@@ -477,6 +476,33 @@ export default function Home() {
         "game-mobile-portrait",
         "game-mobile-landscape",
       );
+      const viewport = window.visualViewport;
+      const availableWidth = viewport?.width ?? window.innerWidth;
+      const availableHeight = viewport?.height ?? window.innerHeight;
+      if (screen === "room") {
+        const roomScale = Math.min(2, availableWidth / 800, availableHeight / 500);
+        root.style.setProperty("--room-scale", String(roomScale));
+      } else {
+        root.style.removeProperty("--room-scale");
+      }
+      if (screen === "lobby") {
+        const lobbyScale = Math.min(2, availableWidth / 960, availableHeight / 430);
+        root.style.setProperty("--lobby-create-scale", String(lobbyScale));
+      } else {
+        root.style.removeProperty("--lobby-create-scale");
+      }
+      if (screen === "menu") {
+        const menuScale = Math.min(2, availableWidth / 640, availableHeight / 520);
+        root.style.setProperty("--menu-scale", String(menuScale));
+      } else {
+        root.style.removeProperty("--menu-scale");
+      }
+      if (screen === "lobby" || screen === "room") {
+        const pageUiScale = Math.min(2, availableWidth / 960, availableHeight / 500);
+        root.style.setProperty("--page-ui-scale", String(pageUiScale));
+      } else {
+        root.style.removeProperty("--page-ui-scale");
+      }
       const fitGame = screen === "game";
       root.classList.toggle("game-fit-viewport", fitGame);
       if (!fitGame) {
@@ -486,9 +512,6 @@ export default function Home() {
         root.style.removeProperty("--game-center-offset-y");
         return;
       }
-      const viewport = window.visualViewport;
-      const availableWidth = viewport?.width ?? window.innerWidth;
-      const availableHeight = viewport?.height ?? window.innerHeight;
       // 1600x900 tuvalin bos kenarlari yerine gorunen oyun sinirini olcekle.
       // Yerlesim degismez; sahne tek parca halinde buyur veya kuculur.
       const scale = Math.min(availableWidth / 1240, availableHeight / 800);
@@ -515,6 +538,10 @@ export default function Home() {
       root.style.removeProperty("--game-mobile-scale");
       root.style.removeProperty("--game-center-offset-x");
       root.style.removeProperty("--game-center-offset-y");
+      root.style.removeProperty("--room-scale");
+      root.style.removeProperty("--lobby-create-scale");
+      root.style.removeProperty("--menu-scale");
+      root.style.removeProperty("--page-ui-scale");
     };
   }, [screen]);
   useEffect(() => {
@@ -744,7 +771,9 @@ export default function Home() {
   useEffect(() => {
     const socketUrl =
       import.meta.env.VITE_SOCKET_URL ||
-      `${window.location.protocol}//${window.location.hostname}:4000`;
+      (import.meta.env.PROD
+        ? "https://one01-55hb.onrender.com"
+        : `${window.location.protocol}//${window.location.hostname}:4000`);
     const s = io(socketUrl, {
       transports: ["websocket"],
     });
@@ -1145,14 +1174,14 @@ export default function Home() {
   }, [socket]);
   useEffect(() => {
     const path = window.location.pathname.replace(/^\//, "");
-    if (["lobby", "room", "game", "settings"].includes(path))
-      setScreen(path as "lobby" | "room" | "game" | "settings");
+    if (["lobby", "room", "game"].includes(path))
+      setScreen(path as "lobby" | "room" | "game");
     setRouteReady(true);
     const onPopState = () => {
       const next = window.location.pathname.replace(/^\//, "");
       setScreen(
-        ["lobby", "room", "game", "settings"].includes(next)
-          ? (next as "lobby" | "room" | "game" | "settings")
+        ["lobby", "room", "game"].includes(next)
+          ? (next as "lobby" | "room" | "game")
           : "menu",
       );
     };
@@ -2099,6 +2128,30 @@ export default function Home() {
       kullaniciId: userId,
     });
   const leaveSeat = () => socket?.emit("oda-ayril", selectedRoom);
+  const updateRoomProfile = (name: string, emoji: string) => {
+    const nextName = name.trim().slice(0, 20) || profileName;
+    setProfileName(nextName);
+    setProfileEmoji(emoji);
+    const updatePlayers = (players: any[] = []) =>
+      players.map((player: any) =>
+        player.socketId === socket?.id
+          ? { ...player, isim: nextName, avatar: emoji }
+          : player,
+      );
+    setRoomSnapshots((current) =>
+      current.map((room) =>
+        room.odaId === selectedRoom
+          ? { ...room, oyuncular: updatePlayers(room.oyuncular) }
+          : room,
+      ),
+    );
+    setGameRoster((current) => updatePlayers(current));
+    socket?.emit("profil-guncelle", {
+      odaId: selectedRoom,
+      isim: nextName,
+      avatar: emoji,
+    });
+  };
   const leaveRoom = () => {
     socket?.emit("oda-ayril", selectedRoom);
     setJoinedRoomId(null);
@@ -2127,25 +2180,10 @@ export default function Home() {
     return (
       <StartMenu
         onStart={() => setScreen("lobby")}
-        onSettings={() => setScreen("settings")}
         onInstall={installApp}
-        showInstall={
-          mobileInstallTarget && Boolean(installPrompt || iosInstallTarget)
-        }
+        showInstall={mobileInstallTarget}
         installHint={installHint}
         notice={notice}
-      />
-    );
-  if (screen === "settings")
-    return (
-      <SettingsView
-        name={profileName}
-        emoji={profileEmoji}
-        soundOn={soundOn}
-        onNameChange={setProfileName}
-        onEmojiChange={setProfileEmoji}
-        onSoundChange={setSoundOn}
-        onBack={() => setScreen("menu")}
       />
     );
   if (screen === "lobby")
@@ -2183,6 +2221,7 @@ export default function Home() {
         onWatch={watchRoom}
         onStart={() => socket?.emit("oyun-baslat")}
         onBack={leaveRoom}
+        onUpdateProfile={updateRoomProfile}
       />
     );
   }
@@ -2955,13 +2994,11 @@ function Opponent({
 
 function StartMenu({
   onStart,
-  onSettings,
   onInstall,
   showInstall,
   installHint,
 }: {
   onStart: () => void;
-  onSettings: () => void;
   onInstall: () => void;
   showInstall: boolean;
   installHint: string;
@@ -2982,101 +3019,14 @@ function StartMenu({
           <button className="primary-action" onClick={onStart}>
             Başla
           </button>
-          <button className="ghost-action" onClick={onSettings}>
-            Ayarlar
-          </button>
           {showInstall && (
             <button className="pwa-install-action" onClick={onInstall}>
-              Uygulamayı yükle
+              Oyunu indir
             </button>
           )}
         </nav>
         {installHint && <p className="pwa-install-hint">{installHint}</p>}
       </div>
-    </main>
-  );
-}
-
-function SettingsView({
-  name,
-  emoji,
-  soundOn,
-  onNameChange,
-  onEmojiChange,
-  onSoundChange,
-  onBack,
-}: {
-  name: string;
-  emoji: string;
-  soundOn: boolean;
-  onNameChange: (value: string) => void;
-  onEmojiChange: (value: string) => void;
-  onSoundChange: (value: boolean) => void;
-  onBack: () => void;
-}) {
-  const emojis = [
-    "🧒",
-    "👧",
-    "🧑",
-    "👩",
-    "👨",
-    "🧕",
-    "👵",
-    "🧓",
-    "😎",
-    "🤠",
-    "🤖",
-    "🦊",
-    "🐼",
-    "🐱",
-    "🌻",
-    "🎮",
-    "🎨",
-    "👾",
-  ];
-  return (
-    <main className="settings-screen">
-      <section className="settings-content">
-        <div className="settings-avatar">{emoji}</div>
-        <label className="settings-name">
-          <span>İsmi düzenle</span>
-          <input
-            value={name}
-            maxLength={20}
-            onChange={(e) => onNameChange(e.target.value)}
-          />
-        </label>
-        <div className="emoji-picker" aria-label="Profil resmi seç">
-          <span>Emoji seç</span>
-          <div>
-            {emojis.map((item) => (
-              <button
-                key={item}
-                className={item === emoji ? "selected" : ""}
-                onClick={() => onEmojiChange(item)}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-        </div>
-        <label className="sound-toggle">
-          <span>Sesleri aç</span>
-          <button
-            aria-pressed={soundOn}
-            onClick={() => onSoundChange(!soundOn)}
-          >
-            {soundOn ? "Açık" : "Kapalı"}
-          </button>
-        </label>
-      </section>
-      <button
-        className="back-link room-back settings-back"
-        onClick={onBack}
-        aria-label="Geri"
-      >
-        <span className="back-arrow">‹</span> Geri
-      </button>
     </main>
   );
 }
@@ -3282,6 +3232,7 @@ function RoomView({
   onWatch,
   onStart,
   onBack,
+  onUpdateProfile,
 }: {
   room: any;
   currentSocketId: string;
@@ -3292,7 +3243,11 @@ function RoomView({
   onWatch: () => void;
   onStart: () => void;
   onBack: () => void;
+  onUpdateProfile: (name: string, emoji: string) => void;
 }) {
+  const [editingName, setEditingName] = useState(false);
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [draftName, setDraftName] = useState("");
   const max = room?.maksimum ?? room?.max ?? 4,
     players = room?.oyuncular ?? [],
     total = players.length,
@@ -3331,10 +3286,83 @@ function RoomView({
                     </>
                   ) : player ? (
                     <>
-                      <span className="avatar avatar-player" aria-hidden="true">
-                        {player.avatar || "🙂"}
-                      </span>
-                      <b>{player.isim}</b>
+                      <div className="room-profile-identity">
+                        <button
+                          type="button"
+                          className="room-emoji-edit"
+                          aria-label="Emojiyi düzenle"
+                          disabled={player.socketId !== currentSocketId}
+                          onClick={() => setEmojiPickerOpen((open) => !open)}
+                        >
+                          <span className="avatar avatar-player" aria-hidden="true">
+                            {player.avatar || "🙂"}
+                          </span>
+                          {player.socketId === currentSocketId && (
+                            <span className="room-edit-pencil" aria-hidden="true">✎</span>
+                          )}
+                        </button>
+                        {player.socketId === currentSocketId && emojiPickerOpen && (
+                          <div className="room-emoji-popover" aria-label="Emoji seç">
+                            {profileEmojis.map((emoji) => (
+                              <button
+                                type="button"
+                                key={emoji}
+                                className={player.avatar === emoji ? "selected" : ""}
+                                onPointerDown={(event) => {
+                                  event.preventDefault();
+                                  event.stopPropagation();
+                                  onUpdateProfile(player.isim, emoji);
+                                  setEmojiPickerOpen(false);
+                                }}
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        {player.socketId === currentSocketId && editingName ? (
+                          <input
+                            className="room-name-input"
+                            aria-label="Oyuncu adı"
+                            value={draftName}
+                            maxLength={20}
+                            autoFocus
+                            enterKeyHint="done"
+                            onChange={(event) => setDraftName(event.target.value)}
+                            onBlur={() => {
+                              onUpdateProfile(draftName, player.avatar);
+                              setEditingName(false);
+                            }}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter") {
+                                event.preventDefault();
+                                event.currentTarget.blur();
+                              }
+                              if (event.key === "Escape") {
+                                setDraftName(player.isim || "");
+                                setEditingName(false);
+                              }
+                            }}
+                          />
+                        ) : (
+                          <button
+                            type="button"
+                            className="room-name-edit"
+                            aria-label="İsmi düzenle"
+                            onClick={() => {
+                              if (player.socketId !== currentSocketId) return;
+                              setDraftName(player.isim || "");
+                              setEditingName(true);
+                            }}
+                            disabled={player.socketId !== currentSocketId}
+                          >
+                            <b>{player.isim}</b>
+                            {player.socketId === currentSocketId && (
+                              <span className="room-edit-pencil" aria-hidden="true">✎</span>
+                            )}
+                          </button>
+                        )}
+                      </div>
                       <small>{Number(player.puan || 0)} puan</small>
                     </>
                   ) : (

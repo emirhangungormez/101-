@@ -569,6 +569,19 @@ io.on("connection", (socket) => {
     odaDurumu(oda);
     odaListesi();
   });
+  socket.on("profil-guncelle", (veri) => {
+    const oda = odaBul(veri?.odaId ?? socket.data.oynadigiOdaId);
+    if (!oda) return hata(socket, "Oda bulunamadi");
+    const oyuncu = oda.oyuncular.find((p) => p.socketId === socket.id);
+    if (!oyuncu || oyuncu.bot) return hata(socket, "Profil guncellenemedi");
+    const isim = String(veri?.isim || "").trim().slice(0, 20);
+    const avatar = String(veri?.avatar || "").slice(0, 8);
+    if (!isim || !avatar) return hata(socket, "Profil bilgileri gecersiz");
+    oyuncu.isim = isim;
+    oyuncu.avatar = avatar;
+    odaDurumu(oda);
+    odaListesi();
+  });
   socket.on("robot-ekle", (veri) => {
     const oda = odaBul(veri?.odaId ?? veri);
     const insanSayisi = oda?.oyuncular.filter((p) => !p.bot).length ?? 0;
