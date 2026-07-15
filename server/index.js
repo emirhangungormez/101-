@@ -845,7 +845,6 @@ io.on("connection", (socket) => {
         ack({
           ok: true,
           mevcutBaraj: oda.gameState.mevcutBaraj,
-          mevcutCiftBaraji: oda.gameState.mevcutCiftBaraji,
           masaZemini: oda.gameState.masaZemini,
         });
     } catch (error) {

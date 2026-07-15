@@ -68,23 +68,6 @@ function runCandidate(tiles, indicator) {
       });
     }
   }
-  // 101'in ozel uc serisi: yalniz tam olarak 11-12-13-1 kabul edilir.
-  // Buradaki son 1 acilis puaninda 11 sayilir; 12-13-1 veya
-  // 11-12-13-1-2 gibi devamlar gecerli degildir.
-  const specialValues = [11, 12, 13, 1];
-  if (
-    tiles.length === specialValues.length &&
-    resolved.every(
-      (tile, index) => tile.wildcard || tile.deger === specialValues[index],
-    )
-  ) {
-    candidates.push({
-      kind: "run",
-      score: 11 + 12 + 13 + 11,
-      assignments: specialValues.map((deger) => ({ renk, deger })),
-      special: "11-12-13-1",
-    });
-  }
   return candidates.sort((a, b) => b.score - a.score)[0] ?? null;
 }
 
@@ -171,7 +154,6 @@ export function previewOpening({
   mode,
   indicator,
   threshold = 101,
-  pairThreshold = 5,
 }) {
   const columns = mode === "pairs" ? PAIRS_COLUMNS : SERIES_COLUMNS;
   const groups = groupsFromPlacements(placements, columns);
@@ -186,9 +168,7 @@ export function previewOpening({
     );
     const pairCount = checked.filter((item) => item.valid).length;
     return {
-      valid:
-        checked.every((item) => item.valid) &&
-        pairCount >= Math.max(5, Number(pairThreshold) || 5),
+      valid: checked.every((item) => item.valid) && pairCount >= 5,
       score: 0,
       pairCount,
       groups,
@@ -214,10 +194,4 @@ export function nextBarrier(ruleType, current, openingScore) {
   return ruleType === "katlamali"
     ? Math.max(Number(current) || 101, openingScore + 1)
     : 101;
-}
-
-export function nextPairBarrier(ruleType, current, openingPairCount) {
-  return ruleType === "katlamali"
-    ? Math.max(Number(current) || 5, Number(openingPairCount) + 1)
-    : 5;
 }

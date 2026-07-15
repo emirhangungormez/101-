@@ -4,7 +4,6 @@ import {
   TABLE_ROWS,
   groupsFromPlacements,
   nextBarrier,
-  nextPairBarrier,
   previewOpening,
   resolveTile,
   validatePair,
@@ -68,7 +67,6 @@ export function yeniOda(
       gosterge: null,
       iskartaKutusu: [],
       mevcutBaraj: 101,
-      mevcutCiftBaraji: 5,
       masaZemini: { seri: [], cift: [] },
       tamamlananEl: 0,
       elNo: 0,
@@ -136,7 +134,6 @@ export function genelDurum(oda) {
     oyunBasladi: g.oyunBasladi,
     siradakiOyuncu: g.siradakiOyuncu,
     mevcutBaraj: g.mevcutBaraj,
-    mevcutCiftBaraji: Number(g.mevcutCiftBaraji || 5),
     masaZemini: g.masaZemini ?? { seri: [], cift: [] },
     kalanTasSayisi: g.deste.length,
     gosterge: g.gosterge,
@@ -225,7 +222,6 @@ export function elDagit(oda) {
   g.sonAtislar = {};
   g.atisGecmisi = {};
   g.mevcutBaraj = 101;
-  g.mevcutCiftBaraji = 5;
   g.masaZemini = { seri: [], cift: [] };
   g.elNo = Number(g.tamamlananEl || 0) + 1;
   g.elDurumu = "oynaniyor";
@@ -585,12 +581,11 @@ function masaHamlesiDogrulaUnsafe(oda, socketId, payload) {
       mode,
       indicator: oda.gameState.gosterge,
       threshold: oda.gameState.mevcutBaraj,
-      pairThreshold: oda.gameState.mevcutCiftBaraji,
     });
     if (!preview.valid)
       throw new Error(
         mode === "pairs"
-          ? `Cift acmak icin ${oda.gameState.mevcutCiftBaraji || 5} gecerli cift gerekli`
+          ? "Cift acmak icin 5 gecerli cift gerekli"
           : `Acmak icin en az ${oda.gameState.mevcutBaraj} puan gerekli`,
       );
     score = preview.score;
@@ -610,12 +605,6 @@ function masaHamlesiDogrulaUnsafe(oda, socketId, payload) {
         oda.kuralTipi,
         oda.gameState.mevcutBaraj,
         score,
-      );
-    else
-      oda.gameState.mevcutCiftBaraji = nextPairBarrier(
-        oda.kuralTipi,
-        oda.gameState.mevcutCiftBaraji,
-        preview.pairCount,
       );
   } else {
     for (const zone of ["series", "pairs"]) {
@@ -709,7 +698,6 @@ export function masaHamlesiDogrula(oda, socketId, payload) {
     acilisPuani: Number(oyuncu.acilisPuani || 0),
     yandanAlinanTasId: oyuncu.yandanAlinanTasId ?? null,
     mevcutBaraj: gameState.mevcutBaraj,
-    mevcutCiftBaraji: Number(gameState.mevcutCiftBaraji || 5),
     eldenBitisAdayi: Boolean(oyuncu.eldenBitisAdayi),
     perSayaci: gameState.perSayaci,
     masaZemini: {
@@ -727,7 +715,6 @@ export function masaHamlesiDogrula(oda, socketId, payload) {
     oyuncu.acilisPuani = snapshot.acilisPuani;
     oyuncu.yandanAlinanTasId = snapshot.yandanAlinanTasId;
     gameState.mevcutBaraj = snapshot.mevcutBaraj;
-    gameState.mevcutCiftBaraji = snapshot.mevcutCiftBaraji;
     oyuncu.eldenBitisAdayi = snapshot.eldenBitisAdayi;
     gameState.perSayaci = snapshot.perSayaci;
     gameState.masaZemini = snapshot.masaZemini;

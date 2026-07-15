@@ -2,7 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   nextBarrier,
-  nextPairBarrier,
   previewOpening,
   resolveTile,
   validatePair,
@@ -29,19 +28,10 @@ test("validates runs and rejects 12-13-1", () => {
   );
 });
 
-test("accepts only the exact 11-12-13-1 special run and scores its 1 as 11", () => {
-  const special = validateSeriesGroup(
-    [11, 12, 13, 1].map((value) => tile(`blue-${value}`, "mavi", value)),
-    indicator,
-  );
-  assert.equal(special.valid, true);
-  assert.equal(special.score, 47);
-  assert.equal(special.special, "11-12-13-1");
+test("rejects every run that wraps from 13 to 1", () => {
   assert.equal(
     validateSeriesGroup(
-      [11, 12, 13, 1, 2].map((value) =>
-        tile(`red-${value}`, "sari", value),
-      ),
+      [11, 12, 13, 1].map((value) => tile(`blue-${value}`, "mavi", value)),
       indicator,
     ).valid,
     false,
@@ -110,15 +100,4 @@ test("counts five separated pairs and calculates barriers", () => {
   );
   assert.equal(nextBarrier("sabit", 130, 120), 101);
   assert.equal(nextBarrier("katlamali", 101, 120), 121);
-  assert.equal(nextPairBarrier("sabit", 8, 7), 5);
-  assert.equal(nextPairBarrier("katlamali", 5, 5), 6);
-  assert.equal(
-    previewOpening({
-      placements,
-      mode: "pairs",
-      indicator,
-      pairThreshold: 6,
-    }).valid,
-    false,
-  );
 });

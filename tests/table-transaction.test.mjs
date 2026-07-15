@@ -33,7 +33,6 @@ function roomWithHand(hand, options = {}) {
       siradakiOyuncu: options.turn ?? 0,
       gosterge: tile("indicator", "kirmizi", 5),
       mevcutBaraj: options.threshold ?? 101,
-      mevcutCiftBaraji: options.pairThreshold ?? 5,
       masaZemini: options.table ?? { seri: [], cift: [] },
     },
   };
@@ -150,7 +149,7 @@ test("commits five physical pairs and rejects four", () => {
   );
 });
 
-test("raises and enforces the folding pair threshold independently", () => {
+test("keeps the pair threshold fixed at five in a folding room", () => {
   const makePairs = (count) => {
     const tiles = [];
     const placements = [];
@@ -169,32 +168,7 @@ test("raises and enforces the folding pair threshold independently", () => {
     mode: "pairs",
     placements: five.placements,
   });
-  assert.equal(first.gameState.mevcutCiftBaraji, 6);
-
-  const rejected = roomWithHand(five.tiles, {
-    rule: "katlamali",
-    pairThreshold: 6,
-  });
-  assert.throws(
-    () =>
-      masaHamlesiDogrula(rejected, "player-1", {
-        mode: "pairs",
-        placements: five.placements,
-      }),
-    /6 gecerli cift/,
-  );
-  assert.equal(rejected.gameState.masaZemini.cift.length, 0);
-
-  const six = makePairs(6);
-  const accepted = roomWithHand(six.tiles, {
-    rule: "katlamali",
-    pairThreshold: 6,
-  });
-  masaHamlesiDogrula(accepted, "player-1", {
-    mode: "pairs",
-    placements: six.placements,
-  });
-  assert.equal(accepted.gameState.mevcutCiftBaraji, 7);
+  assert.equal(first.oyuncular[0].acilisPuani, 5);
 });
 
 test("allows a series opener to extend a committed run", () => {
