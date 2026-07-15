@@ -482,13 +482,17 @@ export default function Home() {
         "game-mobile-landscape",
         screen === "game" && isMobile && !isPortrait,
       );
-      if (screen !== "game" || !isMobile || isPortrait) {
+      const fitGame = screen === "game" && !(isMobile && isPortrait);
+      root.classList.toggle("game-fit-viewport", fitGame);
+      if (!fitGame) {
+        root.style.removeProperty("--game-scale");
         root.style.removeProperty("--game-mobile-scale");
         return;
       }
       const availableWidth = window.innerWidth;
       const availableHeight = window.innerHeight;
       const scale = Math.min(availableWidth / 1600, availableHeight / 900);
+      root.style.setProperty("--game-scale", String(scale));
       root.style.setProperty("--game-mobile-scale", String(scale));
     };
     updateGameViewport();
@@ -501,7 +505,9 @@ export default function Home() {
         "app-mobile-portrait",
         "game-mobile-portrait",
         "game-mobile-landscape",
+        "game-fit-viewport",
       );
+      root.style.removeProperty("--game-scale");
       root.style.removeProperty("--game-mobile-scale");
     };
   }, [screen]);
@@ -2146,11 +2152,17 @@ export default function Home() {
           <i aria-hidden="true" />
           Tema
         </button>
+      </div>
+      <div className="game-top-info">
         {onlineGame && game.toplamEl > 0 && (
           <span className="game-top-round">
             <b>{Math.min(game.tamamlananEl + 1, game.toplamEl)}. el</b>
           </span>
         )}
+        <p className={`rack-status ${penaltyAlert ? "penalty" : ""}`}>
+          <span className={isMyTurn ? "pulse" : ""} />
+          {penaltyAlert || notice}
+        </p>
       </div>
       {isSpectator && (
         <div className="spectator-badge" role="status">
@@ -2669,10 +2681,6 @@ export default function Home() {
             </div>,
             document.body,
           )}
-        <p className={`rack-status ${penaltyAlert ? "penalty" : ""}`}>
-          <span className={isMyTurn ? "pulse" : ""} />
-          {penaltyAlert || notice}
-        </p>
       </section>
     </main>
   );

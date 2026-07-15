@@ -6376,3 +6376,143 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
 .game-shell .game-top-actions .game-top-round {
   justify-content: center !important;
 }
+
+/* Cizimdeki nihai oyun yerlesimi: 1600x900 tuval oranini koruyarak ekrani doldurur. */
+html.game-fit-viewport,
+html.game-fit-viewport body {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+html.game-fit-viewport .game-shell {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 1600px !important;
+  min-width: 1600px !important;
+  max-width: 1600px !important;
+  height: 900px !important;
+  min-height: 900px !important;
+  max-height: 900px !important;
+  margin: 0 !important;
+  transform: translate(-50%, -50%) scale(var(--game-scale, 1)) !important;
+  transform-origin: center center !important;
+}
+
+body > .rack-drag-ghost {
+  transform: translate(-50%, -50%) scale(var(--game-scale, 1)) !important;
+}
+
+/* Ust profil merkezde; kontroller solunda, el ve yonlendirme bilgisi sagindadir. */
+.game-shell .game-top-actions {
+  top: 24px !important;
+  left: auto !important;
+  right: calc(50% + 140px) !important;
+  width: auto !important;
+  transform: none !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+}
+
+.game-shell .game-top-info {
+  position: absolute !important;
+  top: 24px !important;
+  left: calc(50% + 140px) !important;
+  z-index: 30 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  height: 58px !important;
+}
+
+.game-shell .game-top-info .game-top-round {
+  flex: 0 0 56px !important;
+  width: 56px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid rgb(255 255 255 / 28%) !important;
+  border-radius: 6px !important;
+  background: rgb(255 255 255 / 4%) !important;
+  color: #fff !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+}
+
+.game-shell .game-top-info .game-top-round b {
+  width: 100% !important;
+  text-align: center !important;
+}
+
+.game-shell .game-top-info .rack-status {
+  position: static !important;
+  inset: auto !important;
+  width: max-content !important;
+  max-width: 330px !important;
+  min-height: 28px !important;
+  margin: 0 !important;
+  padding: 3px 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transform: none !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  line-height: 20px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-top.game-player-position-top,
+.game-shell
+  > .game-player-strip
+  > .game-player:only-child:not(.game-player-position-left):not(.game-player-position-right),
+.game-shell
+  > .game-player-strip
+  > .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right) {
+  top: 24px !important;
+}
+
+/* Ust iskarta yuvalari seri ve cift alanlarinin ust kenariyla ayni hizadadir. */
+.game-shell .opponent-discard-corner {
+  top: 150px !important;
+}
+
+/* Acma alanlari ve merkez kontrolleri, ust seritten sonra tek blok olarak baslar. */
+.game-shell > .game-area {
+  top: 120px !important;
+}
+
+.game-shell .game-center-info,
+.game-shell .game-center-info:has(.deal-button) {
+  top: 150px !important;
+}
+
+/* Yan profiller acma alanlarinin orta ekseninde, koselerdeki taslarla ayni sutundadir. */
+.game-shell > .game-player-strip > .game-player-position-left,
+.game-shell > .game-player-strip > .game-player-position-right,
+.game-shell > .game-player-strip > .game-player-position-right:only-child,
+.game-shell
+  > .game-player-strip
+  > .game-player:first-child:not(:only-child),
+.game-shell
+  > .game-player-strip
+  > .game-player:nth-child(2):last-child,
+.game-shell > .game-player-strip > .game-player:nth-child(3) {
+  top: 390px !important;
+}
+
+/* Yonlendirme ust bilgiye tasindigi icin istaka ile acma alanlari arasinda bos satir kalmaz. */
+.game-shell > .rack-area {
+  grid-template-rows: 180px 18px !important;
+}
