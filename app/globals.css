@@ -6168,8 +6168,8 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
 .game-shell .turn-timer-slot {
   grid-column: 1 !important;
   grid-row: 2 !important;
-  width: 1080px !important;
-  max-width: calc(100% - 32px) !important;
+  width: 998px !important;
+  max-width: 100% !important;
   height: 18px !important;
   min-height: 18px !important;
   transform: translateY(34px) !important;
@@ -6179,10 +6179,34 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
   width: 100% !important;
   height: 18px !important;
   margin: 0 !important;
+  display: block !important;
 }
 
 .game-shell .turn-timer-slot .turn-timer-track {
-  height: 5px !important;
+  position: relative !important;
+  width: 100% !important;
+  height: 18px !important;
+  flex: none !important;
+  border-radius: 4px !important;
+}
+
+.game-shell .turn-timer-slot .turn-timer-track > span {
+  position: absolute !important;
+  inset: 0 auto 0 0 !important;
+}
+
+.game-shell .turn-timer-slot .turn-timer-track > small {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  display: grid !important;
+  place-items: center !important;
+  min-width: 0 !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 18px !important;
+  text-align: center !important;
 }
 
 /* Oyun yonlendirmesi ust oyun alani ile asagidaki istakanin tam ortasindadir. */

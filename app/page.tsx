@@ -2851,10 +2851,8 @@ function TurnTimer({
             background: color,
           }}
         />
+        <small>{seconds}</small>
       </div>
-      <small>
-        {phase === "draw" ? "Taş çek" : "Taş at"} · {seconds}s
-      </small>
     </div>
   );
 }
