@@ -489,9 +489,8 @@ export default function Home() {
         root.style.removeProperty("--game-mobile-scale");
         return;
       }
-      const availableWidth = window.innerWidth;
       const availableHeight = window.innerHeight;
-      const scale = Math.min(availableWidth / 1600, availableHeight / 900);
+      const scale = availableHeight / 900;
       root.style.setProperty("--game-scale", String(scale));
       root.style.setProperty("--game-mobile-scale", String(scale));
     };
@@ -2128,9 +2127,10 @@ export default function Home() {
     );
   }
   return (
-    <main
-      className={`game-shell game-theme-${gameTheme} ${isSpectator ? "spectator-mode" : ""} ${game.elSonucu ? "round-complete" : ""}`}
-    >
+    <div className="game-viewport">
+      <main
+        className={`game-shell game-theme-${gameTheme} ${isSpectator ? "spectator-mode" : ""} ${game.elSonucu ? "round-complete" : ""}`}
+      >
       <div className="game-top-actions">
         {!isSpectator && (onlineGame || gamePrepared) && (
           <button className="game-leave-button" onClick={leaveGame}>
@@ -2680,7 +2680,8 @@ export default function Home() {
             document.body,
           )}
       </section>
-    </main>
+      </main>
+    </div>
   );
 }
 

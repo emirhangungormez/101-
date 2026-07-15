@@ -6402,6 +6402,16 @@ html.game-fit-viewport .game-shell {
   transform-origin: center center !important;
 }
 
+/* Oyun tuvalini yapisini bozmadan tek, gorunmez bir sahnede kirp ve ortala. */
+.game-viewport {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background: inherit;
+}
+
 body > .rack-drag-ghost {
   transform: translate(-50%, -50%) scale(var(--game-scale, 1)) !important;
 }
