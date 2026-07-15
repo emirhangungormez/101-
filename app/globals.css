@@ -6650,3 +6650,35 @@ body > .rack-drag-ghost {
 .game-shell .turn-timer-slot {
   transform: none !important;
 }
+
+/* Ust oyun bilgilerini acma alanlarinin hemen ustunde tek, dengeli sirada tut. */
+.game-shell .game-top-actions {
+  top: 97px !important;
+  right: calc(50% + 132px) !important;
+}
+
+.game-shell .game-top-info {
+  top: 82px !important;
+  left: calc(50% + 132px) !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-top.game-player-position-top,
+.game-shell
+  > .game-player-strip
+  > .game-player:only-child:not(.game-player-position-left):not(.game-player-position-right),
+.game-shell
+  > .game-player-strip
+  > .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right) {
+  top: 82px !important;
+  left: 50% !important;
+  right: auto !important;
+  width: 240px !important;
+  min-width: 240px !important;
+  max-width: 240px !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+  transform: translateX(-50%) !important;
+}
