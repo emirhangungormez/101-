@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   atilanTasIslenebilirMi,
+  atilanTasCezaNedeni,
   jokeriDegistir,
   masaHamlesiDogrula,
 } from "../server/game.js";
@@ -32,6 +33,7 @@ function roomWithHand(hand, options = {}) {
       siradakiOyuncu: options.turn ?? 0,
       gosterge: tile("indicator", "kirmizi", 5),
       mevcutBaraj: options.threshold ?? 101,
+      mevcutCiftBaraji: options.pairThreshold ?? 5,
       masaZemini: options.table ?? { seri: [], cift: [] },
     },
   };
@@ -148,6 +150,53 @@ test("commits five physical pairs and rejects four", () => {
   );
 });
 
+test("raises and enforces the folding pair threshold independently", () => {
+  const makePairs = (count) => {
+    const tiles = [];
+    const placements = [];
+    for (let pair = 0; pair < count; pair += 1) {
+      for (let copy = 0; copy < 2; copy += 1) {
+        const tas = tile(`fold-${count}-${pair}-${copy}`, "sari", pair + 1);
+        tiles.push(tas);
+        placements.push({ zone: "pairs", row: pair, col: copy, tasId: tas.id });
+      }
+    }
+    return { tiles, placements };
+  };
+  const five = makePairs(5);
+  const first = roomWithHand(five.tiles, { rule: "katlamali" });
+  masaHamlesiDogrula(first, "player-1", {
+    mode: "pairs",
+    placements: five.placements,
+  });
+  assert.equal(first.gameState.mevcutCiftBaraji, 6);
+
+  const rejected = roomWithHand(five.tiles, {
+    rule: "katlamali",
+    pairThreshold: 6,
+  });
+  assert.throws(
+    () =>
+      masaHamlesiDogrula(rejected, "player-1", {
+        mode: "pairs",
+        placements: five.placements,
+      }),
+    /6 gecerli cift/,
+  );
+  assert.equal(rejected.gameState.masaZemini.cift.length, 0);
+
+  const six = makePairs(6);
+  const accepted = roomWithHand(six.tiles, {
+    rule: "katlamali",
+    pairThreshold: 6,
+  });
+  masaHamlesiDogrula(accepted, "player-1", {
+    mode: "pairs",
+    placements: six.placements,
+  });
+  assert.equal(accepted.gameState.mevcutCiftBaraji, 7);
+});
+
 test("allows a series opener to extend a committed run", () => {
   const committedTiles = [4, 5, 6].map((value) =>
     tile(`committed-${value}`, "mavi", value),
@@ -188,7 +237,48 @@ test("does not let a pair opener create a new series", () => {
           tasId: tas.id,
         })),
       }),
-    /Cift acan oyuncu yeni seri acamaz/,
+    /Cift acan oyuncu seri perlerine tas isleyemez/,
+  );
+});
+
+test("does not let a pair opener extend an existing series or take its okey", () => {
+  const wildcard = tile("pair-opener-okey", "kirmizi", 6);
+  const committed = [tile("blue-4-x", "mavi", 4), wildcard, tile("blue-6-x", "mavi", 6)].map(
+    (tas, col) => ({
+      zone: "series",
+      row: 0,
+      col,
+      perId: "existing-series",
+      tasId: tas.id,
+      tas,
+      ownerKoltukNo: 1,
+    }),
+  );
+  const extension = tile("blue-7-x", "mavi", 7);
+  const replacement = tile("blue-5-x", "mavi", 5);
+  const room = roomWithHand([extension, replacement], {
+    openingType: "pairs",
+    table: { seri: committed, cift: [] },
+  });
+  assert.throws(
+    () =>
+      masaHamlesiDogrula(room, "player-1", {
+        mode: "series",
+        placements: [
+          { zone: "series", row: 0, col: 3, tasId: extension.id },
+        ],
+      }),
+    /seri perlerine tas isleyemez/,
+  );
+  assert.throws(
+    () =>
+      jokeriDegistir(room, "player-1", {
+        zone: "series",
+        row: 0,
+        col: 1,
+        tasId: replacement.id,
+      }),
+    /seri perlerindeki okeyi alamaz/,
   );
 });
 
@@ -233,6 +323,47 @@ test("detects a discard that can extend a committed series", () => {
   assert.equal(
     atilanTasIslenebilirMi(room, tile("yellow-7", "sari", 7)),
     false,
+  );
+});
+
+test("detects set completion, wildcard replacement and real-okey discard penalties", () => {
+  const wildcard = tile("workable-okey", "kirmizi", 6);
+  const set = [
+    tile("set-blue-8", "mavi", 8),
+    tile("set-black-8", "siyah", 8),
+    tile("set-red-8", "kirmizi", 8),
+  ].map((tas, col) => ({
+    zone: "series",
+    row: 0,
+    col,
+    perId: "set-8",
+    tasId: tas.id,
+    tas,
+  }));
+  const run = [tile("run-blue-4", "mavi", 4), wildcard, tile("run-blue-6", "mavi", 6)].map(
+    (tas, col) => ({
+      zone: "series",
+      row: 1,
+      col,
+      perId: "run-with-okey",
+      tasId: tas.id,
+      tas,
+    }),
+  );
+  const room = roomWithHand([], { table: { seri: [...set, ...run], cift: [] } });
+  assert.equal(atilanTasIslenebilirMi(room, tile("set-yellow-8", "sari", 8)), true);
+  assert.equal(atilanTasIslenebilirMi(room, tile("run-blue-5", "mavi", 5)), true);
+  assert.equal(
+    atilanTasCezaNedeni(room, tile("physical-okey", "kirmizi", 6)),
+    "Okey atildi",
+  );
+  assert.equal(
+    atilanTasCezaNedeni(
+      room,
+      tile("finishing-okey", "kirmizi", 6),
+      { bitiriyor: true },
+    ),
+    null,
   );
 });
 

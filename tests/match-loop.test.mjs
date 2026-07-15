@@ -154,6 +154,45 @@ test("scores an exhausted deck as 101 for unopened and rack total for opened pla
   assert.equal(room.gameState.oyunBasladi, false);
 });
 
+test("scores an elden finish as -202/+202 and doubles it with an okey finish", () => {
+  const makeRoom = () => {
+    const room = yeniOda(
+      "elden-room",
+      "Elden",
+      { socketId: "player-0", kullaniciId: "user-0" },
+      3,
+    );
+    room.oyuncular = [
+      player(0, "Biten", "series", []),
+      player(1, "Acan", "series", [{ id: "blue-3", renk: "mavi", deger: 3 }]),
+      player(2, "Acmayan", null, [{ id: "red-9", renk: "kirmizi", deger: 9 }]),
+    ];
+    room.gameState.oyunBasladi = true;
+    room.gameState.elNo = 1;
+    room.gameState.gosterge = { id: "indicator", renk: "sari", deger: 4 };
+    return room;
+  };
+
+  const normal = makeRoom();
+  const normalResult = eliTamamla(
+    normal,
+    normal.oyuncular[0],
+    { id: "last", renk: "mavi", deger: 7 },
+    { eldenBitti: true },
+  );
+  assert.equal(normalResult.eldenBitti, true);
+  assert.deepEqual(normal.koltukPuanlari, [-202, 202, 202]);
+
+  const withOkey = makeRoom();
+  eliTamamla(
+    withOkey,
+    withOkey.oyuncular[0],
+    { id: "last-okey", renk: "sari", deger: 5 },
+    { eldenBitti: true },
+  );
+  assert.deepEqual(withOkey.koltukPuanlari, [-404, 404, 404]);
+});
+
 test("shows in-hand penalties in the round delta without adding them twice", () => {
   const room = yeniOda(
     "penalty-room",

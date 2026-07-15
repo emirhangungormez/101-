@@ -16,6 +16,7 @@ import {
   maciHazirla,
   sonrakiElBaslangicOyuncusu,
   atilanTasIslenebilirMi,
+  atilanTasCezaNedeni,
   jokeriDegistir,
   koltukPuaniniGuncelle,
   koltukCezasiniGuncelle,
@@ -124,9 +125,11 @@ const atisiKaydet = (oda, oyuncu, atilan) => {
     ...(oda.gameState.atisGecmisi[oyuncu.koltukNo] || []),
   ].slice(0, 3);
   oyuncu.cekildiMi = false;
+  oyuncu.eldenBitisAdayi = false;
 };
-const islekTasCezasiUygula = (oda, oyuncu, tas) => {
-  if (!atilanTasIslenebilirMi(oda, tas)) return null;
+const atisCezasiUygula = (oda, oyuncu, tas, { bitiriyor = false } = {}) => {
+  const neden = atilanTasCezaNedeni(oda, tas, { bitiriyor });
+  if (!neden) return null;
   const toplam = koltukPuaniniGuncelle(oda, oyuncu.koltukNo, 101);
   const cezaToplami = koltukCezasiniGuncelle(oda, oyuncu.koltukNo, 101);
   const ceza = {
@@ -136,19 +139,19 @@ const islekTasCezasiUygula = (oda, oyuncu, tas) => {
     puan: 101,
     toplam,
     cezaToplami,
-    neden: "Islenebilecek tas atildi",
+    neden,
   };
   io.to(oda.odaId).emit("ceza-uygulandi", ceza);
   return ceza;
 };
-const eliBitir = (oda, oyuncu, atilan) => {
+const eliBitir = (oda, oyuncu, atilan, options = {}) => {
   clearTimeout(hamleZamanlayicilari.get(oda.odaId));
   hamleZamanlayicilari.delete(oda.odaId);
   oda.gameState.hamleSonZaman = null;
   oda.gameState.hamleSuresi = null;
   clearTimeout(desteBitisZamanlayicilari.get(oda.odaId));
   desteBitisZamanlayicilari.delete(oda.odaId);
-  const sonuc = eliTamamla(oda, oyuncu, atilan);
+  const sonuc = eliTamamla(oda, oyuncu, atilan, options);
   io.to(oda.odaId).emit("el-tamamlandi", {
     sonuc,
     oda: genelDurum(oda),
@@ -302,7 +305,10 @@ const hamleZamanlayicisiniKur = (
     );
     const atilan = aktifOyuncu.eldekiTaslar.splice(index >= 0 ? index : 0, 1)[0];
     if (!atilan) return;
-    islekTasCezasiUygula(aktifOda, aktifOyuncu, atilan);
+    const bitiriyor =
+      aktifOyuncu.eldekiTaslar.length === 0 && aktifOyuncu.acilisTipi;
+    const eldenBitti = Boolean(aktifOyuncu.eldenBitisAdayi && bitiriyor);
+    atisCezasiUygula(aktifOda, aktifOyuncu, atilan, { bitiriyor });
     atisiKaydet(aktifOda, aktifOyuncu, atilan);
     io.to(aktifOda.odaId).emit("tas-atildi", {
       koltukNo: aktifOyuncu.koltukNo,
@@ -310,8 +316,8 @@ const hamleZamanlayicisiniKur = (
       otomatik: true,
     });
     elGonder(io.to(aktifOyuncu.socketId), aktifOyuncu);
-    if (aktifOyuncu.eldekiTaslar.length === 0 && aktifOyuncu.acilisTipi)
-      return eliBitir(aktifOda, aktifOyuncu, atilan);
+    if (bitiriyor)
+      return eliBitir(aktifOda, aktifOyuncu, atilan, { eldenBitti });
     sonrakiOyuncu(aktifOda);
     oyunDurumu(aktifOda);
     odaDurumu(aktifOda);
@@ -394,14 +400,16 @@ const robotTurunuBaslat = (oda) => {
       const index = robot.eldekiTaslar.findIndex((tile) => tile.id === secilen?.id);
       const atilan = robot.eldekiTaslar.splice(index >= 0 ? index : 0, 1)[0];
       if (!atilan) return;
-      islekTasCezasiUygula(oda, robot, atilan);
+      const bitiriyor = robot.eldekiTaslar.length === 0 && robot.acilisTipi;
+      const eldenBitti = Boolean(robot.eldenBitisAdayi && bitiriyor);
+      atisCezasiUygula(oda, robot, atilan, { bitiriyor });
       atisiKaydet(oda, robot, atilan);
       io.to(oda.odaId).emit("tas-atildi", {
         koltukNo: robot.koltukNo,
         tas: atilan,
       });
-      if (robot.eldekiTaslar.length === 0 && robot.acilisTipi) {
-        eliBitir(oda, robot, atilan);
+      if (bitiriyor) {
+        eliBitir(oda, robot, atilan, { eldenBitti });
         return;
       }
       sonrakiOyuncu(oda);
@@ -793,12 +801,14 @@ io.on("connection", (socket) => {
     const i = p.eldekiTaslar.findIndex((t) => String(t.id) === String(tasId));
     if (i < 0) return hata(socket, "Tas elinizde degil");
     const atilan = p.eldekiTaslar.splice(i, 1)[0];
-    islekTasCezasiUygula(oda, p, atilan);
+    const bitiriyor = p.eldekiTaslar.length === 0 && p.acilisTipi;
+    const eldenBitti = Boolean(p.eldenBitisAdayi && bitiriyor);
+    atisCezasiUygula(oda, p, atilan, { bitiriyor });
     atisiKaydet(oda, p, atilan);
     io.to(oda.odaId).emit("tas-atildi", { koltukNo: p.koltukNo, tas: atilan });
     elGonder(socket, p);
-    if (p.eldekiTaslar.length === 0 && p.acilisTipi) {
-      eliBitir(oda, p, atilan);
+    if (bitiriyor) {
+      eliBitir(oda, p, atilan, { eldenBitti });
       return;
     }
     sonrakiOyuncu(oda);
@@ -835,6 +845,7 @@ io.on("connection", (socket) => {
         ack({
           ok: true,
           mevcutBaraj: oda.gameState.mevcutBaraj,
+          mevcutCiftBaraji: oda.gameState.mevcutCiftBaraji,
           masaZemini: oda.gameState.masaZemini,
         });
     } catch (error) {

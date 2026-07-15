@@ -4,6 +4,7 @@ import {
   TABLE_ROWS,
   groupsFromPlacements,
   nextBarrier,
+  nextPairBarrier,
   previewOpening,
   resolveTile,
   validatePair,
@@ -67,6 +68,7 @@ export function yeniOda(
       gosterge: null,
       iskartaKutusu: [],
       mevcutBaraj: 101,
+      mevcutCiftBaraji: 5,
       masaZemini: { seri: [], cift: [] },
       tamamlananEl: 0,
       elNo: 0,
@@ -134,6 +136,7 @@ export function genelDurum(oda) {
     oyunBasladi: g.oyunBasladi,
     siradakiOyuncu: g.siradakiOyuncu,
     mevcutBaraj: g.mevcutBaraj,
+    mevcutCiftBaraji: Number(g.mevcutCiftBaraji || 5),
     masaZemini: g.masaZemini ?? { seri: [], cift: [] },
     kalanTasSayisi: g.deste.length,
     gosterge: g.gosterge,
@@ -191,6 +194,7 @@ export function koltukDurumunuSakla(oda, oyuncu) {
     acilisPuani: Number(oyuncu.acilisPuani || 0),
     yandanAlinanTasId: oyuncu.yandanAlinanTasId ?? null,
     sureBonusuKullanildi: Boolean(oyuncu.sureBonusuKullanildi),
+    eldenBitisAdayi: Boolean(oyuncu.eldenBitisAdayi),
   };
 }
 
@@ -206,6 +210,7 @@ export function koltukDurumunuDevral(oda, koltukNo) {
     acilisPuani: Number(durum.acilisPuani || 0),
     yandanAlinanTasId: durum.yandanAlinanTasId ?? null,
     sureBonusuKullanildi: Boolean(durum.sureBonusuKullanildi),
+    eldenBitisAdayi: Boolean(durum.eldenBitisAdayi),
   };
 }
 export function elDagit(oda) {
@@ -220,6 +225,7 @@ export function elDagit(oda) {
   g.sonAtislar = {};
   g.atisGecmisi = {};
   g.mevcutBaraj = 101;
+  g.mevcutCiftBaraji = 5;
   g.masaZemini = { seri: [], cift: [] };
   g.elNo = Number(g.tamamlananEl || 0) + 1;
   g.elDurumu = "oynaniyor";
@@ -239,6 +245,7 @@ export function elDagit(oda) {
     p.acilisPuani = 0;
     p.yandanAlinanTasId = null;
     p.sureBonusuKullanildi = false;
+    p.eldenBitisAdayi = false;
   });
   g.oyunBasladi = true;
 }
@@ -267,7 +274,7 @@ export function sonrakiElBaslangicOyuncusu(oda) {
   return sira[Number(oda.gameState.tamamlananEl || 0) % sira.length];
 }
 
-const gercekOkeyMi = (tas, gosterge) =>
+export const gercekOkeyMi = (tas, gosterge) =>
   Boolean(tas && resolveTile(tas, gosterge).wildcard);
 
 export function eldeKalanTasPuani(oyuncu, gosterge) {
@@ -277,18 +284,28 @@ export function eldeKalanTasPuani(oyuncu, gosterge) {
   }, 0);
 }
 
-export function eliTamamla(oda, kazanan, bitisTasi) {
+export function eliTamamla(
+  oda,
+  kazanan,
+  bitisTasi,
+  { eldenBitti = false } = {},
+) {
   const g = oda.gameState;
   if (!g.oyunBasladi || !kazanan) throw new Error("Aktif el bulunamadi");
   const okeyleBitti = gercekOkeyMi(bitisTasi, g.gosterge);
   const kazananCift = kazanan.acilisTipi === "pairs";
   const bitisCarpani = (okeyleBitti ? 2 : 1) * (kazananCift ? 2 : 1);
+  const eldenBitisPuani = 202 * (okeyleBitti ? 2 : 1);
   const puanlar = oda.oyuncular.map((oyuncu) => {
     let elFarki;
-    if (oyuncu.koltukNo === kazanan.koltukNo)
+    if (eldenBitti)
+      elFarki =
+        oyuncu.koltukNo === kazanan.koltukNo
+          ? -eldenBitisPuani
+          : eldenBitisPuani;
+    else if (oyuncu.koltukNo === kazanan.koltukNo)
       elFarki = -101 * bitisCarpani;
-    else if (!oyuncu.acilisTipi)
-      elFarki = 101 * (okeyleBitti || kazananCift ? 2 : 1);
+    else if (!oyuncu.acilisTipi) elFarki = 101 * bitisCarpani;
     else {
       const ciftCarpani = oyuncu.acilisTipi === "pairs" ? 2 : 1;
       elFarki =
@@ -326,6 +343,7 @@ export function eliTamamla(oda, kazanan, bitisTasi) {
     kazananKoltukNo: kazanan.koltukNo,
     kazananIsim: kazanan.isim,
     okeyleBitti,
+    eldenBitti,
     acilisTipi: kazanan.acilisTipi,
     puanlar,
     macBitti,
@@ -377,43 +395,30 @@ export function eliBerabereTamamla(oda) {
   };
   return g.elSonucu;
 }
-function ayniTas(a, b) {
-  return a && b && a.id === b.id;
-}
-export function siraliPerGecerli(per) {
-  if (!Array.isArray(per) || per.length < 3) return false;
-  if (per.some((t) => t.renk === "joker")) return false;
-  const renkAyni = per.every((t) => t.renk === per[0].renk);
-  const degerler = per.map((t) => t.deger).sort((a, b) => a - b);
-  const ard = degerler.every((v, i) => i === 0 || v === degerler[i - 1] + 1);
-  const grup =
-    new Set(per.map((t) => t.deger)).size === 1 &&
-    new Set(per.map((t) => t.renk)).size === per.length;
-  return (renkAyni && ard) || grup;
-}
 export function seriElDogrula(oda, socketId, perler) {
-  const oyuncu = oda.oyuncular.find((p) => p.socketId === socketId);
-  if (!oyuncu) throw new Error("Oyuncu odada degil");
-  const taslar = perler.flat();
-  if (!perler.length || perler.some((p) => !siraliPerGecerli(p)))
+  if (!Array.isArray(perler) || !perler.length)
     throw new Error("Gecersiz per");
-  if (
-    new Set(taslar.map((t) => t.id)).size !== taslar.length ||
-    taslar.some((t) => !oyuncu.eldekiTaslar.some((x) => ayniTas(x, t)))
-  )
-    throw new Error("Taslar oyuncunun elinde degil");
-  const toplam = taslar.reduce(
-    (n, t) => n + (t.renk === "joker" ? 0 : t.deger),
-    0,
+  const occupiedRows = new Set(
+    (oda.gameState.masaZemini?.seri || []).map((cell) => Number(cell.row)),
   );
-  if (toplam < oda.gameState.mevcutBaraj)
-    throw new Error(`Baraj ${oda.gameState.mevcutBaraj}`);
-  oyuncu.eldekiTaslar = oyuncu.eldekiTaslar.filter(
-    (t) => !taslar.some((x) => ayniTas(x, t)),
-  );
-  oda.gameState.masaZemini.seri.push(...perler);
-  oda.gameState.mevcutBaraj = toplam + 1;
-  return toplam;
+  let nextRow = 0;
+  const placements = perler.flatMap((per) => {
+    while (occupiedRows.has(nextRow)) nextRow += 1;
+    if (nextRow >= TABLE_ROWS) throw new Error("Masada yeterli satir yok");
+    const row = nextRow;
+    occupiedRows.add(row);
+    nextRow += 1;
+    return per.map((tas, col) => ({
+      zone: "series",
+      row,
+      col,
+      tasId: tas.id,
+    }));
+  });
+  return masaHamlesiDogrula(oda, socketId, {
+    mode: "series",
+    placements,
+  }).score;
 }
 
 const zoneKey = (zone) => (zone === "pairs" ? "cift" : "seri");
@@ -464,16 +469,49 @@ const masaZemininiDuzenle = (oda) => {
 
 export function atilanTasIslenebilirMi(oda, tas) {
   if (!oda?.gameState?.gosterge || !tas) return false;
-  return perGruplari(
+  const indicator = oda.gameState.gosterge;
+  const seriesWorkable = perGruplari(
     oda.gameState.masaZemini?.seri || [],
     SERIES_COLUMNS,
   ).some((group) => {
     const tiles = group.map((cell) => cell.tas);
-    return (
-      validateSeriesGroup([tas, ...tiles], oda.gameState.gosterge).valid ||
-      validateSeriesGroup([...tiles, tas], oda.gameState.gosterge).valid
-    );
+    // Basa/sona eklemenin yaninda, ayni sayi gruplari ve araya giren seri
+    // taslari da tum olasi konumlarda sinanir.
+    for (let index = 0; index <= tiles.length; index += 1) {
+      const candidate = [...tiles];
+      candidate.splice(index, 0, tas);
+      if (validateSeriesGroup(candidate, indicator).valid) return true;
+    }
+    // Masadaki gercek okeyin temsil ettigi tas atiliyorsa o da isler tastir.
+    return tiles.some((tile, index) => {
+      if (!resolveTile(tile, indicator).wildcard) return false;
+      const candidate = [...tiles];
+      candidate[index] = tas;
+      return validateSeriesGroup(candidate, indicator).valid;
+    });
   });
+  if (seriesWorkable) return true;
+
+  return perGruplari(
+    oda.gameState.masaZemini?.cift || [],
+    PAIRS_COLUMNS,
+  ).some((group) => {
+    const tiles = group.map((cell) => cell.tas);
+    return tiles.some((tile, index) => {
+      if (!resolveTile(tile, indicator).wildcard) return false;
+      const candidate = [...tiles];
+      candidate[index] = tas;
+      return validatePair(candidate, indicator).valid;
+    });
+  });
+}
+
+export function atilanTasCezaNedeni(oda, tas, { bitiriyor = false } = {}) {
+  if (!tas || bitiriyor) return null;
+  if (gercekOkeyMi(tas, oda?.gameState?.gosterge)) return "Okey atildi";
+  return atilanTasIslenebilirMi(oda, tas)
+    ? "Islenebilecek tas atildi"
+    : null;
 }
 
 function masaHamlesiDogrulaUnsafe(oda, socketId, payload) {
@@ -535,6 +573,7 @@ function masaHamlesiDogrulaUnsafe(oda, socketId, payload) {
   });
 
   let score = 0;
+  const ilkAcilis = !oyuncu.acilisTipi;
   if (!oyuncu.acilisTipi) {
     if (placements.some((placement) => placement.zone !== mode))
       throw new Error("Taslari secili acma alanina dizmelisiniz");
@@ -546,11 +585,12 @@ function masaHamlesiDogrulaUnsafe(oda, socketId, payload) {
       mode,
       indicator: oda.gameState.gosterge,
       threshold: oda.gameState.mevcutBaraj,
+      pairThreshold: oda.gameState.mevcutCiftBaraji,
     });
     if (!preview.valid)
       throw new Error(
         mode === "pairs"
-          ? "Cift acmak icin 5 gecerli cift gerekli"
+          ? `Cift acmak icin ${oda.gameState.mevcutCiftBaraji || 5} gecerli cift gerekli`
           : `Acmak icin en az ${oda.gameState.mevcutBaraj} puan gerekli`,
       );
     score = preview.score;
@@ -571,12 +611,20 @@ function masaHamlesiDogrulaUnsafe(oda, socketId, payload) {
         oda.gameState.mevcutBaraj,
         score,
       );
+    else
+      oda.gameState.mevcutCiftBaraji = nextPairBarrier(
+        oda.kuralTipi,
+        oda.gameState.mevcutCiftBaraji,
+        preview.pairCount,
+      );
   } else {
     for (const zone of ["series", "pairs"]) {
       const additions = placements.filter(
         (placement) => placement.zone === zone,
       );
       if (!additions.length) continue;
+      if (oyuncu.acilisTipi === "pairs" && zone === "series")
+        throw new Error("Cift acan oyuncu seri perlerine tas isleyemez");
       const committed = oda.gameState.masaZemini[zoneKey(zone)] || [];
       const combined = [...committed, ...additions];
       const groups = groupsFromPlacements(
@@ -627,17 +675,6 @@ function masaHamlesiDogrulaUnsafe(oda, socketId, payload) {
       )
         throw new Error("Islenen cift gecersiz");
       if (
-        oyuncu.acilisTipi === "pairs" &&
-        zone === "series" &&
-        affected.some(
-          (group) =>
-            !group.some((cell) =>
-              committed.some((item) => coordKey(item) === coordKey(cell)),
-            ),
-        )
-      )
-        throw new Error("Cift acan oyuncu yeni seri acamaz");
-      if (
         oyuncu.acilisTipi === "series" &&
         zone === "pairs" &&
         !committed.length
@@ -653,6 +690,7 @@ function masaHamlesiDogrulaUnsafe(oda, socketId, payload) {
     oda.gameState.masaZemini[zoneKey(placement.zone)].push(placement);
   // Oyuncunun sectigi koordinatlar korunur; masa kendiliginden toparlanmaz.
   oyuncu.yandanAlinanTasId = null;
+  if (ilkAcilis) oyuncu.eldenBitisAdayi = true;
   return { score, placements, oyuncu };
 }
 
@@ -671,6 +709,8 @@ export function masaHamlesiDogrula(oda, socketId, payload) {
     acilisPuani: Number(oyuncu.acilisPuani || 0),
     yandanAlinanTasId: oyuncu.yandanAlinanTasId ?? null,
     mevcutBaraj: gameState.mevcutBaraj,
+    mevcutCiftBaraji: Number(gameState.mevcutCiftBaraji || 5),
+    eldenBitisAdayi: Boolean(oyuncu.eldenBitisAdayi),
     perSayaci: gameState.perSayaci,
     masaZemini: {
       seri: (gameState.masaZemini?.seri || []).map((cell) => ({ ...cell })),
@@ -687,6 +727,8 @@ export function masaHamlesiDogrula(oda, socketId, payload) {
     oyuncu.acilisPuani = snapshot.acilisPuani;
     oyuncu.yandanAlinanTasId = snapshot.yandanAlinanTasId;
     gameState.mevcutBaraj = snapshot.mevcutBaraj;
+    gameState.mevcutCiftBaraji = snapshot.mevcutCiftBaraji;
+    oyuncu.eldenBitisAdayi = snapshot.eldenBitisAdayi;
     gameState.perSayaci = snapshot.perSayaci;
     gameState.masaZemini = snapshot.masaZemini;
     throw error;
@@ -703,6 +745,8 @@ export function jokeriDegistir(oda, socketId, payload) {
     throw new Error("Sira sizde degil");
   if (!oyuncu.acilisTipi)
     throw new Error("Okeyi almak icin once el acmalisiniz");
+  if (oyuncu.acilisTipi === "pairs")
+    throw new Error("Cift acan oyuncu seri perlerindeki okeyi alamaz");
   if (payload?.zone !== "series")
     throw new Error("Okey yalniz seri alanindan alinabilir");
 

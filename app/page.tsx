@@ -409,6 +409,7 @@ export default function Home() {
   const [game, setGame] = useState({
     siradakiOyuncu: 0,
     mevcutBaraj: 101,
+    mevcutCiftBaraji: 5,
     gostergeTas: { id: 99, value: 5, color: "yellow" } as Tile,
     kalanTasSayisi: 0,
     tur: 0,
@@ -742,6 +743,8 @@ export default function Home() {
           ? serverTileToTile(room.gosterge)
           : old.gostergeTas,
         mevcutBaraj: room.mevcutBaraj ?? old.mevcutBaraj,
+        mevcutCiftBaraji:
+          room.mevcutCiftBaraji ?? old.mevcutCiftBaraji ?? 5,
         toplamEl: Number(room.toplamEl || 5),
         tamamlananEl: Number(room.tamamlananEl || 0),
         elNo: Number(room.elNo || 0),
@@ -1192,6 +1195,7 @@ export default function Home() {
     mode: openingMode,
     indicator: game.gostergeTas,
     threshold: game.mevcutBaraj,
+    pairThreshold: game.mevcutCiftBaraji,
   });
   const score = openingPreview.score;
   const hasOpened = Boolean(ownPlayer?.acilisTipi);
@@ -1782,6 +1786,8 @@ export default function Home() {
         setGame((current) => ({
           ...current,
           mevcutBaraj: response.mevcutBaraj ?? current.mevcutBaraj,
+          mevcutCiftBaraji:
+            response.mevcutCiftBaraji ?? current.mevcutCiftBaraji ?? 5,
         }));
         setNotice("Taşlar masaya işlendi");
       });
@@ -2417,7 +2423,7 @@ export default function Home() {
                     ? `${pending.length} taş hazır`
                     : openingMode === "series"
                       ? `${openingPreview.score} / ${game.mevcutBaraj}`
-                      : `${openingPreview.pairCount} / 5 çift`}
+                      : `${openingPreview.pairCount} / ${game.mevcutCiftBaraji || 5} çift`}
                 </output>
               </div>
             </>

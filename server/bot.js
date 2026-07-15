@@ -139,7 +139,7 @@ export function botMasaPlani(oda, oyuncu) {
       if (placements.length && placements.length < oyuncu.eldekiTaslar.length)
         return { mode: "series", placements };
     }
-    if (pairs.length >= 5) {
+    if (pairs.length >= Number(oda.gameState.mevcutCiftBaraji || 5)) {
       const placements = gruplariYerlestir(oda, "pairs", pairs);
       if (placements.length && placements.length < oyuncu.eldekiTaslar.length)
         return { mode: "pairs", placements };
