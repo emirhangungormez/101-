@@ -6260,7 +6260,7 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
 .game-shell
   > .game-player-strip
   > .game-player.game-player-position-top.game-player-position-top {
-  top: 42px !important;
+  top: 50px !important;
   left: 50% !important;
   right: auto !important;
   width: 240px !important;
@@ -6269,6 +6269,16 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
   height: 58px !important;
   min-height: 58px !important;
   max-height: 58px !important;
+  transform: translateX(-50%) !important;
+}
+
+/* Oyun verisi hazirlanirken konum sinifi olmayan ust profil de kontrol satirina girmez. */
+.game-shell
+  > .game-player-strip
+  > .game-player:not(.game-player-position-left):not(.game-player-position-right) {
+  top: 50px !important;
+  left: 50% !important;
+  right: auto !important;
   transform: translateX(-50%) !important;
 }
 
