@@ -2199,6 +2199,17 @@ export default function Home() {
               game.roomOwnerSocketId !== socket?.id && (
                 <p>Oda kurucusu yeni eli başlatacak.</p>
               )}
+            {game.elSonucu.macBitti && (
+              <button
+                className="next-hand-button menu-return-button"
+                onClick={() => {
+                  leaveRoom();
+                  setScreen("menu");
+                }}
+              >
+                Menüye dön
+              </button>
+            )}
           </div>
         </section>
       )}

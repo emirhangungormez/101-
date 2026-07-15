@@ -6172,7 +6172,7 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
   max-width: calc(100% - 32px) !important;
   height: 18px !important;
   min-height: 18px !important;
-  transform: translateY(50px) !important;
+  transform: translateY(34px) !important;
 }
 
 .game-shell .turn-timer-slot .turn-timer {
