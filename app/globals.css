@@ -6526,7 +6526,10 @@ body > .rack-drag-ghost {
   > .game-player.game-player-position-right.game-player-position-right,
 .game-shell
   > .game-player-strip
-  > .game-player.game-player-position-right.game-player-position-right:only-child {
+  > .game-player.game-player-position-right.game-player-position-right:only-child,
+.game-shell > .game-player-strip > .game-player:first-child:not(:only-child),
+.game-shell > .game-player-strip > .game-player:nth-child(2):last-child,
+.game-shell > .game-player-strip > .game-player:nth-child(3) {
   width: 82px !important;
   min-width: 82px !important;
   max-width: 82px !important;
@@ -6548,7 +6551,8 @@ body > .rack-drag-ghost {
 
 .game-shell
   > .game-player-strip
-  > .game-player.game-player-position-left.game-player-position-left {
+  > .game-player.game-player-position-left.game-player-position-left,
+.game-shell > .game-player-strip > .game-player:first-child:not(:only-child) {
   left: var(--discard-corner-inset) !important;
   right: auto !important;
 }
@@ -6558,7 +6562,9 @@ body > .rack-drag-ghost {
   > .game-player.game-player-position-right.game-player-position-right,
 .game-shell
   > .game-player-strip
-  > .game-player.game-player-position-right.game-player-position-right:only-child {
+  > .game-player.game-player-position-right.game-player-position-right:only-child,
+.game-shell > .game-player-strip > .game-player:nth-child(2):last-child,
+.game-shell > .game-player-strip > .game-player:nth-child(3) {
   left: auto !important;
   right: var(--discard-corner-inset) !important;
 }
@@ -6570,6 +6576,18 @@ body > .rack-drag-ghost {
 .game-shell
   > .game-player-strip
   > .game-player.game-player-position-right
+  .game-player-name,
+.game-shell
+  > .game-player-strip
+  > .game-player:first-child:not(:only-child)
+  .game-player-name,
+.game-shell
+  > .game-player-strip
+  > .game-player:nth-child(2):last-child
+  .game-player-name,
+.game-shell
+  > .game-player-strip
+  > .game-player:nth-child(3)
   .game-player-name {
   width: 100% !important;
   min-width: 0 !important;
@@ -6589,6 +6607,18 @@ body > .rack-drag-ghost {
 .game-shell
   > .game-player-strip
   > .game-player.game-player-position-right
+  .game-player-order,
+.game-shell
+  > .game-player-strip
+  > .game-player:first-child:not(:only-child)
+  .game-player-order,
+.game-shell
+  > .game-player-strip
+  > .game-player:nth-child(2):last-child
+  .game-player-order,
+.game-shell
+  > .game-player-strip
+  > .game-player:nth-child(3)
   .game-player-order {
   position: absolute !important;
   top: 10px !important;
