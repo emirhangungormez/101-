@@ -6131,3 +6131,31 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
 .game-shell .opponent-discard-corner {
   top: 12px !important;
 }
+
+/* Yapısal first-child kurallari yan profil olcusunu ezmesin. */
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-left.game-player-position-left,
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-right.game-player-position-right {
+  width: 82px !important;
+  min-width: 82px !important;
+  max-width: 82px !important;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-left.game-player-position-left {
+  left: var(--discard-corner-inset) !important;
+  right: auto !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-right.game-player-position-right {
+  left: auto !important;
+  right: var(--discard-corner-inset) !important;
+}
