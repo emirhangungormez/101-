@@ -6084,3 +6084,50 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
   right: var(--discard-corner-inset) !important;
   left: auto !important;
 }
+
+/* Seri, merkez kontrolleri ve cift alani istakayla ayni 998px eksende biter. */
+.game-shell .table-head,
+.game-shell .table-matrix {
+  grid-template-columns: 580px 240px !important;
+  column-gap: 178px !important;
+}
+
+.game-shell > .game-area,
+.game-shell .board-stage,
+.game-shell .table-head,
+.game-shell .table-matrix {
+  width: 998px !important;
+  max-width: 998px !important;
+}
+
+/* Orta aksiyonlar daha dar ve iki oyun alani arasinda ferah kalir. */
+.game-shell .table-controls {
+  width: 126px !important;
+}
+
+/* Yan profiller, ayni taraftaki iskarta yuvasiyla tek bir dusey eksen olusturur. */
+.game-shell > .game-player-strip > .game-player-position-left,
+.game-shell > .game-player-strip > .game-player-position-right,
+.game-shell > .game-player-strip > .game-player-position-right:only-child {
+  width: 82px !important;
+  min-width: 82px !important;
+  max-width: 82px !important;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+
+.game-shell > .game-player-strip > .game-player-position-left {
+  left: var(--discard-corner-inset) !important;
+  right: auto !important;
+}
+
+.game-shell > .game-player-strip > .game-player-position-right,
+.game-shell > .game-player-strip > .game-player-position-right:only-child {
+  left: auto !important;
+  right: var(--discard-corner-inset) !important;
+}
+
+/* Ust iki iskarta yuvasi ust kenara yaklasir. */
+.game-shell .opponent-discard-corner {
+  top: 12px !important;
+}
