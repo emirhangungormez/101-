@@ -6845,6 +6845,14 @@ body > .rack-drag-ghost {
   left: calc(50% + 132px) !important;
 }
 
+/* Seri ve çift ızgaralarının arasındaki gerçek orta eksen. */
+.game-shell .game-center-info,
+.game-shell .game-center-info:has(.deal-button) {
+  left: calc(50% + 200px) !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+}
+
 .game-shell
   > .game-player-strip
   > .game-player.game-player-position-top.game-player-position-top,
