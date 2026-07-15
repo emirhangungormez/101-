@@ -6516,3 +6516,77 @@ body > .rack-drag-ghost {
 .game-shell > .rack-area {
   grid-template-rows: 180px 18px !important;
 }
+
+/* Yan profil kartlari, ust ve alt tas yuvalariyla ayni 82px sutuna oturur. */
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-left.game-player-position-left,
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-right.game-player-position-right,
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-right.game-player-position-right:only-child {
+  width: 82px !important;
+  min-width: 82px !important;
+  max-width: 82px !important;
+  height: 214px !important;
+  min-height: 214px !important;
+  max-height: 214px !important;
+  padding: 16px 6px !important;
+  flex-flow: column nowrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-left.game-player-position-left {
+  left: var(--discard-corner-inset) !important;
+  right: auto !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-right.game-player-position-right,
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-right.game-player-position-right:only-child {
+  left: auto !important;
+  right: var(--discard-corner-inset) !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-left
+  .game-player-name,
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-right
+  .game-player-name {
+  width: 100% !important;
+  min-width: 0 !important;
+  flex: 0 0 auto !important;
+  flex-flow: column nowrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  overflow: visible !important;
+  white-space: normal !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-left
+  .game-player-order,
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-right
+  .game-player-order {
+  position: absolute !important;
+  top: 10px !important;
+  left: 10px !important;
+}
