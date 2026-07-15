@@ -6180,9 +6180,9 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
   margin: 0 !important;
 }
 
-/* Oyun yonlendirmesi uzaktan da rahat okunur. */
+/* Oyun yonlendirmesi ust oyun alani ile asagidaki istakanin tam ortasindadir. */
 .game-shell .rack-status {
-  top: -31px !important;
+  top: -4px !important;
   min-height: 22px !important;
   font-size: 15px !important;
   font-weight: 700 !important;
