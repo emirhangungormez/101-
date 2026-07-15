@@ -507,6 +507,7 @@ io.on("connection", (socket) => {
       typeof veri === "string" || typeof veri === "number" ? veri : veri?.odaId;
     const oda = odaBul(odaId);
     if (!oda) return hata(socket, "Oda bulunamadi");
+    const kullaniciId = String(veri?.kullaniciId || socket.id);
     const onceki = odaBul(socket.data.oynadigiOdaId);
     if (onceki && onceki.odaId !== odaId) {
       odadanCikar(onceki, socket.id);
@@ -516,10 +517,34 @@ io.on("connection", (socket) => {
     }
     if (oda.oyuncular.some((p) => p.socketId === socket.id))
       return socket.emit("oda-katildi", { odaId });
+    const yenidenBaglanan = oda.oyuncular.find(
+      (p) => !p.bot && p.kullaniciId === kullaniciId,
+    );
+    if (yenidenBaglanan) {
+      yenidenBaglanan.socketId = socket.id;
+      socket.join(odaId);
+      socket.data.oynadigiOdaId = odaId;
+      socket.data.izlenenOdaId = odaId;
+      oda.izleyiciler = oda.izleyiciler.filter((id) => id !== socket.id);
+      if (yenidenBaglanan.kullaniciId === oda.kurucuId)
+        oda.kurucuSocketId = socket.id;
+      if (oda.gameState.oyunBasladi) elGonder(socket, yenidenBaglanan);
+      socket.emit("oda-katildi", {
+        odaId,
+        oyunBasladi: Boolean(oda.gameState.oyunBasladi),
+        oda: genelDurum(oda),
+      });
+      odaDurumu(oda);
+      odaListesi();
+      return;
+    }
     if (oda.oyuncular.length >= oda.maksimum) return hata(socket, "Oda dolu");
+    const kayitliKoltuk = oda.kullaniciKoltuklari?.[kullaniciId];
     const istenenKoltuk = Number.isInteger(veri?.koltukNo)
       ? veri.koltukNo
-      : bosKoltuk(oda);
+      : Number.isInteger(kayitliKoltuk)
+        ? kayitliKoltuk
+        : bosKoltuk(oda);
     if (
       istenenKoltuk < 0 ||
       istenenKoltuk >= oda.maksimum ||
@@ -530,12 +555,11 @@ io.on("connection", (socket) => {
     socket.join(odaId);
     socket.data.oynadigiOdaId = odaId;
     oda.kullaniciKoltuklari ||= {};
-    oda.kullaniciKoltuklari[String(veri?.kullaniciId || socket.id)] =
-      istenenKoltuk;
+    oda.kullaniciKoltuklari[kullaniciId] = istenenKoltuk;
     const devralinan = koltukDurumunuDevral(oda, istenenKoltuk);
     const yeniOyuncu = {
       socketId: socket.id,
-      kullaniciId: String(veri?.kullaniciId || socket.id),
+      kullaniciId,
       isim: String(veri?.isim || "Oyuncu").slice(0, 20),
       avatar: String(veri?.avatar || "🙂"),
       koltukNo: istenenKoltuk,

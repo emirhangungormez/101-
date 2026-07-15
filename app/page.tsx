@@ -816,7 +816,9 @@ export default function Home() {
         ilkHamle:
           Boolean(room.oyunBasladi) && room.sonAtanKoltukNo == null,
       }));
-      const mine = (room.oyuncular || []).find((p: any) => p.socketId === s.id);
+      const mine = (room.oyuncular || []).find(
+        (p: any) => p.socketId === s.id || p.kullaniciId === userId,
+      );
       setMySeat(mine?.koltukNo ?? null);
       const previous = mine
         ? previousPlayerSeat(room.oyuncular || [], mine.koltukNo)
@@ -829,7 +831,7 @@ export default function Home() {
     };
     const prepareGame = (odaId: any, room: any) => {
       const mine = (room?.oyuncular || []).find(
-        (p: any) => p.socketId === s.id,
+        (p: any) => p.socketId === s.id || p.kullaniciId === userId,
       );
       setMySeat(mine?.koltukNo ?? null);
       setSelectedRoom(odaId);
@@ -847,19 +849,27 @@ export default function Home() {
       const storedRoomId = window.localStorage.getItem("okey-selected-room");
       list.forEach((room) => {
         rememberRoster(room);
-        if (room.oyuncular.some((p: any) => p.socketId === s.id))
+        if (
+          room.oyuncular.some(
+            (p: any) => p.socketId === s.id || p.kullaniciId === userId,
+          )
+        )
           applyGame(room);
         if (
           room.elDurumu === "dagitim-bekliyor" &&
           String(room.odaId) === String(storedRoomId) &&
           room.oyuncular.some(
-            (p: any) => Number.isInteger(p.siraNo) && p.socketId === s.id,
+            (p: any) =>
+              Number.isInteger(p.siraNo) &&
+              (p.socketId === s.id || p.kullaniciId === userId),
           )
         )
           prepareGame(room.odaId, room);
       });
       const joined = list.find((d) =>
-        d.oyuncular.some((p: any) => p.socketId === s.id),
+        d.oyuncular.some(
+          (p: any) => p.socketId === s.id || p.kullaniciId === userId,
+        ),
       );
       setJoinedRoomId(joined?.odaId ?? null);
       setRooms(
@@ -885,7 +895,17 @@ export default function Home() {
         })),
       );
     };
-    s.on("connect", () => s.emit("oda-listesi-iste"));
+    s.on("connect", () => {
+      s.emit("oda-listesi-iste");
+      const reconnectRoomId = window.localStorage.getItem("okey-joined-room");
+      if (reconnectRoomId)
+        s.emit("oda-katil", {
+          odaId: reconnectRoomId,
+          isim: profileName,
+          avatar: profileEmoji,
+          kullaniciId: userId,
+        });
+    });
     s.on("oda-listesi", mapRooms);
     s.on("oda-durum", (room) => {
       rememberRoster(room);
@@ -893,7 +913,9 @@ export default function Home() {
       if (
         room.elDurumu === "dagitim-bekliyor" &&
         room.oyuncular.some(
-          (p: any) => Number.isInteger(p.siraNo) && p.socketId === s.id,
+          (p: any) =>
+            Number.isInteger(p.siraNo) &&
+            (p.socketId === s.id || p.kullaniciId === userId),
         )
       )
         prepareGame(room.odaId, room);
@@ -1000,6 +1022,7 @@ export default function Home() {
     });
     s.on("oda-katildi", ({ odaId, oyunBasladi, oda }) => {
       setJoinedRoomId(odaId);
+      window.localStorage.setItem("okey-joined-room", String(odaId));
       if ((oyunBasladi || oda?.macAktif) && oda) {
         applyGame(oda);
         setScreen("game");
@@ -1209,7 +1232,10 @@ export default function Home() {
   const isSpectator = Boolean(
     (onlineGame || gamePrepared) &&
     gameRoster.length &&
-    !gameRoster.some((player: any) => player.socketId === socket?.id),
+    !gameRoster.some(
+      (player: any) =>
+        player.socketId === socket?.id || player.kullaniciId === userId,
+    ),
   );
   const isMyTurn =
     !isSpectator &&
@@ -1254,7 +1280,8 @@ export default function Home() {
     ),
   );
   const ownPlayer = gameRoster.find(
-    (player: any) => player.socketId === socket?.id,
+    (player: any) =>
+      player.socketId === socket?.id || player.kullaniciId === userId,
   );
   const seriesOpeningPreview = previewOpening({
     placements: pendingPlacements.filter((item) => item.zone === "series"),
@@ -1935,6 +1962,7 @@ export default function Home() {
   const me = roomPlayers.find(
     (player: any) =>
       player.socketId === socket?.id ||
+      player.kullaniciId === userId ||
       (!socket?.id && !player.bot && player.isim === profileName),
   );
   const playerBeforeMe = previousPlayerSeat(roomPlayers, me?.koltukNo ?? null);
@@ -2127,14 +2155,17 @@ export default function Home() {
       avatar: profileEmoji,
       kullaniciId: userId,
     });
-  const leaveSeat = () => socket?.emit("oda-ayril", selectedRoom);
+  const leaveSeat = () => {
+    window.localStorage.removeItem("okey-joined-room");
+    socket?.emit("oda-ayril", selectedRoom);
+  };
   const updateRoomProfile = (name: string, emoji: string) => {
     const nextName = name.trim().slice(0, 20) || profileName;
     setProfileName(nextName);
     setProfileEmoji(emoji);
     const updatePlayers = (players: any[] = []) =>
       players.map((player: any) =>
-        player.socketId === socket?.id
+        player.socketId === socket?.id || player.kullaniciId === userId
           ? { ...player, isim: nextName, avatar: emoji }
           : player,
       );
@@ -2154,6 +2185,7 @@ export default function Home() {
   };
   const leaveRoom = () => {
     socket?.emit("oda-ayril", selectedRoom);
+    window.localStorage.removeItem("okey-joined-room");
     setJoinedRoomId(null);
     setOnlineGame(false);
     setGamePrepared(false);
