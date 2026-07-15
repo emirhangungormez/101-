@@ -6275,7 +6275,7 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
 /* Istaka ve iki yan tas yuvasi, alt kenara biraz daha yaklasir. */
 .game-shell .rack-board,
 .game-shell .rack-actions {
-  transform: translateY(10px) !important;
+  transform: translateY(50px) !important;
 }
 
 /* Yonlendirme metnini yalnizca metin kadar saran minimal durum cercevesi. */
