@@ -6237,10 +6237,10 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
 .game-shell .game-top-actions {
   top: 8px !important;
   left: 50% !important;
-  width: 620px !important;
+  width: 240px !important;
   transform: translateX(-50%) !important;
   justify-content: center !important;
-  gap: 20px !important;
+  gap: 8px !important;
 }
 
 .game-shell .game-top-round {
@@ -6308,12 +6308,26 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
 .game-shell .game-top-actions .game-leave-button,
 .game-shell .game-top-actions .game-theme-button,
 .game-shell .game-top-actions .game-top-round {
+  height: 28px !important;
   min-height: 28px !important;
-  padding: 0 10px !important;
+  max-height: 28px !important;
+  padding: 0 8px !important;
   border: 1px solid rgb(255 255 255 / 28%) !important;
   border-radius: 6px !important;
   background: rgb(255 255 255 / 4%) !important;
   box-sizing: border-box !important;
+}
+
+.game-shell .game-top-actions .game-leave-button {
+  flex: 0 0 94px !important;
+}
+
+.game-shell .game-top-actions .game-theme-button {
+  flex: 0 0 74px !important;
+}
+
+.game-shell .game-top-actions .game-top-round {
+  flex: 0 0 56px !important;
 }
 
 .game-shell .game-top-actions .game-leave-button,
