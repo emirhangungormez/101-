@@ -6330,6 +6330,13 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
   flex: 0 0 56px !important;
 }
 
+.game-shell .game-top-actions .game-top-round b {
+  display: block !important;
+  width: 100% !important;
+  line-height: 26px !important;
+  text-align: center !important;
+}
+
 .game-shell .game-top-actions .game-leave-button,
 .game-shell .game-top-actions .game-theme-button {
   display: inline-flex !important;
