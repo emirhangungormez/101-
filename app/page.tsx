@@ -2149,9 +2149,6 @@ export default function Home() {
         {onlineGame && game.toplamEl > 0 && (
           <span className="game-top-round">
             <b>{Math.min(game.tamamlananEl + 1, game.toplamEl)}. el</b>
-            <span>
-              {game.tamamlananEl}/{game.toplamEl} tamamlandı
-            </span>
           </span>
         )}
       </div>
