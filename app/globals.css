@@ -6065,3 +6065,22 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
   font-weight: 650 !important;
   line-height: 1.25 !important;
 }
+
+/* Dort iskarta alani ayni 1186px oyun dikdortgeninin koselerine baglanir. */
+.game-shell {
+  --discard-corner-inset: max(0px, calc(50% - 593px));
+}
+
+.game-shell .opponent-discard-corner {
+  top: 132px !important;
+}
+
+.game-shell .opponent-discard-corner-left {
+  left: var(--discard-corner-inset) !important;
+  right: auto !important;
+}
+
+.game-shell .opponent-discard-corner-right {
+  right: var(--discard-corner-inset) !important;
+  left: auto !important;
+}
