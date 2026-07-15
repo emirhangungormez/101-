@@ -6162,22 +6162,27 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
 
 /* Sure gorunmese de ayni satiri ayirir; istaka hicbir durumda yer degistirmez. */
 .game-shell > .rack-area {
-  grid-template-rows: 180px 14px 24px !important;
+  grid-template-rows: 180px 18px 24px !important;
 }
 
 .game-shell .turn-timer-slot {
   grid-column: 1 !important;
   grid-row: 2 !important;
-  width: 998px !important;
-  max-width: 100% !important;
-  height: 14px !important;
-  min-height: 14px !important;
+  width: 1080px !important;
+  max-width: calc(100% - 32px) !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  transform: translateY(50px) !important;
 }
 
 .game-shell .turn-timer-slot .turn-timer {
   width: 100% !important;
-  height: 14px !important;
+  height: 18px !important;
   margin: 0 !important;
+}
+
+.game-shell .turn-timer-slot .turn-timer-track {
+  height: 5px !important;
 }
 
 /* Oyun yonlendirmesi ust oyun alani ile asagidaki istakanin tam ortasindadir. */
