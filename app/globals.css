@@ -6873,3 +6873,38 @@ body > .rack-drag-ghost {
   max-height: 58px !important;
   transform: translateX(-50%) !important;
 }
+/* Profil kartlarinda isim ve puan ayni hizada, avatarin hemen yaninda ortalanir. */
+.game-shell > .game-player-strip .game-player .game-player-name {
+  display: grid !important;
+  grid-template-columns: max-content max-content !important;
+  grid-template-rows: 18px 16px 16px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  justify-items: center !important;
+  column-gap: 6px !important;
+  row-gap: 0 !important;
+  text-align: center !important;
+  width: max-content !important;
+  min-width: 0 !important;
+  flex: 0 0 auto !important;
+}
+.game-shell > .game-player-strip .game-player .game-player-name > b {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  width: auto !important;
+  white-space: nowrap !important;
+}
+.game-shell > .game-player-strip .game-player .game-player-name > small {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  width: auto !important;
+  white-space: nowrap !important;
+}
+.game-shell > .game-player-strip .game-player .game-player-name > :is(.player-opening, .player-penalty) {
+  grid-column: 2 !important;
+  grid-row: 2 / span 2 !important;
+  width: auto !important;
+  max-width: none !important;
+  white-space: nowrap !important;
+  justify-self: center !important;
+}
