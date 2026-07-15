@@ -1,0 +1,25 @@
+{
+  "name": "101 Okey",
+  "short_name": "101 Okey",
+  "description": "Çevrimiçi, çok oyunculu 101 Okey",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#35101f",
+  "theme_color": "#35101f",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
