@@ -6314,6 +6314,44 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
   transform: translateX(-50%) !important;
 }
 
+/* Ust profilde acilis ve ceza etiketlerinin tamamini gorunur tut. */
+.game-shell .game-top-actions {
+  right: calc(50% + 152px) !important;
+}
+
+.game-shell .game-top-info {
+  left: calc(50% + 152px) !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-top.game-player-position-top,
+.game-shell
+  > .game-player-strip
+  > .game-player:only-child:not(.game-player-position-left):not(.game-player-position-right),
+.game-shell
+  > .game-player-strip
+  > .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right) {
+  width: 280px !important;
+  min-width: 280px !important;
+  max-width: 280px !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-top
+  .game-player-name,
+.game-shell
+  > .game-player-strip
+  > .game-player:only-child:not(.game-player-position-left):not(.game-player-position-right)
+  .game-player-name,
+.game-shell
+  > .game-player-strip
+  > .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right)
+  .game-player-name {
+  gap: 4px !important;
+}
+
 /* Istaka ve iki yan tas yuvasi, alt kenara biraz daha yaklasir. */
 .game-shell .rack-board,
 .game-shell .rack-actions {
