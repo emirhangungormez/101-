@@ -6271,3 +6271,22 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
   max-height: 58px !important;
   transform: translateX(-50%) !important;
 }
+
+/* Istaka ve iki yan tas yuvasi, alt kenara biraz daha yaklasir. */
+.game-shell .rack-board,
+.game-shell .rack-actions {
+  transform: translateY(10px) !important;
+}
+
+/* Yonlendirme metnini yalnizca metin kadar saran minimal durum cercevesi. */
+.game-shell .rack-status {
+  width: max-content !important;
+  max-width: calc(100% - 180px) !important;
+  min-height: 24px !important;
+  padding: 1px 10px !important;
+  border: 1px solid rgb(255 255 255 / 28%) !important;
+  border-radius: 6px !important;
+  background: rgb(255 255 255 / 4%) !important;
+  box-sizing: border-box !important;
+  line-height: 20px !important;
+}
