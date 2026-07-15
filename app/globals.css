@@ -6509,7 +6509,8 @@ body > .rack-drag-ghost {
   > .game-player-strip
   > .game-player:nth-child(2):last-child,
 .game-shell > .game-player-strip > .game-player:nth-child(3) {
-  top: 390px !important;
+  top: 487px !important;
+  transform: translateY(-50%) !important;
 }
 
 /* Yonlendirme ust bilgiye tasindigi icin istaka ile acma alanlari arasinda bos satir kalmaz. */
@@ -6623,4 +6624,29 @@ body > .rack-drag-ghost {
   position: absolute !important;
   top: 10px !important;
   left: 10px !important;
+}
+
+/* Oyun govdesini istakaya yaklastir; istaka ve sure ekran icinde kalir. */
+.game-shell > .game-area {
+  top: 145px !important;
+}
+
+.game-shell .game-center-info,
+.game-shell .game-center-info:has(.deal-button),
+.game-shell .opponent-discard-corner {
+  top: 175px !important;
+}
+
+.game-shell > .rack-area {
+  bottom: 8px !important;
+  grid-template-rows: 180px 18px !important;
+}
+
+.game-shell .rack-board,
+.game-shell .rack-actions {
+  transform: none !important;
+}
+
+.game-shell .turn-timer-slot {
+  transform: none !important;
 }
