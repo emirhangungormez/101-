@@ -6406,6 +6406,87 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
   line-height: 13px !important;
 }
 
+/* Ust kartta acilis etiketi yalnizca puanin altinda yer alir; isim yatayda kalir. */
+.game-shell
+  > .game-player-strip
+  > :is(
+    .game-player.game-player-position-top,
+    .game-player:only-child:not(.game-player-position-left):not(.game-player-position-right),
+    .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right)
+  )
+  .game-player-name {
+  display: grid !important;
+  grid-template-columns: max-content max-content !important;
+  grid-template-rows: 14px 12px 12px !important;
+  align-items: center !important;
+  justify-content: start !important;
+  column-gap: 5px !important;
+  row-gap: 0 !important;
+  width: auto !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > :is(
+    .game-player.game-player-position-top,
+    .game-player:only-child:not(.game-player-position-left):not(.game-player-position-right),
+    .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right)
+  )
+  .game-player-name
+  > b {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  width: auto !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > :is(
+    .game-player.game-player-position-top,
+    .game-player:only-child:not(.game-player-position-left):not(.game-player-position-right),
+    .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right)
+  )
+  .game-player-name
+  > small {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  width: auto !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > :is(
+    .game-player.game-player-position-top,
+    .game-player:only-child:not(.game-player-position-left):not(.game-player-position-right),
+    .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right)
+  )
+  .game-player-name
+  > .player-opening {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  width: auto !important;
+  max-width: none !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > :is(
+    .game-player.game-player-position-top,
+    .game-player:only-child:not(.game-player-position-left):not(.game-player-position-right),
+    .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right)
+  )
+  .game-player-name
+  > .player-penalty {
+  grid-column: 2 !important;
+  grid-row: 3 !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
 /* Istaka ve iki yan tas yuvasi, alt kenara biraz daha yaklasir. */
 .game-shell .rack-board,
 .game-shell .rack-actions {
