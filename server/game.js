@@ -11,6 +11,11 @@ import {
 } from "../shared/okey-rules.js";
 
 export const aktifOdalar = Object.create(null);
+export const MAKSIMUM_AKTIF_ODA_SAYISI = 5;
+
+export function yeniOdaOlusturulabilir() {
+  return Object.keys(aktifOdalar).length < MAKSIMUM_AKTIF_ODA_SAYISI;
+}
 
 const renkler = ["kirmizi", "mavi", "siyah", "sari"];
 export function desteOlustur() {

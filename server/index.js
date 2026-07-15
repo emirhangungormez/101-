@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import { Server } from "socket.io";
 import {
   aktifOdalar,
+  yeniOdaOlusturulabilir,
   yeniOda,
   genelDurum,
   elDagit,
@@ -431,6 +432,9 @@ io.on("connection", (socket) => {
   socket.on("oda-listesi-iste", odaListesi);
   socket.on("oda-olustur", (veri) => {
     try {
+      if (!yeniOdaOlusturulabilir()) {
+        return hata(socket, "En fazla 5 aktif oda olusturulabilir");
+      }
       const odaId = `oda-${Math.random().toString(36).slice(2, 8)}`;
       const maksimum = [2, 3, 4].includes(veri?.maksimum) ? veri.maksimum : 4;
       const oda = yeniOda(

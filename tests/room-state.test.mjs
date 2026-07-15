@@ -1,11 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  aktifOdalar,
   genelDurum,
   koltukDurumunuDevral,
   koltukDurumunuSakla,
   koltukPuaniniGuncelle,
+  MAKSIMUM_AKTIF_ODA_SAYISI,
   yeniOda,
+  yeniOdaOlusturulabilir,
 } from "../server/game.js";
 
 const creator = {
@@ -13,6 +16,29 @@ const creator = {
   kullaniciId: "creator-user",
   isim: "Kurucu",
 };
+
+test("limits the server to five simultaneous active rooms", () => {
+  const eskiOdalar = { ...aktifOdalar };
+  for (const odaId of Object.keys(aktifOdalar)) delete aktifOdalar[odaId];
+
+  try {
+    assert.equal(MAKSIMUM_AKTIF_ODA_SAYISI, 5);
+    for (let index = 0; index < MAKSIMUM_AKTIF_ODA_SAYISI; index += 1) {
+      assert.equal(yeniOdaOlusturulabilir(), true);
+      aktifOdalar[`limit-room-${index}`] = yeniOda(
+        `limit-room-${index}`,
+        `Masa ${index + 1}`,
+        creator,
+        4,
+        "sabit",
+      );
+    }
+    assert.equal(yeniOdaOlusturulabilir(), false);
+  } finally {
+    for (const odaId of Object.keys(aktifOdalar)) delete aktifOdalar[odaId];
+    Object.assign(aktifOdalar, eskiOdalar);
+  }
+});
 
 test("keeps score on the room seat when its occupant changes", () => {
   const room = yeniOda("room-score", "Puan Masası", creator, 3, "sabit");
