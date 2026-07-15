@@ -6316,11 +6316,11 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
 
 /* Ust profilde acilis ve ceza etiketlerinin tamamini gorunur tut. */
 .game-shell .game-top-actions {
-  right: calc(50% + 152px) !important;
+  right: calc(50% + 132px) !important;
 }
 
 .game-shell .game-top-info {
-  left: calc(50% + 152px) !important;
+  left: calc(50% + 132px) !important;
 }
 
 .game-shell
@@ -6332,9 +6332,9 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
 .game-shell
   > .game-player-strip
   > .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right) {
-  width: 280px !important;
-  min-width: 280px !important;
-  max-width: 280px !important;
+  width: 240px !important;
+  min-width: 240px !important;
+  max-width: 240px !important;
 }
 
 .game-shell
@@ -6349,7 +6349,52 @@ html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
   > .game-player-strip
   > .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right)
   .game-player-name {
-  gap: 4px !important;
+  min-width: 72px !important;
+  flex: 1 1 72px !important;
+  flex-flow: column nowrap !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 1px !important;
+  overflow: visible !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-top
+  .game-player-name
+  > b,
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-top
+  .game-player-name
+  > small,
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-top
+  .game-player-name
+  > .player-opening,
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-top
+  .game-player-name
+  > .player-penalty {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  font-size: 10px !important;
+  line-height: 11px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-top
+  .game-player-name
+  > b {
+  font-size: 12px !important;
+  line-height: 13px !important;
 }
 
 /* Istaka ve iki yan tas yuvasi, alt kenara biraz daha yaklasir. */
