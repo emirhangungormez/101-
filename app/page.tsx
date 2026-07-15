@@ -396,6 +396,7 @@ export default function Home() {
   const serverTableReadyRef = useRef(false);
   const serverTableSignatureRef = useRef<string | null>(null);
   const focusedOpeningZonesRef = useRef({ series: false, pairs: false });
+  const focusingOpeningZonesRef = useRef({ series: false, pairs: false });
   const rackSnapshotRef = useRef<RackCell[] | null>(null);
   const rackOrderRef = useRef<RackCell[]>(rack);
   const tableOrderRef = useRef(table);
@@ -549,31 +550,48 @@ export default function Home() {
     return () => window.cancelAnimationFrame(frame);
   }, [onlineGame, gamePrepared, game.elNo]);
 
-  const focusNewTableCells = (zone: Zone, indices: number[]) => {
-    if (!indices.length) return;
+  const focusNewTableCells = (
+    zone: Zone,
+    indices: number[],
+    onComplete?: (focused: boolean) => void,
+  ) => {
+    if (!indices.length) {
+      onComplete?.(false);
+      return;
+    }
     const grid = zone === "series" ? seriesGridRef.current : pairsGridRef.current;
-    if (!grid) return;
-    window.requestAnimationFrame(() => {
-      const cells = indices
-        .map((index) =>
-          grid.querySelector<HTMLElement>(`[data-table-cell="${index}"]`),
-        )
-        .filter((cell): cell is HTMLElement => Boolean(cell));
-      if (!cells.length) return;
-      const left = Math.min(...cells.map((cell) => cell.offsetLeft));
-      const top = Math.min(...cells.map((cell) => cell.offsetTop));
-      const right = Math.max(
-        ...cells.map((cell) => cell.offsetLeft + cell.offsetWidth),
-      );
-      const bottom = Math.max(
-        ...cells.map((cell) => cell.offsetTop + cell.offsetHeight),
-      );
-      grid.scrollTo({
-        left: Math.max(0, (left + right - grid.clientWidth) / 2),
-        top: Math.max(0, (top + bottom - grid.clientHeight) / 2),
-        behavior: "smooth",
+    if (!grid) {
+      onComplete?.(false);
+      return;
+    }
+    const tryFocus = (attemptsLeft: number) =>
+      window.requestAnimationFrame(() => {
+        const cells = indices
+          .map((index) =>
+            grid.querySelector<HTMLElement>(`[data-table-cell="${index}"]`),
+          )
+          .filter((cell): cell is HTMLElement => Boolean(cell));
+        if (!cells.length) {
+          if (attemptsLeft > 1) tryFocus(attemptsLeft - 1);
+          else onComplete?.(false);
+          return;
+        }
+        const left = Math.min(...cells.map((cell) => cell.offsetLeft));
+        const top = Math.min(...cells.map((cell) => cell.offsetTop));
+        const right = Math.max(
+          ...cells.map((cell) => cell.offsetLeft + cell.offsetWidth),
+        );
+        const bottom = Math.max(
+          ...cells.map((cell) => cell.offsetTop + cell.offsetHeight),
+        );
+        grid.scrollTo({
+          left: Math.max(0, (left + right - grid.clientWidth) / 2),
+          top: Math.max(0, (top + bottom - grid.clientHeight) / 2),
+          behavior: "smooth",
+        });
+        onComplete?.(true);
       });
-    });
+    tryFocus(6);
   };
   useEffect(() => {
     if (!socket) return;
@@ -1035,6 +1053,7 @@ export default function Home() {
         serverTableSignatureRef.current = null;
         serverTableCellsRef.current = { series: new Set(), pairs: new Set() };
         focusedOpeningZonesRef.current = { series: false, pairs: false };
+        focusingOpeningZonesRef.current = { series: false, pairs: false };
       }
       const signature = tableGroundSignature(room.masaZemini);
       if (serverTableSignatureRef.current === signature) return;
@@ -1057,23 +1076,33 @@ export default function Home() {
       // kullanicinin elle sectigi gorunum kesinlikle degismez.
       if (
         !focusedOpeningZonesRef.current.series &&
+        !focusingOpeningZonesRef.current.series &&
         nextServerCells.series.size > 0
       ) {
+        focusingOpeningZonesRef.current.series = true;
         focusNewTableCells(
           "series",
           newSeries.length ? newSeries : [...nextServerCells.series],
+          (focused) => {
+            focusingOpeningZonesRef.current.series = false;
+            if (focused) focusedOpeningZonesRef.current.series = true;
+          },
         );
-        focusedOpeningZonesRef.current.series = true;
       }
       if (
         !focusedOpeningZonesRef.current.pairs &&
+        !focusingOpeningZonesRef.current.pairs &&
         nextServerCells.pairs.size > 0
       ) {
+        focusingOpeningZonesRef.current.pairs = true;
         focusNewTableCells(
           "pairs",
           newPairs.length ? newPairs : [...nextServerCells.pairs],
+          (focused) => {
+            focusingOpeningZonesRef.current.pairs = false;
+            if (focused) focusedOpeningZonesRef.current.pairs = true;
+          },
         );
-        focusedOpeningZonesRef.current.pairs = true;
       }
       serverTableCellsRef.current = nextServerCells;
       serverTableReadyRef.current = true;
