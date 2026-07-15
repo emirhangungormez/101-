@@ -1221,14 +1221,30 @@ export default function Home() {
   const ownPlayer = gameRoster.find(
     (player: any) => player.socketId === socket?.id,
   );
-  const openingPreview = previewOpening({
-    placements: pendingPlacements.filter((item) => item.zone === openingMode),
-    mode: openingMode,
+  const seriesOpeningPreview = previewOpening({
+    placements: pendingPlacements.filter((item) => item.zone === "series"),
+    mode: "series",
     indicator: game.gostergeTas,
     threshold: game.mevcutBaraj,
   });
+  const pairsOpeningPreview = previewOpening({
+    placements: pendingPlacements.filter((item) => item.zone === "pairs"),
+    mode: "pairs",
+    indicator: game.gostergeTas,
+    threshold: game.mevcutBaraj,
+  });
+  const openingPreview =
+    openingMode === "series" ? seriesOpeningPreview : pairsOpeningPreview;
   const score = openingPreview.score;
   const hasOpened = Boolean(ownPlayer?.acilisTipi);
+  const initialSeriesReady =
+    pendingPlacements.length > 0 &&
+    pendingPlacements.every((item) => item.zone === "series") &&
+    seriesOpeningPreview.valid;
+  const initialPairsReady =
+    pendingPlacements.length > 0 &&
+    pendingPlacements.every((item) => item.zone === "pairs") &&
+    pairsOpeningPreview.valid;
   const pendingKeys = new Set(
     pendingPlacements.map((item) => `${item.zone}:${item.row}:${item.col}`),
   );
@@ -1274,8 +1290,8 @@ export default function Home() {
       (!sideDrawTileId ||
         pending.some((tile) => String(tile.id) === sideDrawTileId)) &&
       ((hasOpened && openedMoveValid) ||
-        (pendingPlacements.every((item) => item.zone === openingMode) &&
-          openingPreview.valid)),
+        initialSeriesReady ||
+        initialPairsReady),
   };
 
   const dragData = (e: React.DragEvent) => {
@@ -1310,6 +1326,7 @@ export default function Home() {
         i === index ? { ...tile, origin: data.index, committed: false } : v,
       ),
     }));
+    setOpeningMode(zone);
     if (zone === "series") requestSeriesTimeBonus();
     setNotice(
       `${zone === "series" ? "Seri" : "Çift"} alanına taş yerleştirildi`,
@@ -1645,6 +1662,7 @@ export default function Home() {
           };
           return next;
         });
+        setOpeningMode(tableTarget.zone);
         if (
           tableTarget.zone === "series" &&
           !(rackPointerDrag.source === "table" && sourceZone === "series")
@@ -1798,8 +1816,15 @@ export default function Home() {
             ? `Geçerli perlerle en az ${game.mevcutBaraj} puana ulaşmalısın`
             : "En az 5 geçerli çift dizmelisin",
       );
+    const resolvedOpeningMode: Zone = !hasOpened
+      ? initialPairsReady
+        ? "pairs"
+        : initialSeriesReady
+          ? "series"
+          : openingMode
+      : openingMode;
     const payload = {
-      mode: openingMode,
+      mode: resolvedOpeningMode,
       placements: pendingPlacements.map(({ zone, row, col, tasId }) => ({
         zone,
         row,
@@ -2454,15 +2479,24 @@ export default function Home() {
                     Geri Topla
                   </button>
                 </div>
-                <output
-                  className={`opening-counter ${openingPreview.valid || hasOpened ? "complete" : ""}`}
-                >
-                  {hasOpened
-                    ? `${pending.length} taş hazır`
-                    : openingMode === "series"
-                      ? `${openingPreview.score} / ${game.mevcutBaraj}`
-                      : `${openingPreview.pairCount} / 5 çift`}
-                </output>
+                {hasOpened ? (
+                  <output className="opening-counter complete">
+                    {pending.length} taş hazır
+                  </output>
+                ) : (
+                  <div className="opening-counter-stack">
+                    <output
+                      className={`opening-counter ${seriesOpeningPreview.valid ? "complete" : ""}`}
+                    >
+                      {seriesOpeningPreview.score} / {game.mevcutBaraj}
+                    </output>
+                    <output
+                      className={`opening-counter ${pairsOpeningPreview.valid ? "complete" : ""}`}
+                    >
+                      {pairsOpeningPreview.pairCount} / 5
+                    </output>
+                  </div>
+                )}
               </div>
             </>
           )

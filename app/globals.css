@@ -4533,6 +4533,15 @@ input:focus-visible {
 .game-shell .opening-counter.complete {
   color: #16a34a !important;
 }
+
+.game-shell .opening-counter-stack {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0 !important;
+  width: 100% !important;
+  min-height: 40px !important;
+  align-content: center !important;
+}
 .game-shell .table-matrix > .grid {
   transition:
     border-color 0.15s ease,
