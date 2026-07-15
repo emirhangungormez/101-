@@ -6653,12 +6653,12 @@ body > .rack-drag-ghost {
 
 /* Ust oyun bilgilerini acma alanlarinin hemen ustunde tek, dengeli sirada tut. */
 .game-shell .game-top-actions {
-  top: 97px !important;
+  top: 122px !important;
   right: calc(50% + 132px) !important;
 }
 
 .game-shell .game-top-info {
-  top: 82px !important;
+  top: 107px !important;
   left: calc(50% + 132px) !important;
 }
 
@@ -6671,7 +6671,7 @@ body > .rack-drag-ghost {
 .game-shell
   > .game-player-strip
   > .game-player:nth-child(2):not(:last-child):not(.game-player-position-left):not(.game-player-position-right) {
-  top: 82px !important;
+  top: 107px !important;
   left: 50% !important;
   right: auto !important;
   width: 240px !important;
