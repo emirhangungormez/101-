@@ -486,7 +486,7 @@ export default function Home() {
         root.style.removeProperty("--room-scale");
       }
       if (screen === "lobby") {
-        const lobbyScale = Math.min(2, availableWidth / 960, availableHeight / 430);
+        const lobbyScale = Math.min(2, availableWidth / 740, availableHeight / 430);
         root.style.setProperty("--lobby-create-scale", String(lobbyScale));
       } else {
         root.style.removeProperty("--lobby-create-scale");

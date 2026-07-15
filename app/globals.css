@@ -1965,20 +1965,28 @@ input:focus-visible {
 
 /* Oda olusturma formu da oda sahnesiyle ayni oranda buyur. */
 .lobby-screen .lobby-content {
-  width: 1420px !important;
-  grid-template-columns: 720px 1px 600px !important;
-  gap: 48px !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 710px !important;
+  min-width: 710px !important;
+  height: 400px !important;
+  min-height: 400px !important;
+  grid-template-columns: 350px 1px 290px !important;
+  gap: 34px !important;
   align-items: start !important;
-  align-content: start !important;
+  align-content: center !important;
   box-sizing: border-box !important;
-  padding-top: 72px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: translate(-50%, -50%) scale(var(--lobby-create-scale, 2)) !important;
+  transform-origin: center center !important;
 }
 
 .lobby-screen .create-panel {
   width: 350px !important;
   justify-self: start !important;
-  transform: scale(var(--lobby-create-scale, 2)) !important;
-  transform-origin: left top !important;
+  transform: none !important;
 }
 
 .lobby-screen .create-panel > h1 {
@@ -1996,15 +2004,14 @@ input:focus-visible {
 }
 
 .lobby-screen .lobby-divider {
-  height: 720px !important;
+  height: 360px !important;
 }
 
 .lobby-screen .rooms-panel {
   width: 290px !important;
   justify-self: end !important;
-  transform: scale(var(--lobby-create-scale, 2)) !important;
+  transform: none !important;
   align-self: start !important;
-  transform-origin: right top !important;
 }
 
 .lobby-screen .create-panel > h1,
@@ -2021,6 +2028,15 @@ input:focus-visible {
 .start-screen .start-menu-content {
   transform: scale(var(--menu-scale, 2)) !important;
   transform-origin: center center !important;
+}
+
+.start-screen,
+.lobby-screen,
+.room-screen {
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  overflow: hidden !important;
 }
 
 /* Tum sayfalardaki geri denetimi ayni boyut ve alt-merkez konumundadir. */
