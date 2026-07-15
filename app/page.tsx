@@ -2572,15 +2572,13 @@ export default function Home() {
           </button>
         </div>
         <div className="turn-timer-slot">
-          {onlineGame && game.hamleSonZaman ? (
-            <TurnTimer
-              limit={game.hamleSuresi ?? turnLimit}
-              deadline={game.hamleSonZaman}
-              phase={turnPhase}
-              running
-              resetKey={`${game.elNo}:${game.siradakiOyuncu}:${turnPhase}:${game.hamleSonZaman}`}
-            />
-          ) : null}
+          <TurnTimer
+            limit={game.hamleSuresi ?? turnLimit}
+            deadline={game.hamleSonZaman}
+            phase={turnPhase}
+            running={onlineGame && Boolean(game.hamleSonZaman)}
+            resetKey={`${game.elNo}:${game.siradakiOyuncu}:${turnPhase}:${game.hamleSonZaman}`}
+          />
         </div>
         <div className="rack-board">
           <div className="rack-discard rack-discard-left">
@@ -2849,17 +2847,18 @@ function TurnTimer({
     );
     return () => window.clearInterval(timer);
   }, [deadline, limit, resetKey, running]);
-  const color = `hsl(${Math.round((seconds / limit) * 120)} 72% 42%)`;
+  const progress = running && limit > 0 ? seconds / limit : 0;
+  const color = `hsl(${Math.round(progress * 120)} 72% 42%)`;
   return (
-    <div className="turn-timer">
+    <div className={`turn-timer ${running ? "running" : "idle"}`}>
       <div className="turn-timer-track">
         <span
           style={{
-            width: `${(seconds / limit) * 100}%`,
+            width: `${progress * 100}%`,
             background: color,
           }}
         />
-        <small>{seconds}</small>
+        <small>{running ? seconds : "—"}</small>
       </div>
     </div>
   );

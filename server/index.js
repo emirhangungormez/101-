@@ -238,7 +238,7 @@ const hamleZamanlayicisiniKur = (
   const oyuncu = oda?.oyuncular.find(
     (item) => item.koltukNo === g?.siradakiOyuncu,
   );
-  if (!g?.oyunBasladi || !oyuncu || oyuncu.bot || g.deste.length === 0) {
+  if (!g?.oyunBasladi || !oyuncu || g.deste.length === 0) {
     if (g && g.deste.length > 0) {
       g.hamleSonZaman = null;
       g.hamleSuresi = null;
