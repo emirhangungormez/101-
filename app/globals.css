@@ -6530,9 +6530,13 @@ body > .rack-drag-ghost {
   width: 82px !important;
   min-width: 82px !important;
   max-width: 82px !important;
+  inline-size: 82px !important;
+  flex: 0 0 82px !important;
   height: 214px !important;
   min-height: 214px !important;
   max-height: 214px !important;
+  block-size: 214px !important;
+  margin: 0 !important;
   padding: 16px 6px !important;
   flex-flow: column nowrap !important;
   align-items: center !important;
