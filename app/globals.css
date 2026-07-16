@@ -6200,6 +6200,84 @@ body > .rack-drag-ghost .tile i {
   transform: none !important;
 }
 
+/* Nihai gorunurluk: seri/cift govdesi gizleme kuralindan sonra acilir. */
+.game-shell > .game-area {
+  display: flex !important;
+  position: absolute !important;
+  top: 18px !important;
+  left: 50% !important;
+  right: auto !important;
+  width: 998px !important;
+  min-width: 998px !important;
+  max-width: 998px !important;
+  height: 363px !important;
+  min-height: 363px !important;
+  max-height: 363px !important;
+  padding: 0 !important;
+  transform: translateX(-50%) !important;
+}
+
+.game-shell > .game-area .board-stage {
+  display: block !important;
+  width: 998px !important;
+  min-width: 998px !important;
+  max-width: 998px !important;
+  height: 363px !important;
+  min-height: 363px !important;
+  max-height: 363px !important;
+}
+
+.game-shell > .game-area .table-head {
+  display: grid !important;
+}
+
+.game-shell > .game-area .table-matrix {
+  display: grid !important;
+  height: 333px !important;
+  min-height: 333px !important;
+  max-height: 333px !important;
+}
+
+.game-shell > .game-area .table-matrix > .grid {
+  display: grid !important;
+  height: 333px !important;
+  min-height: 333px !important;
+  max-height: 333px !important;
+}
+
+/* Seri ve cift alanlari ust tas yuvalarindan istakaya kadar uzanir. */
+.game-shell > .game-area {
+  display: flex !important;
+  position: absolute !important;
+  top: 18px !important;
+  left: 50% !important;
+  right: auto !important;
+  width: 998px !important;
+  min-width: 998px !important;
+  max-width: 998px !important;
+  height: 363px !important;
+  min-height: 363px !important;
+  max-height: 363px !important;
+  padding: 0 !important;
+  transform: translateX(-50%) !important;
+}
+
+.game-shell .board-stage {
+  width: 998px !important;
+  min-width: 998px !important;
+  max-width: 998px !important;
+  height: 363px !important;
+  min-height: 363px !important;
+  max-height: 363px !important;
+}
+
+.game-shell .table-matrix,
+.game-shell .table-matrix > .grid {
+  height: 333px !important;
+  min-height: 333px !important;
+  max-height: 333px !important;
+}
+
 .game-shell .opponent-rack-discard .incoming-pointer-tile:nth-child(2) {
   transform: translate(3px, -3px) !important;
 }
@@ -6946,9 +7024,9 @@ html.game-fit-viewport .game-shell {
   width: 1600px !important;
   min-width: 1600px !important;
   max-width: 1600px !important;
-  height: 900px !important;
-  min-height: 900px !important;
-  max-height: 900px !important;
+  height: 654px !important;
+  min-height: 654px !important;
+  max-height: 654px !important;
   margin: 0 !important;
   transform: translate(-50%, -50%) scale(var(--game-scale, 1)) !important;
   transform-origin: center center !important;
@@ -7209,6 +7287,50 @@ body > .rack-drag-ghost {
   transform: none !important;
 }
 
+/* Istakadaki tas ile surukleme katmanindaki tas birebir ayni geometridedir. */
+.game-shell .rack-pointer-tile,
+.game-shell .rack-cell .tile,
+body > .rack-drag-ghost,
+body > .rack-drag-ghost .tile {
+  width: 56px !important;
+  min-width: 56px !important;
+  max-width: 56px !important;
+  height: 78px !important;
+  min-height: 78px !important;
+  max-height: 78px !important;
+  box-sizing: border-box !important;
+}
+
+.game-shell .rack-cell .tile,
+body > .rack-drag-ghost .tile {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
+  padding: 7px 0 0 !important;
+  border-radius: 6px !important;
+  aspect-ratio: 56 / 78 !important;
+}
+
+.game-shell .rack-cell .tile span,
+body > .rack-drag-ghost .tile span {
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  line-height: 0.86 !important;
+}
+
+.game-shell .rack-cell .tile i,
+body > .rack-drag-ghost .tile i {
+  width: 16px !important;
+  height: 16px !important;
+  margin: auto auto 8px !important;
+  border-radius: 50% !important;
+  background: currentColor !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
 .game-shell .turn-timer-slot {
   transform: none !important;
 }
@@ -7380,4 +7502,1781 @@ body > .rack-drag-ghost {
   justify-self: center !important;
   overflow: visible !important;
   text-overflow: clip !important;
+}
+
+/* Mobil okunabilirlik: istaka buyur, acma alanlari boydan kisalir. */
+.game-shell .table-matrix,
+.game-shell .table-matrix > .grid {
+  height: 120px !important;
+  min-height: 120px !important;
+  max-height: 120px !important;
+}
+
+.game-shell > .game-area,
+.game-shell .board-stage {
+  height: 150px !important;
+  min-height: 150px !important;
+  max-height: 150px !important;
+}
+
+.game-shell > .rack-area {
+  bottom: 3px !important;
+  grid-template-rows: 174px 18px 24px !important;
+  row-gap: 3px !important;
+}
+
+.game-shell .rack-board {
+  width: 1388px !important;
+  max-width: 1388px !important;
+  grid-template-columns: 90px 1184px 90px !important;
+  column-gap: 12px !important;
+}
+
+.game-shell .rack-grid {
+  width: 1184px !important;
+  height: 174px !important;
+  grid-template-columns: repeat(19, 56px) !important;
+  grid-template-rows: repeat(2, 78px) !important;
+  column-gap: 6px !important;
+  row-gap: 6px !important;
+  padding: 6px !important;
+  box-sizing: border-box !important;
+}
+
+.game-shell .rack-grid::after {
+  top: 87px !important;
+}
+
+.game-shell .rack-cell {
+  width: 56px !important;
+  height: 78px !important;
+  min-height: 78px !important;
+}
+
+.game-shell .rack-cell .tile {
+  width: 56px !important;
+  max-width: 56px !important;
+  height: 78px !important;
+  min-height: 78px !important;
+  aspect-ratio: 56 / 78 !important;
+}
+
+.game-shell .rack-cell .tile span {
+  font-size: 28px !important;
+  line-height: 1 !important;
+}
+
+.game-shell .rack-cell .tile i {
+  font-size: 16px !important;
+}
+
+.game-shell .rack-actions {
+  width: 1388px !important;
+  max-width: 1388px !important;
+  height: 174px !important;
+  grid-template-columns: 90px 1184px 90px !important;
+  column-gap: 12px !important;
+}
+
+.game-shell .rack-discard {
+  width: 90px !important;
+  height: 115px !important;
+  flex-basis: 115px !important;
+}
+
+.game-shell .rack-discard > small {
+  font-size: 12px !important;
+  line-height: 14px !important;
+}
+
+.game-shell .rack-actions button:nth-child(2),
+.game-shell .rack-actions button:nth-child(3) {
+  width: 90px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  font-size: 12px !important;
+  transform: translateY(-38px) !important;
+}
+
+.game-shell .turn-timer-slot {
+  width: 1184px !important;
+  max-width: 1184px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+/* Nihai tas olcusu: istakada ve suruklerken ayni kutu modeli kullanilir. */
+.game-shell .rack-pointer-tile,
+.game-shell .rack-cell .tile,
+body > .rack-drag-ghost,
+body > .rack-drag-ghost .tile {
+  width: 56px !important;
+  min-width: 56px !important;
+  max-width: 56px !important;
+  height: 78px !important;
+  min-height: 78px !important;
+  max-height: 78px !important;
+  box-sizing: border-box !important;
+  flex: 0 0 56px !important;
+}
+
+.game-shell .rack-cell .tile,
+body > .rack-drag-ghost .tile {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
+  padding: 7px 0 0 !important;
+  border: 1px solid #d4d4d4 !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  aspect-ratio: 56 / 78 !important;
+}
+
+.game-shell .rack-cell .tile span,
+body > .rack-drag-ghost .tile span {
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  line-height: 0.86 !important;
+}
+
+.game-shell .rack-cell .tile i,
+body > .rack-drag-ghost .tile i {
+  width: 16px !important;
+  height: 16px !important;
+  margin: auto auto 8px !important;
+  border-radius: 50% !important;
+  background: currentColor !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+body > .rack-drag-ghost .tile {
+  box-shadow: 0 0 0 2px #2563eb !important;
+}
+
+/* Istaka duzenlenirken yalnizca alt oyun bolumu gorunur. */
+.game-shell > :not(.rack-area) {
+  display: none !important;
+}
+
+/* Alt grup ekran kenarina baglidir; bos grid satiri alt bosluk olusturmaz. */
+.game-shell > .rack-area {
+  left: 50% !important;
+  right: auto !important;
+  bottom: 2px !important;
+  width: 1388px !important;
+  min-width: 1388px !important;
+  max-width: 1388px !important;
+  height: 195px !important;
+  min-height: 195px !important;
+  max-height: 195px !important;
+  grid-template-rows: 174px 18px !important;
+  row-gap: 3px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  transform: translateX(-50%) !important;
+}
+
+/* Dizme butonlari yan tas yuvalarinin merkez eksenindedir. */
+.game-shell .rack-actions button:nth-child(2),
+.game-shell .rack-actions button:nth-child(3) {
+  margin: 0 !important;
+  justify-self: center !important;
+  align-self: start !important;
+}
+
+/* Daha genis hareket alani: eni sabit 17 sutunlu, daha uzun istaka. */
+.game-shell > .rack-area {
+  height: 219px !important;
+  min-height: 219px !important;
+  max-height: 219px !important;
+  grid-template-rows: 198px 18px !important;
+}
+
+.game-shell .rack-grid {
+  width: 1184px !important;
+  height: 198px !important;
+  grid-template-columns: repeat(17, 64px) !important;
+  grid-template-rows: repeat(2, 89px) !important;
+  column-gap: 5px !important;
+  row-gap: 8px !important;
+  padding: 6px 8px !important;
+}
+
+.game-shell .rack-grid::after {
+  top: 99px !important;
+}
+
+.game-shell .rack-cell,
+.game-shell .rack-pointer-tile,
+.game-shell .rack-cell .tile,
+body > .rack-drag-ghost,
+body > .rack-drag-ghost .tile {
+  width: 64px !important;
+  min-width: 64px !important;
+  max-width: 64px !important;
+  height: 89px !important;
+  min-height: 89px !important;
+  max-height: 89px !important;
+  box-sizing: border-box !important;
+  flex-basis: 64px !important;
+}
+
+.game-shell .rack-cell .tile,
+body > .rack-drag-ghost .tile {
+  padding-top: 8px !important;
+  aspect-ratio: 64 / 89 !important;
+}
+
+.game-shell .rack-cell .tile span,
+body > .rack-drag-ghost .tile span {
+  font-size: 36px !important;
+}
+
+.game-shell .rack-cell .tile i,
+body > .rack-drag-ghost .tile i {
+  width: 18px !important;
+  height: 18px !important;
+  margin-bottom: 9px !important;
+}
+
+.game-shell .rack-actions {
+  height: 198px !important;
+}
+
+.game-shell .rack-discard {
+  height: 132px !important;
+  flex-basis: 132px !important;
+}
+
+.game-shell .rack-discard .tile,
+.game-shell .rack-discard .incoming-pointer-tile {
+  width: 64px !important;
+  min-width: 64px !important;
+  max-width: 64px !important;
+  height: 89px !important;
+  min-height: 89px !important;
+  max-height: 89px !important;
+}
+
+.game-shell .rack-discard .tile span {
+  font-size: 36px !important;
+}
+
+.game-shell .rack-discard .tile i {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* Yan tas yiginlari yuvalarinin tam yatay merkezinde kalir. */
+.game-shell .rack-discard {
+  align-items: center !important;
+}
+
+.game-shell .rack-discard .incoming-discard-stack,
+.game-shell .rack-discard .my-discard-stack {
+  width: 64px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  left: auto !important;
+  right: auto !important;
+}
+
+.game-shell .rack-discard .incoming-pointer-tile {
+  left: 0 !important;
+  right: auto !important;
+}
+
+.game-shell .rack-discard .incoming-pointer-tile:nth-child(1) {
+  transform: translateY(0) !important;
+}
+
+.game-shell .rack-discard .incoming-pointer-tile:nth-child(2) {
+  transform: translateY(-3px) !important;
+}
+
+.game-shell .rack-discard .incoming-pointer-tile:nth-child(3) {
+  transform: translateY(-6px) !important;
+}
+
+/* Dizme butonu + yan tas yuvasi tek grup olarak istakayla ortalanir. */
+.game-shell .rack-actions button:nth-child(2),
+.game-shell .rack-actions button:nth-child(3) {
+  transform: translateY(9px) !important;
+}
+
+.game-shell .rack-discard-left,
+.game-shell .rack-discard-right {
+  transform: translateY(24px) !important;
+}
+
+/* Seri/cift govdesi gizleme katmanindan sonra yeniden acilir. */
+.game-shell > .game-area {
+  display: flex !important;
+  position: absolute !important;
+  top: 18px !important;
+  left: 50% !important;
+  right: auto !important;
+  width: 1184px !important;
+  min-width: 1184px !important;
+  max-width: 1184px !important;
+  height: 363px !important;
+  min-height: 363px !important;
+  max-height: 363px !important;
+  padding: 0 !important;
+  transform: translateX(-50%) !important;
+}
+
+.game-shell > .game-area .board-stage {
+  display: block !important;
+  width: 1184px !important;
+  min-width: 1184px !important;
+  max-width: 1184px !important;
+  height: 363px !important;
+  min-height: 363px !important;
+  max-height: 363px !important;
+}
+
+.game-shell > .game-area .table-head,
+.game-shell > .game-area .table-matrix,
+.game-shell > .game-area .table-matrix > .grid {
+  display: grid !important;
+}
+
+.game-shell > .game-area .table-matrix,
+.game-shell > .game-area .table-matrix > .grid {
+  height: 333px !important;
+  min-height: 333px !important;
+  max-height: 333px !important;
+}
+
+.game-shell > .game-area .table-head,
+.game-shell > .game-area .table-matrix {
+  width: 1184px !important;
+  min-width: 1184px !important;
+  max-width: 1184px !important;
+  grid-template-columns: 697px 289px !important;
+  column-gap: 198px !important;
+}
+
+/* Basliklar yukseklikten sayilmaz; gercek acma izgarasi ust hizadan baslar. */
+.game-shell > .game-area .board-stage {
+  position: relative !important;
+}
+
+.game-shell > .game-area .table-head {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 3 !important;
+  height: 28px !important;
+  pointer-events: none !important;
+}
+
+.game-shell > .game-area .table-matrix {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+.game-shell > .game-area .table-matrix,
+.game-shell > .game-area .table-matrix > .grid {
+  height: 363px !important;
+  min-height: 363px !important;
+  max-height: 363px !important;
+}
+
+/* Seri ile cift arasindaki gosterge, deste ve butonlar tek dikey sutundur. */
+.game-shell > .game-center-info {
+  display: flex !important;
+  position: absolute !important;
+  top: 28px !important;
+  left: calc(50% + 204px) !important;
+  right: auto !important;
+  z-index: 8 !important;
+  width: 150px !important;
+  min-width: 150px !important;
+  max-width: 150px !important;
+  height: 345px !important;
+  min-height: 345px !important;
+  max-height: 345px !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  padding: 0 !important;
+  transform: translateX(-50%) !important;
+}
+
+.game-shell > .game-center-info .indicator-tile,
+.game-shell > .game-center-info .deck-info {
+  position: relative !important;
+  inset: auto !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.game-shell > .game-center-info .table-controls {
+  position: relative !important;
+  inset: auto !important;
+  width: 150px !important;
+  min-width: 150px !important;
+  max-width: 150px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 6px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.game-shell > .game-center-info .table-mode-buttons,
+.game-shell > .game-center-info .table-action-buttons {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 150px !important;
+  gap: 6px !important;
+}
+
+.game-shell > .game-center-info .table-controls button {
+  width: 150px !important;
+  min-width: 150px !important;
+  max-width: 150px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  margin: 0 !important;
+}
+
+.game-shell > .game-center-info .opening-counter,
+.game-shell > .game-center-info .opening-counter-stack {
+  width: 150px !important;
+  margin: 0 !important;
+  text-align: center !important;
+}
+
+/* Orta sutundaki taslar istakadaki 64x89 tas oranini kullanir. */
+.game-shell > .game-center-info .indicator-tile .tile,
+.game-shell > .game-center-info .center-deck-stack,
+.game-shell > .game-center-info .center-deck-tile {
+  width: 64px !important;
+  min-width: 64px !important;
+  max-width: 64px !important;
+  height: 89px !important;
+  min-height: 89px !important;
+  max-height: 89px !important;
+  box-sizing: border-box !important;
+  aspect-ratio: 64 / 89 !important;
+}
+
+.game-shell > .game-center-info .indicator-tile .tile {
+  padding: 8px 0 0 !important;
+}
+
+.game-shell > .game-center-info .indicator-tile .tile span {
+  font-size: 36px !important;
+  font-weight: 700 !important;
+  line-height: 0.86 !important;
+}
+
+.game-shell > .game-center-info .indicator-tile .tile i {
+  width: 18px !important;
+  height: 18px !important;
+  margin: auto auto 9px !important;
+  font-size: 0 !important;
+  border-radius: 50% !important;
+  background: currentColor !important;
+}
+
+.game-shell > .game-center-info .center-deck-tile {
+  display: grid !important;
+  place-items: center !important;
+  font-size: 28px !important;
+}
+
+.game-shell > .game-center-info .table-controls button {
+  height: 26px !important;
+  min-height: 26px !important;
+}
+
+/* Orta aksiyonlar iki butonlu iki satir halinde gruplanir. */
+.game-shell > .game-center-info {
+  width: 170px !important;
+  min-width: 170px !important;
+  max-width: 170px !important;
+}
+
+.game-shell > .game-center-info .table-controls {
+  width: 170px !important;
+  min-width: 170px !important;
+  max-width: 170px !important;
+}
+
+.game-shell > .game-center-info .table-mode-buttons,
+.game-shell > .game-center-info .table-action-buttons {
+  display: grid !important;
+  grid-template-columns: repeat(2, 82px) !important;
+  width: 170px !important;
+  column-gap: 6px !important;
+  row-gap: 0 !important;
+}
+
+.game-shell > .game-center-info .table-controls button {
+  width: 82px !important;
+  min-width: 82px !important;
+  max-width: 82px !important;
+  margin: 0 !important;
+}
+
+.game-shell > .game-center-info .opening-counter,
+.game-shell > .game-center-info .opening-counter-stack {
+  width: 170px !important;
+}
+
+/* Seri ve cift sayaclari buyuk, tek bir cerceveli bilgi blogudur. */
+.game-shell > .game-center-info .opening-counter-stack {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  grid-template-rows: 30px !important;
+  width: 170px !important;
+  padding: 5px 8px !important;
+  border: 1px solid rgb(255 255 255 / 45%) !important;
+  border-radius: 8px !important;
+  background: rgb(255 255 255 / 8%) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.game-shell > .game-center-info .opening-counter-stack .opening-counter {
+  display: grid !important;
+  place-items: center !important;
+  width: 100% !important;
+  min-height: 30px !important;
+  font-size: 17px !important;
+  font-weight: 750 !important;
+  line-height: 30px !important;
+}
+
+.game-shell > .game-center-info .opening-counter-stack .opening-counter + .opening-counter {
+  border-top: 0 !important;
+  border-left: 1px solid rgb(255 255 255 / 22%) !important;
+}
+
+/* Sayaclar ayri kartlardir ve acma alanlarinin alt kenarina hizalanir. */
+.game-shell > .game-center-info {
+  top: 18px !important;
+  height: 363px !important;
+  min-height: 363px !important;
+  max-height: 363px !important;
+}
+
+.game-shell > .game-center-info .table-controls {
+  position: static !important;
+}
+
+.game-shell > .game-center-info .opening-counter-stack {
+  position: absolute !important;
+  left: 0 !important;
+  right: auto !important;
+  bottom: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, 82px) !important;
+  grid-template-rows: 34px !important;
+  column-gap: 6px !important;
+  width: 170px !important;
+  height: 34px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  overflow: visible !important;
+}
+
+.game-shell > .game-center-info .opening-counter-stack .opening-counter {
+  width: 82px !important;
+  min-width: 82px !important;
+  max-width: 82px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 !important;
+  border: 1px solid rgb(255 255 255 / 45%) !important;
+  border-radius: 7px !important;
+  background: rgb(255 255 255 / 8%) !important;
+  box-sizing: border-box !important;
+  line-height: 32px !important;
+}
+
+.game-shell > .game-center-info .opening-counter-stack .opening-counter + .opening-counter {
+  border-top: 1px solid rgb(255 255 255 / 45%) !important;
+  border-left: 1px solid rgb(255 255 255 / 45%) !important;
+}
+
+/* Sayaclar kontrol akisindan ayrilir ve alanin gercek alt kenarina sabitlenir. */
+.game-shell > .game-center-info .table-controls > .opening-counter,
+.game-shell > .game-center-info .table-controls > .opening-counter-stack {
+  display: none !important;
+}
+
+.game-shell > .game-center-info .opening-counter-overlay {
+  position: absolute !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, 82px) !important;
+  column-gap: 6px !important;
+  width: 170px !important;
+  height: 34px !important;
+}
+
+.game-shell > .game-center-info .opening-counter-overlay .opening-counter {
+  display: grid !important;
+  place-items: center !important;
+  width: 82px !important;
+  min-width: 82px !important;
+  max-width: 82px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid rgb(255 255 255 / 45%) !important;
+  border-radius: 7px !important;
+  background: rgb(255 255 255 / 8%) !important;
+  box-sizing: border-box !important;
+  font-size: 17px !important;
+  font-weight: 750 !important;
+  line-height: 32px !important;
+}
+
+/* Orta sutunun nihai, cakismayan grid yerlesimi. */
+.game-shell > .game-center-info {
+  display: grid !important;
+  grid-template-columns: repeat(2, 82px) !important;
+  grid-template-rows: 96px minmax(0, 1fr) 34px !important;
+  column-gap: 6px !important;
+  row-gap: 8px !important;
+  align-items: start !important;
+  justify-items: center !important;
+}
+
+.game-shell > .game-center-info .indicator-tile {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  align-self: start !important;
+}
+
+.game-shell > .game-center-info .indicator-tile > small {
+  display: none !important;
+}
+
+.game-shell > .game-center-info .deck-info {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  align-self: start !important;
+}
+
+.game-shell > .game-center-info .table-controls {
+  position: static !important;
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 170px !important;
+  gap: 7px !important;
+  align-self: start !important;
+}
+
+.game-shell > .game-center-info .table-mode-buttons,
+.game-shell > .game-center-info .table-action-buttons {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 170px !important;
+  gap: 7px !important;
+}
+
+.game-shell > .game-center-info .table-controls button {
+  width: 170px !important;
+  min-width: 170px !important;
+  max-width: 170px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 10px !important;
+  font-size: 14px !important;
+  font-weight: 650 !important;
+}
+
+.game-shell > .game-center-info .table-controls > .opening-counter,
+.game-shell > .game-center-info .table-controls > .opening-counter-stack {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.game-shell > .game-center-info .opening-counter-overlay {
+  position: static !important;
+  grid-column: 1 / -1 !important;
+  grid-row: 3 !important;
+  align-self: end !important;
+  transform: none !important;
+  margin: 0 !important;
+}
+
+/* Orta sutun acma alanlari arasindaki gercek eksene oturur. */
+.game-shell > .game-center-info {
+  left: calc(50% + 194px) !important;
+  grid-template-columns: repeat(2, 70px) !important;
+  column-gap: 0 !important;
+  justify-content: center !important;
+}
+
+.game-shell > .game-center-info .indicator-tile,
+.game-shell > .game-center-info .deck-info {
+  justify-self: center !important;
+  align-self: start !important;
+}
+
+/* Sayaclar acma alanlarinin alt kenarina fiziksel olarak sabitlenir. */
+.game-shell > .game-center-info .opening-counter-overlay {
+  position: absolute !important;
+  left: 0 !important;
+  right: auto !important;
+  bottom: 0 !important;
+  width: 170px !important;
+  transform: none !important;
+}
+
+/* Oyun ekraninda gorunen buton metinleri guclu ve buyuk harftir. */
+.game-shell .table-controls button,
+.game-shell .rack-actions button {
+  text-transform: uppercase !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* Orta alanin optik merkez ve dikey denge duzeltmeleri. */
+.game-shell > .game-center-info {
+  left: calc(50% + 199px) !important;
+  grid-template-columns: repeat(2, 68px) !important;
+  column-gap: 0 !important;
+}
+
+.game-shell > .game-center-info .indicator-tile,
+.game-shell > .game-center-info .deck-info {
+  width: 64px !important;
+  min-width: 64px !important;
+  max-width: 64px !important;
+  height: 89px !important;
+  min-height: 89px !important;
+  max-height: 89px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  align-self: start !important;
+  justify-self: center !important;
+}
+
+.game-shell > .game-center-info .deck-info {
+  transform: translateY(-4px) !important;
+}
+
+.game-shell > .game-center-info .table-controls {
+  height: 100% !important;
+  align-self: stretch !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+.game-shell > .game-center-info .table-mode-buttons,
+.game-shell > .game-center-info .table-action-buttons {
+  gap: 7px !important;
+}
+
+.game-shell > .game-center-info .opening-counter-overlay {
+  bottom: -28px !important;
+}
+
+.game-shell > .game-center-info .table-controls button:disabled {
+  opacity: 1 !important;
+  color: rgb(235 243 240 / 82%) !important;
+  background: rgb(255 255 255 / 24%) !important;
+  border-color: rgb(255 255 255 / 28%) !important;
+}
+
+/* Orta sutunun tum alt gruplari ayni optik merkez cizgisinde bulusur. */
+.game-shell > .game-center-info .indicator-tile {
+  transform: translateX(8px) !important;
+}
+
+.game-shell > .game-center-info .deck-info {
+  transform: translate(8px, -4px) !important;
+}
+
+.game-shell > .game-center-info .table-controls {
+  transform: translateX(7px) !important;
+}
+
+.game-shell > .game-center-info .opening-counter-overlay {
+  left: -6px !important;
+}
+
+/* Orta alan artik piksel duzeltmesi degil, 198px boslugun geometrik merkezidir. */
+.game-shell > .game-center-info {
+  left: calc(50% + 204px) !important;
+  width: 198px !important;
+  min-width: 198px !important;
+  max-width: 198px !important;
+  grid-template-columns: 64px 64px !important;
+  column-gap: 8px !important;
+  justify-content: center !important;
+  justify-items: center !important;
+}
+
+.game-shell > .game-center-info .indicator-tile,
+.game-shell > .game-center-info .deck-info {
+  transform: none !important;
+  justify-self: center !important;
+}
+
+.game-shell > .game-center-info .table-controls {
+  width: 170px !important;
+  min-width: 170px !important;
+  max-width: 170px !important;
+  justify-self: center !important;
+  transform: none !important;
+}
+
+.game-shell > .game-center-info .table-mode-buttons,
+.game-shell > .game-center-info .table-action-buttons {
+  width: 170px !important;
+}
+
+.game-shell > .game-center-info .table-controls button,
+.game-shell > .game-center-info .deal-button,
+.game-shell > .game-center-info .finish-empty-hand {
+  width: 170px !important;
+  min-width: 170px !important;
+  max-width: 170px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 10px !important;
+  border-radius: 8px !important;
+  box-sizing: border-box !important;
+  text-transform: uppercase !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1 !important;
+}
+
+.game-shell > .game-center-info > .deal-button {
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
+  align-self: center !important;
+  justify-self: center !important;
+  position: static !important;
+  inset: auto !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.game-shell > .game-center-info .deck-info:has(.finish-empty-hand),
+.game-shell > .game-center-info .deck-info:has(.finish-empty-wait) {
+  grid-column: 1 / -1 !important;
+  width: 170px !important;
+  max-width: 170px !important;
+  justify-self: center !important;
+}
+
+.game-shell > .game-center-info .finish-empty-hand {
+  margin: 0 !important;
+}
+
+.game-shell > .game-center-info .opening-counter-overlay {
+  left: 50% !important;
+  right: auto !important;
+  bottom: 0 !important;
+  width: 170px !important;
+  transform: translateX(-50%) !important;
+}
+
+/* Mobil okunabilirlik: arayuz metinleri iki kat olcege yaklastirilir. */
+.game-shell > .game-center-info .table-controls {
+  gap: 4px !important;
+}
+
+.game-shell > .game-center-info .table-mode-buttons,
+.game-shell > .game-center-info .table-action-buttons {
+  gap: 4px !important;
+}
+
+.game-shell > .game-center-info .table-controls button,
+.game-shell > .game-center-info .deal-button,
+.game-shell > .game-center-info .finish-empty-hand {
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 5px !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.game-shell > .game-center-info .opening-counter-overlay {
+  width: 170px !important;
+  height: 34px !important;
+  grid-template-columns: repeat(2, 82px) !important;
+  column-gap: 6px !important;
+}
+
+.game-shell > .game-center-info .opening-counter-overlay .opening-counter {
+  width: 82px !important;
+  min-width: 82px !important;
+  max-width: 82px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  font-size: 17px !important;
+  line-height: 32px !important;
+  letter-spacing: normal !important;
+}
+
+.game-shell .rack-actions button:nth-child(2),
+.game-shell .rack-actions button:nth-child(3) {
+  height: 38px !important;
+  min-height: 38px !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.game-shell .rack-discard > small,
+.game-shell .table-head span,
+.game-shell .turn-timer small,
+.game-shell .rack-status,
+.game-shell .game-player-order,
+.game-shell .game-player-name,
+.game-shell .game-player-status {
+  font-size: 20px !important;
+  line-height: 1.15 !important;
+  font-weight: 750 !important;
+}
+
+.game-shell .turn-timer-slot .turn-timer-track > small {
+  font-size: 22px !important;
+}
+
+/* Deste bittiginde deste karti 0 olur ve yalnizca eli bitir aksiyonu kalir. */
+.game-shell > .game-center-info:has(.deck-info .finish-empty-hand) .table-controls,
+.game-shell > .game-center-info:has(.deck-info .finish-empty-hand) .opening-counter-overlay,
+.game-shell > .game-center-info:has(.deck-info .finish-empty-wait) .table-controls,
+.game-shell > .game-center-info:has(.deck-info .finish-empty-wait) .opening-counter-overlay {
+  display: none !important;
+}
+
+.game-shell:not(.round-complete):has(.finish-empty-hand)
+  button:not(.finish-empty-hand) {
+  display: none !important;
+}
+
+.game-shell > .game-center-info .deck-info:has(.finish-empty-hand),
+.game-shell > .game-center-info .deck-info:has(.finish-empty-wait) {
+  position: relative !important;
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  width: 64px !important;
+  min-width: 64px !important;
+  max-width: 64px !important;
+  height: 89px !important;
+  min-height: 89px !important;
+  max-height: 89px !important;
+  transform: none !important;
+}
+
+.game-shell > .game-center-info .deck-info:has(.finish-empty-hand)::before,
+.game-shell > .game-center-info .deck-info:has(.finish-empty-wait)::before {
+  content: "0" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  width: 64px !important;
+  height: 89px !important;
+  border: 1px solid #d4d4d4 !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  color: #404b5a !important;
+  box-sizing: border-box !important;
+  font-size: 28px !important;
+  font-weight: 700 !important;
+}
+
+.game-shell > .game-center-info .deck-info .finish-empty-hand {
+  position: absolute !important;
+  top: 104px !important;
+  left: -17px !important;
+  z-index: 5 !important;
+  width: 170px !important;
+  min-width: 170px !important;
+  max-width: 170px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.game-shell > .game-center-info .deck-info .finish-empty-wait {
+  position: absolute !important;
+  top: 104px !important;
+  left: -17px !important;
+  width: 170px !important;
+  text-align: center !important;
+}
+
+/* El sonucu hem yerel hem cevrimici oyunda puan katmanini acar. */
+.game-shell > .round-result {
+  display: grid !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 100000 !important;
+  place-items: center !important;
+}
+
+/* El sonu puan paneli oda olusturma arayuzu kadar buyuk ve okunaklidir. */
+.game-shell > .round-result .round-result-content {
+  width: 680px !important;
+  max-width: 680px !important;
+}
+
+.game-shell > .round-result .round-result-content > small {
+  font-size: 18px !important;
+  line-height: 1.3 !important;
+}
+
+.game-shell > .round-result .round-result-content h2 {
+  margin: 14px 0 34px !important;
+  font-size: 42px !important;
+  line-height: 1.12 !important;
+}
+
+.game-shell > .round-result .round-score-list > div {
+  grid-template-columns: 1fr 90px 110px !important;
+  min-height: 70px !important;
+  padding: 0 12px !important;
+  box-sizing: border-box !important;
+  font-size: 20px !important;
+}
+
+.game-shell > .round-result .round-score-list > div > span,
+.game-shell > .round-result .round-score-list > div > small,
+.game-shell > .round-result .round-score-list > div > b {
+  font-size: 20px !important;
+  line-height: 1.2 !important;
+}
+
+.game-shell > .round-result .next-hand-button {
+  width: 320px !important;
+  height: 64px !important;
+  margin-top: 34px !important;
+  border-radius: 10px !important;
+  font-size: 20px !important;
+  font-weight: 750 !important;
+}
+
+.game-shell > .round-result .round-result-content p {
+  font-size: 18px !important;
+  line-height: 1.4 !important;
+}
+
+/* Yan alan etiketleri kendi sutunlarinda sarilir, komsu ogelere tasmaz. */
+.game-shell .rack-discard-left > small,
+.game-shell .rack-discard-right > small {
+  top: auto !important;
+  bottom: -40px !important;
+  left: 50% !important;
+  width: 90px !important;
+  max-width: 90px !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+  transform: translateX(-50%) !important;
+  white-space: normal !important;
+  overflow-wrap: normal !important;
+  text-align: center !important;
+  font-size: 16px !important;
+  font-weight: 750 !important;
+  line-height: 17px !important;
+}
+
+/* Eli bitir butonunun merkezi, 198px orta sutunun merkezidir. */
+.game-shell > .game-center-info .deck-info .finish-empty-hand {
+  left: 68px !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  text-align: center !important;
+}
+
+.game-shell > .game-center-info > .deal-button {
+  position: absolute !important;
+  top: 104px !important;
+  left: 50% !important;
+  right: auto !important;
+  margin: 0 !important;
+  transform: translateX(-50%) !important;
+}
+
+/* El sonu ekraninda oyun temasindan kalan ust/alt bantlar beyazdir. */
+html:has(.game-shell.round-complete),
+body:has(.game-shell.round-complete),
+.game-viewport:has(.game-shell.round-complete),
+.game-shell.round-complete {
+  background: #fff !important;
+}
+
+/* Tas cekme animasyonu istakadaki yeni tasla birebir ayni olcektedir. */
+.game-shell .draw-fly,
+.game-shell .draw-fly .tile,
+.game-shell .center-deck-stack > .draw-fly.draw-from-deste {
+  width: 64px !important;
+  min-width: 64px !important;
+  max-width: 64px !important;
+  height: 89px !important;
+  min-height: 89px !important;
+  max-height: 89px !important;
+  box-sizing: border-box !important;
+}
+
+.game-shell .draw-fly .tile {
+  padding: 8px 0 0 !important;
+  aspect-ratio: 64 / 89 !important;
+}
+
+.game-shell .draw-fly .tile span {
+  font-size: 36px !important;
+  line-height: 0.86 !important;
+}
+
+.game-shell .draw-fly .tile i {
+  width: 18px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  margin: auto auto 9px !important;
+}
+
+/* Taslari diz durumu da normal orta sutun koordinatlarini kullanir. */
+.game-shell > .game-center-info:has(> .deal-button) {
+  top: 18px !important;
+  left: calc(50% + 204px) !important;
+  width: 198px !important;
+  height: 363px !important;
+  transform: translateX(-50%) !important;
+}
+
+.game-shell > .game-center-info:has(> .deal-button) > .deal-button {
+  position: absolute !important;
+  top: 104px !important;
+  left: 50% !important;
+  right: auto !important;
+  width: 170px !important;
+  height: 42px !important;
+  margin: 0 !important;
+  transform: translateX(-50%) !important;
+}
+
+/* Taslari Diz ve Eli Bitir ayni dogrudan ana aksiyon yuvasini kullanir. */
+.game-shell > .game-center-info .deck-info > .finish-empty-hand {
+  display: none !important;
+}
+
+.game-shell > .game-center-info > :is(.deal-button, .center-primary-action) {
+  display: grid !important;
+  position: absolute !important;
+  top: 104px !important;
+  left: 50% !important;
+  right: auto !important;
+  z-index: 10 !important;
+  place-items: center !important;
+  width: 170px !important;
+  min-width: 170px !important;
+  max-width: 170px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  padding: 0 10px !important;
+  box-sizing: border-box !important;
+  transform: translateX(-50%) !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+/* Yan profiller ust ve alt tas alanlarinin arasinda, yatay ve kompakt durur. */
+.game-shell > .game-player-strip {
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 7 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+}
+
+.game-shell > .game-player-strip > .game-player {
+  display: none !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-left.game-player-position-left,
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-right.game-player-position-right {
+  display: grid !important;
+  position: absolute !important;
+  top: 303px !important;
+  bottom: auto !important;
+  width: 190px !important;
+  min-width: 190px !important;
+  max-width: 190px !important;
+  height: 76px !important;
+  min-height: 76px !important;
+  max-height: 76px !important;
+  grid-template-columns: 20px 42px minmax(0, 1fr) !important;
+  grid-template-rows: 34px 22px !important;
+  align-items: center !important;
+  column-gap: 7px !important;
+  row-gap: 2px !important;
+  padding: 9px 10px !important;
+  border: 1px solid rgb(255 255 255 / 35%) !important;
+  border-radius: 10px !important;
+  background: rgb(255 255 255 / 6%) !important;
+  box-sizing: border-box !important;
+  transform: translateY(-50%) !important;
+  pointer-events: auto !important;
+  overflow: hidden !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-left.game-player-position-left {
+  left: 8px !important;
+  right: auto !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-right.game-player-position-right {
+  left: auto !important;
+  right: 8px !important;
+}
+
+.game-shell > .game-player-strip .game-player-order {
+  position: static !important;
+  grid-column: 1 !important;
+  grid-row: 1 / span 2 !important;
+  align-self: start !important;
+  margin: 0 !important;
+  font-size: 16px !important;
+  line-height: 20px !important;
+}
+
+.game-shell > .game-player-strip .game-player-avatar {
+  position: static !important;
+  grid-column: 2 !important;
+  grid-row: 1 / span 2 !important;
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  font-size: 22px !important;
+}
+
+.game-shell > .game-player-strip .game-player-name {
+  position: static !important;
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+
+.game-shell > .game-player-strip .game-player-name > * {
+  position: static !important;
+  display: inline !important;
+  width: auto !important;
+  margin: 0 !important;
+  font-size: 14px !important;
+  line-height: 18px !important;
+  white-space: nowrap !important;
+}
+
+.game-shell > .game-player-strip .game-player-status {
+  position: static !important;
+  grid-column: 3 !important;
+  grid-row: 2 !important;
+  justify-self: start !important;
+  margin: 0 !important;
+  font-size: 14px !important;
+  line-height: 18px !important;
+  white-space: nowrap !important;
+}
+
+.game-shell > .game-player-strip .player-move {
+  display: none !important;
+}
+
+/* Yan profiller tek satirlik kart olarak 90 derece cevrilir. */
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-left.game-player-position-left,
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-right.game-player-position-right {
+  display: flex !important;
+  top: 303px !important;
+  width: 250px !important;
+  min-width: 250px !important;
+  max-width: 250px !important;
+  height: 64px !important;
+  min-height: 64px !important;
+  max-height: 64px !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  padding: 7px 9px !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-left.game-player-position-left {
+  left: 26px !important;
+  right: auto !important;
+  transform: translateY(-50%) rotate(-90deg) !important;
+}
+
+.game-shell
+  > .game-player-strip
+  > .game-player.game-player-position-right.game-player-position-right {
+  left: auto !important;
+  right: 26px !important;
+  transform: translateY(-50%) rotate(90deg) !important;
+}
+
+.game-shell > .game-player-strip .game-player-order,
+.game-shell > .game-player-strip .game-player-avatar,
+.game-shell > .game-player-strip .game-player-name,
+.game-shell > .game-player-strip .game-player-status {
+  position: static !important;
+  inset: auto !important;
+  grid-column: auto !important;
+  grid-row: auto !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.game-shell > .game-player-strip .game-player-avatar {
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  font-size: 18px !important;
+}
+
+.game-shell > .game-player-strip .game-player-name {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 4px !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+.game-shell > .game-player-strip .game-player-order,
+.game-shell > .game-player-strip .game-player-name > *,
+.game-shell > .game-player-strip .game-player-status {
+  display: inline !important;
+  width: auto !important;
+  max-width: none !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 16px !important;
+  white-space: nowrap !important;
+}
+
+/* Onceki oyuncu solda, sonraki oyuncu sagda; tas alanlari arasinda ortali. */
+.game-shell > .minimal-side-profiles {
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 8 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+}
+
+.game-shell .minimal-side-profile {
+  position: absolute !important;
+  top: 303px !important;
+  display: flex !important;
+  width: 90px !important;
+  height: 140px !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 9px 6px !important;
+  border: 1px solid rgb(255 255 255 / 35%) !important;
+  border-radius: 10px !important;
+  background: rgb(255 255 255 / 7%) !important;
+  box-sizing: border-box !important;
+  transform: translateY(-50%) !important;
+  overflow: hidden !important;
+}
+
+.game-shell .minimal-side-profile-order {
+  position: absolute !important;
+  top: 7px !important;
+  left: 8px !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+}
+
+.game-shell .minimal-side-profile-left {
+  left: 106px !important;
+  right: auto !important;
+}
+
+.game-shell .minimal-side-profile-right {
+  left: auto !important;
+  right: 106px !important;
+}
+
+.game-shell .minimal-side-profile-avatar {
+  display: grid !important;
+  place-items: center !important;
+  width: 46px !important;
+  height: 46px !important;
+  flex: 0 0 46px !important;
+  border: 1px solid rgb(255 255 255 / 45%) !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
+}
+
+.game-shell .minimal-side-profile > strong {
+  display: block !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 750 !important;
+  line-height: 18px !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.game-shell .minimal-side-profile > small,
+.game-shell .minimal-side-profile-opening {
+  display: block !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 15px !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.game-shell .minimal-side-profile-opening {
+  color: #67e8f9 !important;
+}
+
+.game-shell .minimal-top-profile {
+  position: absolute !important;
+  top: 4px !important;
+  left: 50% !important;
+  display: flex !important;
+  width: 330px !important;
+  height: 44px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  padding: 5px 10px !important;
+  border: 1px solid rgb(255 255 255 / 35%) !important;
+  border-radius: 9px !important;
+  background: rgb(255 255 255 / 7%) !important;
+  box-sizing: border-box !important;
+  transform: translateX(-50%) !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+
+.game-shell .minimal-top-profile-order,
+.game-shell .minimal-top-profile > strong,
+.game-shell .minimal-top-profile > small,
+.game-shell .minimal-top-profile-opening {
+  flex: 0 0 auto !important;
+  color: #fff !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+  line-height: 16px !important;
+  white-space: nowrap !important;
+}
+
+.game-shell .minimal-top-profile-avatar {
+  display: grid !important;
+  place-items: center !important;
+  width: 32px !important;
+  height: 32px !important;
+  flex: 0 0 32px !important;
+  border: 1px solid rgb(255 255 255 / 45%) !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+}
+
+.game-shell .minimal-top-profile-opening {
+  color: #67e8f9 !important;
+}
+
+/* Ust profil icin ayri serit: oyun govdesi asagi iner, alt hizasi degismez. */
+.game-shell > .game-area,
+.game-shell > .game-center-info,
+.game-shell > .game-center-info:has(> .deal-button) {
+  top: 52px !important;
+  height: 363px !important;
+  min-height: 363px !important;
+  max-height: 363px !important;
+}
+
+.game-shell > .game-area .board-stage,
+.game-shell > .game-area .table-matrix,
+.game-shell > .game-area .table-matrix > .grid {
+  height: 363px !important;
+  min-height: 363px !important;
+  max-height: 363px !important;
+}
+
+.game-shell .opponent-discard-corner {
+  top: 52px !important;
+}
+
+.game-shell .minimal-side-profile {
+  top: 337px !important;
+}
+
+/* Ust profil ile oyun govdesi arasinda hafif bosluk. */
+.game-shell > .game-area,
+.game-shell > .game-center-info,
+.game-shell > .game-center-info:has(> .deal-button),
+.game-shell .opponent-discard-corner {
+  top: 58px !important;
+}
+
+/* Ust kose kontrolleri. */
+.game-shell > .game-top-actions {
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 50 !important;
+  width: 100% !important;
+  height: 0 !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+
+.game-shell > .game-top-actions .game-leave-button,
+.game-shell > .game-top-actions .game-theme-button {
+  display: inline-flex !important;
+  position: absolute !important;
+  top: 6px !important;
+  width: auto !important;
+  min-width: 112px !important;
+  height: 36px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 12px !important;
+  font-size: 14px !important;
+  font-weight: 750 !important;
+  pointer-events: auto !important;
+  transform: none !important;
+}
+
+.game-shell > .game-top-actions .game-leave-button {
+  left: 106px !important;
+  right: auto !important;
+}
+
+.game-shell > .game-top-actions .game-theme-button {
+  left: auto !important;
+  right: 106px !important;
+}
+
+.game-shell > .game-top-actions .game-sound-button {
+  display: inline-grid !important;
+  position: absolute !important;
+  top: 6px !important;
+  left: auto !important;
+  right: 226px !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  place-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid rgb(255 255 255 / 35%) !important;
+  border-radius: 8px !important;
+  background: rgb(255 255 255 / 6%) !important;
+  color: #fff !important;
+  font-size: 18px !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  transform: none !important;
+}
+
+/* Ust tas yuvalari acma izgaralarinin gorunen ust kenariyla hizalidir. */
+.game-shell .opponent-discard-corner {
+  top: 98px !important;
+}
+
+/* Alt koselerin karsiligi olan iki rakip tas alani ustte gorunur. */
+.game-shell > .game-top-actions .game-leave-button {
+  width: 150px !important;
+}
+
+.game-shell > .game-top-actions .game-theme-button {
+  width: 112px !important;
+}
+
+.game-shell > .game-top-info {
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 51 !important;
+  width: 100% !important;
+  height: 0 !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+
+.game-shell > .game-top-info .game-top-round,
+.game-shell > .game-top-info .rack-status {
+  display: inline-flex !important;
+  position: absolute !important;
+  top: 6px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 12px !important;
+  border: 1px solid rgb(255 255 255 / 35%) !important;
+  border-radius: 8px !important;
+  background: rgb(255 255 255 / 6%) !important;
+  box-sizing: border-box !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 750 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  transform: none !important;
+}
+
+.game-shell > .game-top-info .game-top-round {
+  left: 264px !important;
+  right: auto !important;
+  width: auto !important;
+  min-width: 70px !important;
+  max-width: none !important;
+}
+
+.game-shell > .game-top-info .rack-status {
+  left: auto !important;
+  right: 278px !important;
+  width: auto !important;
+  min-width: 150px !important;
+  max-width: 280px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.game-shell > .game-top-info .rack-status > span {
+  flex: 0 0 auto !important;
+}
+
+.game-shell > .game-top-actions :is(.game-leave-button, .game-theme-button),
+.game-shell > .game-top-info :is(.game-top-round, .rack-status) {
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  block-size: 36px !important;
+  flex-basis: 36px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  line-height: 34px !important;
+}
+
+.game-shell > .game-top-info .game-top-round > b {
+  display: block !important;
+  height: 34px !important;
+  line-height: 34px !important;
+}
+
+.game-shell > .opponent-discard-corners {
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+}
+
+.game-shell .opponent-discard-corner {
+  top: 58px !important;
+  width: 90px !important;
+  min-width: 90px !important;
+  max-width: 90px !important;
+  transform: none !important;
+}
+
+.game-shell .opponent-discard-corner-left {
+  left: 106px !important;
+  right: auto !important;
+}
+
+.game-shell .opponent-discard-corner-right {
+  left: auto !important;
+  right: 106px !important;
+}
+
+.game-shell .opponent-discard-corner .opponent-rack-discard {
+  width: 90px !important;
+  min-width: 90px !important;
+  max-width: 90px !important;
+  height: 132px !important;
+  min-height: 132px !important;
+  max-height: 132px !important;
+  flex-basis: 132px !important;
+  transform: none !important;
 }

@@ -344,6 +344,11 @@ export default function Home() {
   const [botSeats, setBotSeats] = useState<number[]>([]);
   const [joinedSeat, setJoinedSeat] = useState<number | null>(null);
   const [joinedRoom, setJoinedRoom] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.localStorage.getItem("okey-sound-enabled") !== "false";
+  });
+  const audioContextRef = useRef<AudioContext | null>(null);
   const [rack, setRack] = useState<RackCell[]>(() => Array(44).fill(null));
   const [table, setTable] = useState(blankTable);
   const [discard, setDiscard] = useState<Tile[]>([]);
@@ -387,6 +392,45 @@ export default function Home() {
   const rackThrowRef = useRef<HTMLDivElement>(null);
   const seriesGridRef = useRef<HTMLDivElement>(null);
   const pairsGridRef = useRef<HTMLDivElement>(null);
+  const previousTurnSoundRef = useRef(false);
+  const previousResultSoundRef = useRef<any>(null);
+  const playGameSound = (
+    kind: "click" | "draw" | "discard" | "success" | "error" | "turn",
+  ) => {
+    if (!soundEnabled || typeof window === "undefined") return;
+    const AudioContextClass =
+      window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const context = audioContextRef.current ?? new AudioContextClass();
+    audioContextRef.current = context;
+    if (context.state === "suspended") void context.resume();
+    const settings = {
+      click: [420, 0.045, 0.035],
+      draw: [620, 0.11, 0.055],
+      discard: [210, 0.09, 0.06],
+      success: [820, 0.16, 0.07],
+      error: [135, 0.14, 0.07],
+      turn: [720, 0.12, 0.055],
+    } as const;
+    const [frequency, duration, volume] = settings[kind];
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.type = kind === "error" ? "square" : "sine";
+    oscillator.frequency.setValueAtTime(frequency, context.currentTime);
+    if (kind === "draw")
+      oscillator.frequency.exponentialRampToValueAtTime(
+        900,
+        context.currentTime + duration,
+      );
+    gain.gain.setValueAtTime(volume, context.currentTime);
+    gain.gain.exponentialRampToValueAtTime(
+      0.0001,
+      context.currentTime + duration,
+    );
+    oscillator.connect(gain).connect(context.destination);
+    oscillator.start();
+    oscillator.stop(context.currentTime + duration);
+  };
   const serverTableCellsRef = useRef<{ series: Set<number>; pairs: Set<number> }>(
     { series: new Set(), pairs: new Set() },
   );
@@ -470,6 +514,8 @@ export default function Home() {
   }, []);
   useEffect(() => {
     const root = document.documentElement;
+    let stablePageWidth = window.visualViewport?.width ?? window.innerWidth;
+    let stablePageHeight = window.visualViewport?.height ?? window.innerHeight;
     const updateGameViewport = () => {
       root.classList.remove(
         "app-mobile-portrait",
@@ -477,8 +523,17 @@ export default function Home() {
         "game-mobile-landscape",
       );
       const viewport = window.visualViewport;
-      const availableWidth = viewport?.width ?? window.innerWidth;
-      const availableHeight = viewport?.height ?? window.innerHeight;
+      const rawWidth = viewport?.width ?? window.innerWidth;
+      const rawHeight = viewport?.height ?? window.innerHeight;
+      const activeTag = document.activeElement?.tagName;
+      const keyboardOpen =
+        screen !== "game" && (activeTag === "INPUT" || activeTag === "TEXTAREA");
+      if (!keyboardOpen) {
+        stablePageWidth = rawWidth;
+        stablePageHeight = rawHeight;
+      }
+      const availableWidth = keyboardOpen ? stablePageWidth : rawWidth;
+      const availableHeight = keyboardOpen ? stablePageHeight : rawHeight;
       if (screen === "room") {
         const roomScale = Math.min(2, availableWidth / 800, availableHeight / 500);
         root.style.setProperty("--room-scale", String(roomScale));
@@ -512,10 +567,11 @@ export default function Home() {
         root.style.removeProperty("--game-center-offset-y");
         return;
       }
-      // 1600x900 tuvalin bos kenarlari yerine gorunen oyun sinirini olcekle.
+      // Gorunen oyun alanini olcekle; mobil yatayda bos 1600x900 tuvali degil,
+      // gercek 1420x620 oyun siniri ekrani doldurur.
       // Yerlesim degismez; sahne tek parca halinde buyur veya kuculur.
-      const scale = Math.min(availableWidth / 1240, availableHeight / 800);
-      const centerOffsetY = -44 * scale;
+      const scale = Math.min(availableWidth / 1420, availableHeight / 654);
+      const centerOffsetY = 0;
       root.style.setProperty("--game-scale", String(scale));
       root.style.setProperty("--game-mobile-scale", String(scale));
       root.style.setProperty("--game-center-offset-y", `${centerOffsetY}px`);
@@ -1241,6 +1297,15 @@ export default function Home() {
     !isSpectator &&
     (onlineGame ? game.siradakiOyuncu === mySeat : game.siradakiOyuncu === 0);
   useEffect(() => {
+    if (isMyTurn && !previousTurnSoundRef.current) playGameSound("turn");
+    previousTurnSoundRef.current = isMyTurn;
+  }, [isMyTurn]);
+  useEffect(() => {
+    if (game.elSonucu && game.elSonucu !== previousResultSoundRef.current)
+      playGameSound("success");
+    previousResultSoundRef.current = game.elSonucu;
+  }, [game.elSonucu]);
+  useEffect(() => {
     if (
       onlineGame &&
       socket?.connected &&
@@ -1368,7 +1433,10 @@ export default function Home() {
       "application/json",
       JSON.stringify({ source, index }),
     );
-  const reject = () => setNotice("Bu hamle şu anda yapılamaz");
+  const reject = () => {
+    playGameSound("error");
+    setNotice("Bu hamle şu anda yapılamaz");
+  };
   const requestSeriesTimeBonus = () => {
     if (onlineGame && socket?.connected) socket.emit("seri-sure-bonusu");
   };
@@ -1389,6 +1457,7 @@ export default function Home() {
       ),
     }));
     setOpeningMode(zone);
+    playGameSound("click");
     if (zone === "series") requestSeriesTimeBonus();
     setNotice(
       `${zone === "series" ? "Seri" : "Çift"} alanına taş yerleştirildi`,
@@ -1399,6 +1468,7 @@ export default function Home() {
     if (isSpectator) return setNotice("İzleyici modunda hamle yapılamaz");
     if (onlineGame && socket?.connected) {
       if (target !== undefined) pendingDrawTargetRef.current = target;
+      playGameSound("draw");
       socket.emit("tas-cek", source === "discard" ? "iskarta" : "deste");
       return;
     }
@@ -1426,6 +1496,7 @@ export default function Home() {
     setHasDrawn(true);
     setTurnPhase("discard");
     setTurnSeconds(60);
+    playGameSound("draw");
     setNotice("Taş çektin, taş atmalısın");
   };
 
@@ -1506,6 +1577,7 @@ export default function Home() {
     if (pending.length)
       return setNotice("Önce masadaki taşları işle veya geri topla");
     if (onlineGame && socket?.connected) {
+      playGameSound("discard");
       socket.emit("tas-at", rack[rackIndex]!.id);
       return;
     }
@@ -1522,6 +1594,7 @@ export default function Home() {
     setTurnPhase("draw");
     setTurnSeconds(60);
     setGame((g) => ({ ...g, tur: g.tur + 1 }));
+    playGameSound("discard");
     setNotice("Taş atıldı, taş çekmelisin");
   };
   const discardSelected = () => {
@@ -1904,6 +1977,7 @@ export default function Home() {
           ...current,
           mevcutBaraj: response.mevcutBaraj ?? current.mevcutBaraj,
         }));
+        playGameSound("success");
         setNotice("Taşlar masaya işlendi");
       });
       return;
@@ -1917,6 +1991,7 @@ export default function Home() {
       ),
     }));
     rackSnapshotRef.current = null;
+    playGameSound("success");
     setNotice("Taşlar masaya işlendi");
   };
   const discardTile = (e: React.DragEvent) => {
@@ -1944,6 +2019,7 @@ export default function Home() {
             colors.indexOf(a.color) - colors.indexOf(b.color),
     );
     setRack([...tiles, ...Array(44 - tiles.length).fill(null)]);
+    playGameSound("click");
     setNotice(
       mode === "series"
         ? "Taşlar serilere göre dizildi"
@@ -2283,6 +2359,20 @@ export default function Home() {
           <i aria-hidden="true" />
           Tema
         </button>
+        <button
+          type="button"
+          className="game-sound-button"
+          aria-label={soundEnabled ? "Sesi kapat" : "Sesi aç"}
+          title={soundEnabled ? "Sesi kapat" : "Sesi aç"}
+          onClick={() => {
+            const next = !soundEnabled;
+            setSoundEnabled(next);
+            window.localStorage.setItem("okey-sound-enabled", String(next));
+            if (next) window.setTimeout(() => playGameSound("click"), 0);
+          }}
+        >
+          {soundEnabled ? "🔊" : "🔇"}
+        </button>
       </div>
       <div className="game-top-info">
         {onlineGame && game.toplamEl > 0 && (
@@ -2300,7 +2390,7 @@ export default function Home() {
           İzleyici modu
         </div>
       )}
-      {game.elSonucu && !onlineGame && (
+      {game.elSonucu && (
         <section className="round-result" role="dialog" aria-modal="true">
           <div className="round-result-content">
             <small>
@@ -2356,6 +2446,7 @@ export default function Home() {
           </div>
         </section>
       )}
+      {false && (
       <section className="game-player-strip" aria-label="Oyuncular">
         {headerPlayers.map((player: any) => {
           const active = onlineGame && game.siradakiOyuncu === player.koltukNo;
@@ -2392,6 +2483,62 @@ export default function Home() {
             </div>
           );
         })}
+      </section>
+      )}
+      <section className="minimal-side-profiles" aria-label="Yan oyuncular">
+        {[
+          previousPlayer
+            ? { ...previousPlayer, profileSide: "left" }
+            : null,
+          nextPlayer && nextPlayer.koltukNo !== previousPlayer?.koltukNo
+            ? { ...nextPlayer, profileSide: "right" }
+            : null,
+        ]
+          .filter(Boolean)
+          .map((player: any) => (
+            <div
+              className={`minimal-side-profile minimal-side-profile-${player.profileSide}`}
+              key={`${player.profileSide}-${player.socketId ?? player.koltukNo}`}
+            >
+              <span className="minimal-side-profile-order">
+                {player.siraNo ?? player.koltukNo}
+              </span>
+              <span className="minimal-side-profile-avatar">
+                {player.avatar || (player.bot ? "🤖" : "🙂")}
+              </span>
+              <strong>{player.isim}</strong>
+              <small>{Number(player.puan || 0)} puan</small>
+              <span className="minimal-side-profile-opening">
+                {player.acilisTipi === "series"
+                  ? "Seri açtı"
+                  : player.acilisTipi === "pairs"
+                    ? "Çift açtı"
+                    : "Açmadı"}
+              </span>
+            </div>
+          ))}
+        {topPlayers.slice(0, 1).map((player: any) => (
+          <div
+            className="minimal-top-profile"
+            key={`top-${player.socketId ?? player.koltukNo}`}
+          >
+            <span className="minimal-top-profile-order">
+              {player.siraNo ?? player.koltukNo}
+            </span>
+            <span className="minimal-top-profile-avatar">
+              {player.avatar || (player.bot ? "🤖" : "🙂")}
+            </span>
+            <strong>{player.isim}</strong>
+            <small>{Number(player.puan || 0)} puan</small>
+            <span className="minimal-top-profile-opening">
+              {player.acilisTipi === "series"
+                ? "Seri açtı"
+                : player.acilisTipi === "pairs"
+                  ? "Çift açtı"
+                  : "Açmadı"}
+            </span>
+          </div>
+        ))}
       </section>
       <section
         className="opponent-discard-corners"
@@ -2511,6 +2658,16 @@ export default function Home() {
                   )
                 )}
               </div>
+              {game.kalanTasSayisi <= 0 &&
+                game.eliBitirecekKoltukNo === mySeat &&
+                !isSpectator && (
+                  <button
+                    className="finish-empty-hand center-primary-action"
+                    onClick={() => socket?.emit("eli-bitir")}
+                  >
+                    Eli Bitir
+                  </button>
+                )}
               <div
                 className="table-controls"
                 aria-label="Masaya açma kontrolleri"
@@ -2574,6 +2731,18 @@ export default function Home() {
                     </output>
                   </div>
                 )}
+              </div>
+              <div className="opening-counter-overlay">
+                <output
+                  className={`opening-counter ${seriesOpeningPreview.valid ? "complete" : ""}`}
+                >
+                  {seriesOpeningPreview.score} / {game.mevcutBaraj}
+                </output>
+                <output
+                  className={`opening-counter ${pairsOpeningPreview.valid ? "complete" : ""}`}
+                >
+                  {pairsOpeningPreview.pairCount} / 5
+                </output>
               </div>
             </>
           )
@@ -2722,7 +2891,7 @@ export default function Home() {
         </div>
         <div className="rack-board">
           <div className="rack-discard rack-discard-left">
-            <small>Yandan taş çek</small>
+            <small>Taş çek</small>
             <div className="incoming-discard-stack">
               {incomingDiscards.slice(-3).map((tile, i) => {
                 const top = i === incomingDiscards.slice(-3).length - 1;
@@ -2758,7 +2927,7 @@ export default function Home() {
             ref={rackGridRef}
             className={`rack-grid ${dealAnimating ? "deal-animating" : ""}`}
           >
-            {rack.slice(0, 32).map((tile, i) => (
+            {Array.from({ length: 34 }, (_, i) => rack[i] ?? null).map((tile, i) => (
               <div
                 className={`rack-cell ${selectedRackIndex === i ? "selected" : ""}`}
                 key={i}
