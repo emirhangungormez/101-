@@ -671,7 +671,7 @@ select {
   color: #171717 !important;
 }
 .tile-yellow {
-  color: #d97706 !important;
+  color: #16a34a !important;
 }
 .tile-joker {
   color: #7c3aed !important;
@@ -6223,6 +6223,10 @@ body > .rack-drag-ghost .tile i {
   opacity: 0.82 !important;
 }
 
+body > .rack-drag-ghost.deck-draw-ghost .tile i {
+  display: none !important;
+}
+
 /* Oda olusturma kartlari ayni hizada kalir; renk noktasi kart tabanina oturur. */
 .create-panel .player-tile:hover,
 .create-panel .player-tile.selected {
@@ -8377,7 +8381,7 @@ body > .rack-drag-ghost .tile i {
 
 /* Orta alan artik piksel duzeltmesi degil, 198px boslugun geometrik merkezidir. */
 .game-shell > .game-center-info {
-  left: calc(50% + 204px + var(--game-center-shift-x, 0px)) !important;
+  left: calc(50% + 204px) !important;
   width: 198px !important;
   min-width: 198px !important;
   max-width: 198px !important;
@@ -9111,6 +9115,30 @@ body:has(.game-shell.round-complete),
 
 .game-shell .minimal-top-profile-opening {
   color: #67e8f9 !important;
+}
+
+/* Acilis durumu profilden ilk bakista okunur. */
+.game-shell :is(.minimal-side-profile, .minimal-top-profile) .minimal-side-profile-opening,
+.game-shell :is(.minimal-side-profile, .minimal-top-profile) .minimal-top-profile-opening {
+  color: #fff !important;
+}
+
+.game-shell :is(.minimal-side-profile, .minimal-top-profile).opened-profile {
+  border-color: rgb(74 222 128 / 88%) !important;
+  background: rgb(22 163 74 / 32%) !important;
+}
+
+.game-shell .opened-profile :is(.minimal-side-profile-opening, .minimal-top-profile-opening) {
+  color: #86efac !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).opened-profile {
+  border-color: rgb(96 165 250 / 90%) !important;
+  background: rgb(37 99 235 / 38%) !important;
+}
+
+.game-shell.game-theme-green .opened-profile :is(.minimal-side-profile-opening, .minimal-top-profile-opening) {
+  color: #bfdbfe !important;
 }
 
 /* Ust profil icin ayri serit: oyun govdesi asagi iner, alt hizasi degismez. */

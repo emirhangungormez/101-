@@ -63,16 +63,9 @@ const createClientId = () => {
   return `okey-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
 };
 const profileNames = [
-  "Ada",
-  "Deniz",
-  "Ece",
-  "Emir",
-  "Lale",
-  "Mert",
-  "Selin",
-  "Yaman",
-  "Zeynep",
-  "Arda",
+  "eren", "zehra", "halime", "esila", "etem", "eymen", "merve",
+  "elif", "meva", "hümeyra", "serap", "aliye", "nurhan", "bekir",
+  "yusuf", "selam", "emir", "yakup", "ayşe", "hatice", "ömer", "osman",
 ];
 const profileEmojis = [
   "🧒",
@@ -401,9 +394,10 @@ export default function Home() {
   const rackThrowRef = useRef<HTMLDivElement>(null);
   const seriesGridRef = useRef<HTMLDivElement>(null);
   const pairsGridRef = useRef<HTMLDivElement>(null);
-  const gameShellRef = useRef<HTMLElement>(null);
-  const centerInfoRef = useRef<HTMLElement>(null);
   const deckDrawPendingRef = useRef(false);
+  const pendingDeckTileRef = useRef<{ tile: Tile; initialTarget: number } | null>(null);
+  const pendingDeckDropTargetRef = useRef<number | null>(null);
+  const deckPointerReleasedRef = useRef(false);
   const previousTurnSoundRef = useRef(false);
   const previousResultSoundRef = useRef<any>(null);
   const playGameSound = (
@@ -464,6 +458,10 @@ export default function Home() {
     oscillator.connect(gain).connect(context.destination);
     oscillator.start();
     oscillator.stop(context.currentTime + duration);
+  };
+  const showDrawAnimation = (seat: number, tile?: Tile) => {
+    setDrawAnimation({ seat, source: "deste", tile });
+    window.setTimeout(() => setDrawAnimation(null), 700);
   };
   const serverTableCellsRef = useRef<{ series: Set<number>; pairs: Set<number> }>(
     { series: new Set(), pairs: new Set() },
@@ -599,43 +597,6 @@ export default function Home() {
         .then((registration) => registration?.update())
         .catch(() => undefined);
   }, [screen]);
-  useEffect(() => {
-    if (screen !== "game") return;
-    const shell = gameShellRef.current;
-    const center = centerInfoRef.current;
-    const series = seriesGridRef.current;
-    const pairs = pairsGridRef.current;
-    if (!shell || !center || !series || !pairs) return;
-    const alignCenterPanel = () => {
-      const seriesRect = series.getBoundingClientRect();
-      const pairsRect = pairs.getBoundingClientRect();
-      const centerRect = center.getBoundingClientRect();
-      const desiredCenter = (seriesRect.right + pairsRect.left) / 2;
-      const actualCenter = (centerRect.left + centerRect.right) / 2;
-      const scale = Number.parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue("--game-scale"),
-      ) || 1;
-      const currentShift = Number.parseFloat(
-        shell.style.getPropertyValue("--game-center-shift-x"),
-      ) || 0;
-      shell.style.setProperty(
-        "--game-center-shift-x",
-        `${currentShift + (desiredCenter - actualCenter) / scale}px`,
-      );
-    };
-    const frame = window.requestAnimationFrame(alignCenterPanel);
-    const observer = new ResizeObserver(alignCenterPanel);
-    observer.observe(series);
-    observer.observe(pairs);
-    observer.observe(center);
-    window.addEventListener("resize", alignCenterPanel);
-    return () => {
-      window.cancelAnimationFrame(frame);
-      observer.disconnect();
-      window.removeEventListener("resize", alignCenterPanel);
-      shell.style.removeProperty("--game-center-shift-x");
-    };
-  }, [screen, gamePrepared, onlineGame, game.elNo]);
   useEffect(() => {
     setTable((current) => ({
       series: resizeTableCells(current.series, SERIES_TABLE_CELLS),
@@ -835,8 +796,11 @@ export default function Home() {
           .filter((tile): tile is TableTile => Boolean(tile && !tile.committed))
           .map((tile) => String(tile.id)),
       );
+      const heldDeckTileId = pendingDeckTileRef.current?.tile.id;
       const rackTiles = tiles.filter(
-        (tile: Tile) => !stagedTileIds.has(String(tile.id)),
+        (tile: Tile) =>
+          !stagedTileIds.has(String(tile.id)) &&
+          String(tile.id) !== String(heldDeckTileId ?? ""),
       );
       const reconciled = reconcileRack(
         rackOrderRef.current,
@@ -846,12 +810,35 @@ export default function Home() {
       const drawnTarget = pendingDrawTargetRef.current;
       const revealedDrawnTile =
         drawnTarget == null ? null : reconciled[drawnTarget] ?? null;
-      if (revealedDrawnTile)
-        setRackPointerDrag((current) =>
-          current?.source === "deck"
-            ? { ...current, index: drawnTarget!, tile: revealedDrawnTile }
-            : current,
-        );
+      if (revealedDrawnTile && deckDrawPendingRef.current) {
+        reconciled[drawnTarget!] = null;
+        pendingDeckTileRef.current = {
+          tile: revealedDrawnTile,
+          initialTarget: drawnTarget!,
+        };
+        if (deckPointerReleasedRef.current) {
+          const requestedTarget = pendingDeckDropTargetRef.current;
+          const target =
+            requestedTarget != null && !reconciled[requestedTarget]
+              ? requestedTarget
+              : !reconciled[drawnTarget!]
+                ? drawnTarget!
+                : reconciled.findIndex((tile, index) => index < 34 && !tile);
+          if (target >= 0) reconciled[target] = revealedDrawnTile;
+          showDrawAnimation(mySeat ?? 0, revealedDrawnTile);
+          pendingDeckTileRef.current = null;
+          pendingDeckDropTargetRef.current = null;
+          deckPointerReleasedRef.current = false;
+          deckDrawPendingRef.current = false;
+          setRackPointerDrag(null);
+        } else {
+          setRackPointerDrag((current) =>
+            current?.source === "deck"
+              ? { ...current, index: drawnTarget!, tile: revealedDrawnTile }
+              : current,
+          );
+        }
+      }
       const pendingTable = pendingSideTableRef.current;
       const sideTileId =
         payload?.yandanAlinanTasId == null
@@ -913,7 +900,7 @@ export default function Home() {
       }
       setRack(reconciled);
       pendingDrawTargetRef.current = null;
-      deckDrawPendingRef.current = false;
+      if (!pendingDeckTileRef.current) deckDrawPendingRef.current = false;
       pendingSideTableRef.current = null;
       setSideDrawTileId(
         sideTileId,
@@ -948,7 +935,7 @@ export default function Home() {
   useEffect(() => {
     if (!socket) return;
     const handleDiscard = ({ koltukNo, tas, otomatik }: any) => {
-      if (otomatik) playGameSound("automatic");
+      playGameSound(otomatik ? "automatic" : "discard");
       const tile = serverTileToTile(tas);
       const player = gameRoster.find((item) => item.koltukNo === koltukNo);
       const self = gameRoster.find((item) => item.socketId === socket.id);
@@ -1141,14 +1128,9 @@ export default function Home() {
       );
     });
     s.on("tas-cekildi", ({ koltukNo, atanKoltukNo, kaynak, tas }) => {
-      if (kaynak === "deste") {
-        setDrawAnimation({
-          seat: koltukNo,
-          source: kaynak,
-          tile: tas ? serverTileToTile(tas) : undefined,
-        });
-        window.setTimeout(() => setDrawAnimation(null), 700);
-      }
+      playGameSound("draw");
+      if (kaynak === "deste" && !deckDrawPendingRef.current)
+        showDrawAnimation(koltukNo, tas ? serverTileToTile(tas) : undefined);
       const sourceSeat = Number.isInteger(atanKoltukNo)
         ? atanKoltukNo
         : previousPlayerSeat(gameRosterRef.current, koltukNo);
@@ -1178,6 +1160,10 @@ export default function Home() {
     s.on("hata", ({ message }) => {
       pendingDrawTargetRef.current = null;
       deckDrawPendingRef.current = false;
+      pendingDeckTileRef.current = null;
+      pendingDeckDropTargetRef.current = null;
+      deckPointerReleasedRef.current = false;
+      setRackPointerDrag(null);
       setNotice(message);
     });
     s.on(
@@ -1643,7 +1629,13 @@ export default function Home() {
     );
     const centerRow = Math.floor(TABLE_ROWS / 2);
     const rows = Array.from({ length: TABLE_ROWS }, (_, index) => index).sort(
-      (a, b) => Math.abs(a - centerRow) - Math.abs(b - centerRow),
+      (a, b) => {
+        const distanceA = Math.abs(a - centerRow);
+        const distanceB = Math.abs(b - centerRow);
+        const stepA = distanceA % 3 === 0 ? 0 : 1;
+        const stepB = distanceB % 3 === 0 ? 0 : 1;
+        return stepA - stepB || distanceA - distanceB || b - a;
+      },
     );
     const placedIndices: number[] = [];
     snapshotRackBeforeTableMove();
@@ -1654,12 +1646,30 @@ export default function Home() {
         const starts = Array.from(
           { length: columns - group.tiles.length + 1 },
           (_, index) => index,
-        ).sort((a, b) => Math.abs(a - centerStart) - Math.abs(b - centerStart));
-        const start = starts.find((col) =>
-          group.tiles.every((_: Tile, offset: number) =>
+        ).sort((a, b) => {
+          const distanceA = Math.abs(a - centerStart);
+          const distanceB = Math.abs(b - centerStart);
+          const stepA = distanceA % 8 === 0 ? 0 : 1;
+          const stepB = distanceB % 8 === 0 ? 0 : 1;
+          return stepA - stepB || distanceA - distanceB;
+        });
+        const start = starts.find((col) => {
+          const endCol = col + group.tiles.length - 1;
+          const cellsFree = group.tiles.every((_: Tile, offset: number) =>
             !occupied.has(row * columns + col + offset),
-          ),
-        );
+          );
+          if (!cellsFree) return false;
+          return [...occupied].every((index) => {
+            const occupiedRow = Math.floor(index / columns);
+            const occupiedCol = index % columns;
+            const verticallyClear = Math.abs(row - occupiedRow) >= 3;
+            const horizontallyClear =
+              occupiedCol < col
+                ? col - occupiedCol >= 8
+                : occupiedCol - endCol >= 8;
+            return verticallyClear || horizontallyClear;
+          });
+        });
         if (start !== undefined) {
           destination = row * columns + start;
           break;
@@ -1722,7 +1732,6 @@ export default function Home() {
   const drawTile = (source: "deck" | "discard", target?: number) => {
     if (onlineGame && socket?.connected) {
       if (target !== undefined) pendingDrawTargetRef.current = target;
-      playGameSound("draw");
       socket.emit("tas-cek", source === "discard" ? "iskarta" : "deste");
       return;
     }
@@ -1830,7 +1839,6 @@ export default function Home() {
     if (pending.length)
       return setNotice("Önce masadaki taşları işle veya geri topla");
     if (onlineGame && socket?.connected) {
-      playGameSound("discard");
       socket.emit("tas-at", rack[rackIndex]!.id);
       return;
     }
@@ -1889,6 +1897,9 @@ export default function Home() {
     const target = rack.findIndex((tile, index) => index < 34 && !tile);
     if (target < 0) return setNotice("Istakada boş yer yok");
     deckDrawPendingRef.current = true;
+    pendingDeckTileRef.current = null;
+    pendingDeckDropTargetRef.current = null;
+    deckPointerReleasedRef.current = false;
     startRackPointerDrag(e, "deck", target, {
       id: "deck-pending",
       value: "?",
@@ -2153,6 +2164,7 @@ export default function Home() {
       centerY = e.clientY + rackPointerDrag.centerOffsetY;
     const cells =
       rackGridRef.current?.querySelectorAll<HTMLElement>(".rack-cell");
+    let requestedTarget: number | null = null;
     if (cells?.length) {
       let target = -1,
         distance = Infinity;
@@ -2174,21 +2186,29 @@ export default function Home() {
         centerY >= gridRect.top - 28 &&
         centerY <= gridRect.bottom + 28 &&
         target >= 0
-      ) {
-        const source = rackPointerDrag.index;
-        if (
-          source >= 0 &&
-          source !== target &&
-          rack[source] &&
-          !rack[target]
-        )
-          setRack((current) => {
-            const next = [...current];
-            next[target] = next[source];
-            next[source] = null;
-            return next;
-          });
-      }
+      ) requestedTarget = target;
+    }
+    deckPointerReleasedRef.current = true;
+    pendingDeckDropTargetRef.current = requestedTarget;
+    const pendingDeck = pendingDeckTileRef.current;
+    if (pendingDeck) {
+      setRack((current) => {
+        const next = [...current];
+        const target =
+          requestedTarget != null && !next[requestedTarget]
+            ? requestedTarget
+            : !next[pendingDeck.initialTarget]
+              ? pendingDeck.initialTarget
+              : next.findIndex((tile, index) => index < 34 && !tile);
+        if (target >= 0) next[target] = pendingDeck.tile;
+        rackOrderRef.current = next;
+        return next;
+      });
+      showDrawAnimation(mySeat ?? 0, pendingDeck.tile);
+      pendingDeckTileRef.current = null;
+      pendingDeckDropTargetRef.current = null;
+      deckPointerReleasedRef.current = false;
+      deckDrawPendingRef.current = false;
     }
     setRackPointerDrag(null);
   };
@@ -2307,7 +2327,23 @@ export default function Home() {
             (Number(a.value) || 99) - (Number(b.value) || 99) ||
             colors.indexOf(a.color) - colors.indexOf(b.color),
     );
-    setRack([...tiles, ...Array(44 - tiles.length).fill(null)]);
+    const arranged: RackCell[] = [];
+    tiles.forEach((tile, index) => {
+      const previous = tiles[index - 1];
+      const groupChanged =
+        index > 0 &&
+        (mode === "series"
+          ? previous.color !== tile.color
+          : previous.value !== tile.value);
+      if (groupChanged) arranged.push(null);
+      arranged.push(tile);
+    });
+    const nextRack = [
+      ...arranged.slice(0, 44),
+      ...Array(Math.max(0, 44 - arranged.length)).fill(null),
+    ];
+    rackOrderRef.current = nextRack;
+    setRack(nextRack);
     playGameSound("click");
     setNotice(
       mode === "series"
@@ -2639,7 +2675,6 @@ export default function Home() {
       onClickCapture={requestMobileFullscreen}
     >
       <main
-        ref={gameShellRef}
         className={`game-shell game-theme-${gameTheme} ${game.elSonucu ? "round-complete" : ""}`}
       >
       <div className="game-top-actions">
@@ -2796,7 +2831,7 @@ export default function Home() {
           .filter(Boolean)
           .map((player: any) => (
             <div
-              className={`minimal-side-profile minimal-side-profile-${player.profileSide}`}
+              className={`minimal-side-profile minimal-side-profile-${player.profileSide} ${player.acilisTipi ? "opened-profile" : ""}`}
               key={`${player.profileSide}-${player.socketId ?? player.koltukNo}`}
             >
               <span className="minimal-side-profile-order">
@@ -2818,7 +2853,7 @@ export default function Home() {
           ))}
         {topPlayers.slice(0, 1).map((player: any) => (
           <div
-            className="minimal-top-profile"
+            className={`minimal-top-profile ${player.acilisTipi ? "opened-profile" : ""}`}
             key={`top-${player.socketId ?? player.koltukNo}`}
           >
             <span className="minimal-top-profile-order">
@@ -2890,7 +2925,7 @@ export default function Home() {
           );
         })}
       </section>
-      <section ref={centerInfoRef} className="game-center-info">
+      <section className="game-center-info">
         {gamePrepared ? (
           <button
             className="deal-button"
@@ -2914,7 +2949,7 @@ export default function Home() {
                       onPointerDown={startDeckDraw}
                       onPointerMove={moveRackPointerDrag}
                       onPointerUp={finishDeckPointerDrag}
-                      onPointerCancel={() => setRackPointerDrag(null)}
+                      onPointerCancel={finishDeckPointerDrag}
                     >
                       <i />
                       <i />
@@ -3265,7 +3300,7 @@ export default function Home() {
         {rackPointerDrag &&
           createPortal(
             <div
-              className="rack-drag-ghost"
+              className={`rack-drag-ghost ${rackPointerDrag.source === "deck" ? "deck-draw-ghost" : ""}`}
               style={{
                 left: rackPointerDrag.x + rackPointerDrag.centerOffsetX,
                 top: rackPointerDrag.y + rackPointerDrag.centerOffsetY,
