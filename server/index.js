@@ -30,6 +30,8 @@ const io = new Server(httpServer, {
 });
 const desteBitisZamanlayicilari = new Map();
 const hamleZamanlayicilari = new Map();
+const ayrilmaZamanlayicilari = new Map();
+const GERI_DONUS_SURESI = 2 * 60 * 1000;
 const hata = (socket, message) => socket.emit("hata", { message });
 const odaBul = (id) => aktifOdalar[id];
 const odaDurumu = (oda) => io.to(oda.odaId).emit("oda-durum", genelDurum(oda));
@@ -37,15 +39,42 @@ const odaListesi = () =>
   io.emit("oda-listesi", Object.values(aktifOdalar).map(genelDurum));
 const odadaGercekOyuncuVar = (oda) =>
   oda.oyuncular.some((oyuncu) => !oyuncu.bot);
-const odadaBagliGercekOyuncuVar = (oda) =>
-  oda.oyuncular.some((oyuncu) => !oyuncu.bot && oyuncu.socketId);
 const odayiSil = (oda) => {
   clearTimeout(hamleZamanlayicilari.get(oda.odaId));
   clearTimeout(desteBitisZamanlayicilari.get(oda.odaId));
   hamleZamanlayicilari.delete(oda.odaId);
   desteBitisZamanlayicilari.delete(oda.odaId);
+  for (const [anahtar, zamanlayici] of ayrilmaZamanlayicilari)
+    if (anahtar.startsWith(`${oda.odaId}:`)) {
+      clearTimeout(zamanlayici);
+      ayrilmaZamanlayicilari.delete(anahtar);
+    }
   io.in(oda.odaId).socketsLeave(oda.odaId);
   delete aktifOdalar[oda.odaId];
+};
+const odaSahibiniDevret = (oda, ayrilanKullaniciId = null) => {
+  if (ayrilanKullaniciId && oda.kurucuId !== ayrilanKullaniciId) return;
+  const yeniSahip = oda.oyuncular.find((oyuncu) => !oyuncu.bot);
+  oda.kurucuId = yeniSahip?.kullaniciId ?? null;
+  oda.kurucuSocketId = yeniSahip?.socketId ?? null;
+};
+const oyuncuyuRobotaDevret = (oda, oyuncu) => {
+  const sonZaman = Date.now() + GERI_DONUS_SURESI;
+  const robot = {
+    ...oyuncu,
+    socketId: `robot-devralan-${Date.now()}-${oyuncu.koltukNo}`,
+    kullaniciId: null,
+    isim: "Robot",
+    avatar: "🤖",
+    bot: true,
+    devralinanKullaniciId: oyuncu.kullaniciId,
+    devralinanIsim: oyuncu.isim,
+    devralinanAvatar: oyuncu.avatar,
+    devralmaSonZaman: sonZaman,
+  };
+  const index = oda.oyuncular.indexOf(oyuncu);
+  if (index >= 0) oda.oyuncular[index] = robot;
+  return robot;
 };
 const bosKoltuk = (oda) =>
   Array.from({ length: oda.maksimum }, (_, i) => i).find(
@@ -509,6 +538,9 @@ io.on("connection", (socket) => {
       (p) => !p.bot && p.kullaniciId === kullaniciId,
     );
     if (yenidenBaglanan) {
+      const ayrilmaAnahtari = `${oda.odaId}:${kullaniciId}`;
+      clearTimeout(ayrilmaZamanlayicilari.get(ayrilmaAnahtari));
+      ayrilmaZamanlayicilari.delete(ayrilmaAnahtari);
       yenidenBaglanan.socketId = socket.id;
       socket.join(odaId);
       socket.data.oynadigiOdaId = odaId;
@@ -526,6 +558,41 @@ io.on("connection", (socket) => {
       odaListesi();
       return;
     }
+    const devralanRobot = oda.oyuncular.find(
+      (p) =>
+        p.bot &&
+        p.devralinanKullaniciId === kullaniciId &&
+        Number(p.devralmaSonZaman || 0) >= Date.now(),
+    );
+    if (devralanRobot) {
+      devralanRobot.socketId = socket.id;
+      devralanRobot.kullaniciId = kullaniciId;
+      devralanRobot.isim = String(
+        veri?.isim || devralanRobot.devralinanIsim || "Oyuncu",
+      ).slice(0, 20);
+      devralanRobot.avatar = String(
+        veri?.avatar || devralanRobot.devralinanAvatar || "🙂",
+      );
+      devralanRobot.bot = false;
+      delete devralanRobot.devralinanKullaniciId;
+      delete devralanRobot.devralinanIsim;
+      delete devralanRobot.devralinanAvatar;
+      delete devralanRobot.devralmaSonZaman;
+      socket.join(odaId);
+      socket.data.oynadigiOdaId = odaId;
+      socket.data.izlenenOdaId = odaId;
+      if (oda.gameState.oyunBasladi) elGonder(socket, devralanRobot);
+      socket.emit("oda-katildi", {
+        odaId,
+        oyunBasladi: Boolean(oda.gameState.oyunBasladi),
+        oda: genelDurum(oda),
+      });
+      odaDurumu(oda);
+      odaListesi();
+      return;
+    }
+    if (oda.gameState.macAktif)
+      return hata(socket, "Devam eden oyuna yeni oyuncu katilamaz");
     if (oda.oyuncular.length >= oda.maksimum) return hata(socket, "Oda dolu");
     const kayitliKoltuk = oda.kullaniciKoltuklari?.[kullaniciId];
     const istenenKoltuk = Number.isInteger(veri?.koltukNo)
@@ -574,12 +641,32 @@ io.on("connection", (socket) => {
   socket.on("oda-ayril", (odaId) => {
     const oda = odaBul(odaId);
     if (!oda) return;
-    odadanCikar(oda, socket.id);
+    const ayrilan = oda.oyuncular.find((p) => p.socketId === socket.id);
+    const aktifMac = Boolean(
+      oda.gameState.macAktif || oda.gameState.oyunBasladi,
+    );
+    if (ayrilan && !ayrilan.bot && aktifMac) {
+      oyuncuyuRobotaDevret(oda, ayrilan);
+      odaSahibiniDevret(oda, ayrilan.kullaniciId);
+    } else {
+      const ayrilanKullaniciId = ayrilan?.kullaniciId ?? null;
+      odadanCikar(oda, socket.id);
+      odaSahibiniDevret(oda, ayrilanKullaniciId);
+    }
     socket.leave(oda.odaId);
     socket.data.oynadigiOdaId = null;
     socket.data.izlenenOdaId = null;
+    if (!odadaGercekOyuncuVar(oda)) {
+      odayiSil(oda);
+      odaListesi();
+      return;
+    }
     odaTemizle(oda);
-    if (aktifOdalar[oda.odaId]) odaDurumu(oda);
+    if (aktifOdalar[oda.odaId]) {
+      odaDurumu(oda);
+      if (oda.gameState.siradakiOyuncu === ayrilan?.koltukNo)
+        robotTurunuBaslat(oda);
+    }
     odaListesi();
   });
   socket.on("profil-guncelle", (veri) => {
@@ -945,18 +1032,45 @@ io.on("connection", (socket) => {
         continue;
       const oyuncu = oda.oyuncular.find((p) => p.socketId === socket.id);
       if (oyuncu && !oyuncu.bot) {
+        const kullaniciId = oyuncu.kullaniciId;
+        const koltukNo = oyuncu.koltukNo;
+        const ayrilmaAnahtari = `${oda.odaId}:${kullaniciId}`;
         oyuncu.socketId = null;
         if (oyuncu.kullaniciId === oda.kurucuId) oda.kurucuSocketId = null;
-      }
-      oda.izleyiciler = oda.izleyiciler.filter((id) => id !== socket.id);
-      if (!odadaBagliGercekOyuncuVar(oda))
-        setTimeout(() => {
+        clearTimeout(ayrilmaZamanlayicilari.get(ayrilmaAnahtari));
+        const zamanlayici = setTimeout(() => {
+          ayrilmaZamanlayicilari.delete(ayrilmaAnahtari);
           const current = aktifOdalar[oda.odaId];
-          if (current && !odadaBagliGercekOyuncuVar(current)) {
+          const bekleyen = current?.oyuncular.find(
+            (p) =>
+              !p.bot &&
+              !p.socketId &&
+              p.kullaniciId === kullaniciId &&
+              p.koltukNo === koltukNo,
+          );
+          if (!current || !bekleyen) return;
+          const aktifMac = Boolean(
+            current.gameState.macAktif || current.gameState.oyunBasladi,
+          );
+          if (aktifMac) oyuncuyuRobotaDevret(current, bekleyen);
+          else
+            current.oyuncular = current.oyuncular.filter(
+              (p) => p !== bekleyen,
+            );
+          odaSahibiniDevret(current, kullaniciId);
+          if (!odadaGercekOyuncuVar(current)) {
             odayiSil(current);
             odaListesi();
+            return;
           }
-        }, 10 * 60 * 1000);
+          odaDurumu(current);
+          odaListesi();
+          if (aktifMac && current.gameState.siradakiOyuncu === koltukNo)
+            robotTurunuBaslat(current);
+        }, GERI_DONUS_SURESI);
+        ayrilmaZamanlayicilari.set(ayrilmaAnahtari, zamanlayici);
+      }
+      oda.izleyiciler = oda.izleyiciler.filter((id) => id !== socket.id);
       odaDurumu(oda);
     }
     odaListesi();

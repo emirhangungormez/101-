@@ -112,6 +112,8 @@ export function genelDurum(oda) {
         koltukNo,
         acilisTipi,
         acilisPuani,
+        devralinanKullaniciId,
+        devralmaSonZaman,
       }) => ({
         socketId,
         kullaniciId,
@@ -121,6 +123,8 @@ export function genelDurum(oda) {
         koltukNo,
         acilisTipi: acilisTipi ?? null,
         acilisPuani: acilisPuani ?? 0,
+        geriDonusKullaniciId: devralinanKullaniciId ?? null,
+        geriDonusSonZaman: Number(devralmaSonZaman || 0) || null,
         puan: Number(oda.koltukPuanlari[koltukNo] || 0),
         cezaPuani: Number(oda.koltukCezaPuanlari[koltukNo] || 0),
         siraNo: oyunSirasi.includes(koltukNo)

@@ -517,13 +517,43 @@ export default function Home() {
     };
     window.addEventListener("beforeinstallprompt", captureInstallPrompt);
     window.addEventListener("appinstalled", installed);
-    if (import.meta.env.PROD && "serviceWorker" in navigator)
-      navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+    const hadController = Boolean(navigator.serviceWorker?.controller);
+    let refreshing = false;
+    const reloadForUpdate = () => {
+      if (!hadController || refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    };
+    if (import.meta.env.PROD && "serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener(
+        "controllerchange",
+        reloadForUpdate,
+      );
+      navigator.serviceWorker
+        .register("/sw.js", { updateViaCache: "none" })
+        .then((registration) => registration.update())
+        .catch(() => undefined);
+    }
     return () => {
       window.removeEventListener("beforeinstallprompt", captureInstallPrompt);
       window.removeEventListener("appinstalled", installed);
+      navigator.serviceWorker?.removeEventListener(
+        "controllerchange",
+        reloadForUpdate,
+      );
     };
   }, []);
+  useEffect(() => {
+    if (
+      screen === "game" &&
+      import.meta.env.PROD &&
+      "serviceWorker" in navigator
+    )
+      navigator.serviceWorker
+        .getRegistration()
+        .then((registration) => registration?.update())
+        .catch(() => undefined);
+  }, [screen]);
   useEffect(() => {
     setTable((current) => ({
       series: resizeTableCells(current.series, SERIES_TABLE_CELLS),
@@ -588,12 +618,16 @@ export default function Home() {
       // Gorunen oyun alanini olcekle; mobil yatayda bos 1600x900 tuvali degil,
       // gercek 1420x620 oyun siniri ekrani doldurur.
       // Yerlesim degismez; sahne tek parca halinde buyur veya kuculur.
+      const mobileGame =
+        availableWidth <= 1100 ||
+        navigator.maxTouchPoints > 0 ||
+        window.matchMedia("(pointer: coarse)").matches;
       const widthScale = availableWidth / 1420;
-      const heightScale = availableHeight / 654;
+      const heightScale = (availableHeight - (mobileGame ? 8 : 0)) / 654;
       const scale = Math.min(widthScale, heightScale);
-      // Yukseklik sinirliyken eski -10px masaustu ofseti ust kontrolleri
-      // kirpiyordu. Mobil yatayda sahneyi tam gorunen alana ortala.
-      const centerOffsetY = heightScale <= widthScale ? 10 : 0;
+      // Mobilde eski -10px masaustu ofsetini kaldir ve iki kenarda da
+      // kirpilmaya karsi cok hafif guvenlik payi birak.
+      const centerOffsetY = mobileGame ? 10 : 0;
       root.style.setProperty("--game-scale", String(scale));
       root.style.setProperty("--game-mobile-scale", String(scale));
       root.style.setProperty("--game-center-offset-y", `${centerOffsetY}px`);
@@ -2355,6 +2389,7 @@ export default function Home() {
     <div
       className={`game-viewport ${penaltyShake ? "penalty-shake" : ""}`}
       onPointerUpCapture={requestMobileFullscreen}
+      onClickCapture={requestMobileFullscreen}
     >
       <main
         className={`game-shell game-theme-${gameTheme} ${game.elSonucu ? "round-complete" : ""}`}
@@ -3471,6 +3506,12 @@ function RoomView({
       (p: any) =>
         p.socketId === currentSocketId || p.kullaniciId === currentUserId,
     ),
+    returnRobot = players.find(
+      (p: any) =>
+        p.bot &&
+        p.geriDonusKullaniciId === currentUserId &&
+        Number(p.geriDonusSonZaman || 0) >= Date.now(),
+    ),
     isMember = Boolean(mine),
     gameInProgress = Boolean(room?.macAktif || room?.oyunBasladi),
     firstEmptySeat = Array.from({ length: max }, (_, i) => i).find(
@@ -3597,13 +3638,22 @@ function RoomView({
                   )}
                 </div>
                 {player?.bot ? (
-                  <button
-                    className="robot-add"
-                    onClick={() => onRemoveComputer(i)}
-                    disabled={!isMember}
-                  >
-                    Robot sil
-                  </button>
+                  player === returnRobot ? (
+                    <button
+                      className="robot-add room-join-seat"
+                      onClick={() => onJoinSeat(i)}
+                    >
+                      Oyuna dön
+                    </button>
+                  ) : (
+                    <button
+                      className="robot-add"
+                      onClick={() => onRemoveComputer(i)}
+                      disabled={!isMember}
+                    >
+                      Robot sil
+                    </button>
+                  )
                 ) : player?.socketId === currentSocketId ? (
                   <button
                     className="robot-add room-leave-seat"
@@ -3641,6 +3691,13 @@ function RoomView({
           </span>
           {gameInProgress && mine ? (
             <button className="start-game" onClick={onReturnToGame}>
+              Oyuna dön
+            </button>
+          ) : gameInProgress && returnRobot ? (
+            <button
+              className="start-game"
+              onClick={() => onJoinSeat(returnRobot.koltukNo)}
+            >
               Oyuna dön
             </button>
           ) : gameInProgress && firstEmptySeat !== undefined ? (
