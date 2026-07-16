@@ -483,6 +483,17 @@ export default function Home() {
   const [sideDrawTileId, setSideDrawTileId] = useState<string | null>(null);
   const [turnPhase, setTurnPhase] = useState<"draw" | "discard">("draw");
   const [socket, setSocket] = useState<Socket | null>(null);
+  const requestMobileFullscreen = () => {
+    if (
+      typeof window === "undefined" ||
+      document.fullscreenElement ||
+      !(navigator.maxTouchPoints > 0 || window.matchMedia("(pointer: coarse)").matches)
+    )
+      return;
+    void document.documentElement
+      .requestFullscreen({ navigationUI: "hide" })
+      .catch(() => undefined);
+  };
   useEffect(() => {
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
@@ -1103,13 +1114,6 @@ export default function Home() {
         setScreen("game");
       }
     });
-    s.on("oda-izleniyor", ({ odaId, oyunBasladi, oda }) => {
-      setSelectedRoom(odaId);
-      if (oyunBasladi || oda?.macAktif) {
-        applyGame(oda);
-        setScreen("game");
-      } else setScreen("room");
-    });
     s.on("oda-olusturuldu", ({ odaId }) => {
       setSelectedRoom(odaId);
       setScreen("room");
@@ -1304,16 +1308,7 @@ export default function Home() {
     if (window.location.pathname !== path)
       window.history.pushState({}, "", path);
   }, [screen, routeReady]);
-  const isSpectator = Boolean(
-    (onlineGame || gamePrepared) &&
-    gameRoster.length &&
-    !gameRoster.some(
-      (player: any) =>
-        player.socketId === socket?.id || player.kullaniciId === userId,
-    ),
-  );
   const isMyTurn =
-    !isSpectator &&
     (onlineGame ? game.siradakiOyuncu === mySeat : game.siradakiOyuncu === 0);
   useEffect(() => {
     if (isMyTurn && !previousTurnSoundRef.current) playGameSound("turn");
@@ -1427,8 +1422,8 @@ export default function Home() {
     );
   });
   const buttonActivity = {
-    canSeriAc: !isSpectator,
-    canCiftAc: !isSpectator,
+    canSeriAc: true,
+    canCiftAc: true,
     canGeriTopla: pending.length > 0 || Boolean(sideDrawTileId),
     canTasIsle:
       isMyTurn &&
@@ -1484,7 +1479,6 @@ export default function Home() {
   };
 
   const drawTile = (source: "deck" | "discard", target?: number) => {
-    if (isSpectator) return setNotice("İzleyici modunda hamle yapılamaz");
     if (onlineGame && socket?.connected) {
       if (target !== undefined) pendingDrawTargetRef.current = target;
       playGameSound("draw");
@@ -1589,7 +1583,6 @@ export default function Home() {
     return row * 16 + col;
   };
   const discardRackIndex = (rackIndex: number) => {
-    if (isSpectator) return setNotice("İzleyici modunda hamle yapılamaz");
     if (!rack[rackIndex]) return reject();
     if (sideDrawTileId)
       return setNotice("Yandan aldığın taşı önce masaya işlemelisin");
@@ -1627,10 +1620,6 @@ export default function Home() {
     tile: Tile,
     zone?: Zone,
   ) => {
-    if (isSpectator) {
-      setNotice("İzleyici modunda hamle yapılamaz");
-      return;
-    }
     if (e.button !== 0) return;
     const rect = e.currentTarget.getBoundingClientRect();
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -2229,7 +2218,6 @@ export default function Home() {
     setSelectedRoom(id);
     setScreen("room");
   };
-  const watchRoom = () => socket?.emit("oda-izle", selectedRoom);
   const addComputer = (seat = 0) =>
     socket?.emit("robot-ekle", {
       odaId: selectedRoom,
@@ -2242,7 +2230,8 @@ export default function Home() {
       koltukNo: seat,
       kullaniciId: userId,
     });
-  const joinSeat = (seat = 0) =>
+  const joinSeat = (seat = 0) => {
+    requestMobileFullscreen();
     socket?.emit("oda-katil", {
       odaId: selectedRoom,
       koltukNo: seat,
@@ -2250,6 +2239,7 @@ export default function Home() {
       avatar: profileEmoji,
       kullaniciId: userId,
     });
+  };
   const leaveSeat = () => {
     window.localStorage.removeItem("okey-joined-room");
     socket?.emit("oda-ayril", selectedRoom);
@@ -2311,7 +2301,10 @@ export default function Home() {
   if (screen === "menu")
     return (
       <StartMenu
-        onStart={() => setScreen("lobby")}
+        onStart={() => {
+          requestMobileFullscreen();
+          setScreen("lobby");
+        }}
         onInstall={installApp}
         showInstall={mobileInstallTarget}
         installHint={installHint}
@@ -2346,11 +2339,12 @@ export default function Home() {
       <RoomView
         room={room}
         currentSocketId={socket?.id ?? ""}
+        currentUserId={userId}
         onAddComputer={addComputer}
         onRemoveComputer={removeComputer}
         onJoinSeat={joinSeat}
         onLeaveSeat={leaveSeat}
-        onWatch={watchRoom}
+        onReturnToGame={() => setScreen("game")}
         onStart={() => socket?.emit("oyun-baslat")}
         onBack={leaveRoom}
         onUpdateProfile={updateRoomProfile}
@@ -2358,12 +2352,15 @@ export default function Home() {
     );
   }
   return (
-    <div className={`game-viewport ${penaltyShake ? "penalty-shake" : ""}`}>
+    <div
+      className={`game-viewport ${penaltyShake ? "penalty-shake" : ""}`}
+      onPointerUpCapture={requestMobileFullscreen}
+    >
       <main
-        className={`game-shell game-theme-${gameTheme} ${isSpectator ? "spectator-mode" : ""} ${game.elSonucu ? "round-complete" : ""}`}
+        className={`game-shell game-theme-${gameTheme} ${game.elSonucu ? "round-complete" : ""}`}
       >
       <div className="game-top-actions">
-        {!isSpectator && (onlineGame || gamePrepared) && (
+        {(onlineGame || gamePrepared) && (
           <button className="game-leave-button" onClick={leaveGame}>
             Oyundan ayrıl
           </button>
@@ -2409,11 +2406,6 @@ export default function Home() {
           {penaltyAlert || notice}
         </p>
       </div>
-      {isSpectator && (
-        <div className="spectator-badge" role="status">
-          İzleyici modu
-        </div>
-      )}
       {game.elSonucu && (
         <section className="round-result" role="dialog" aria-modal="true">
           <div className="round-result-content">
@@ -2668,7 +2660,7 @@ export default function Home() {
                     </div>
                   </>
                 ) : (
-                  game.eliBitirecekKoltukNo === mySeat && !isSpectator ? (
+                  game.eliBitirecekKoltukNo === mySeat ? (
                     <button
                       className="finish-empty-hand"
                       onClick={() => socket?.emit("eli-bitir")}
@@ -2683,8 +2675,7 @@ export default function Home() {
                 )}
               </div>
               {game.kalanTasSayisi <= 0 &&
-                game.eliBitirecekKoltukNo === mySeat &&
-                !isSpectator && (
+                game.eliBitirecekKoltukNo === mySeat && (
                   <button
                     className="finish-empty-hand center-primary-action"
                     onClick={() => socket?.emit("eli-bitir")}
@@ -2705,7 +2696,6 @@ export default function Home() {
                       setOpeningMode("series");
                       setNotice("Seri alanı seçildi");
                     }}
-                    disabled={isSpectator}
                   >
                     Seri Aç
                   </button>
@@ -2717,7 +2707,6 @@ export default function Home() {
                       setOpeningMode("pairs");
                       setNotice("Çift alanı seçildi");
                     }}
-                    disabled={isSpectator}
                   >
                     Çift Aç
                   </button>
@@ -2897,10 +2886,10 @@ export default function Home() {
       <section className="rack-area">
         <div className="rack-actions">
           <button onClick={() => drawTile("deck")}>Ortadan taş çek</button>
-          <button disabled={isSpectator} onClick={() => sortRack("pairs")}>
+          <button onClick={() => sortRack("pairs")}>
             Çift diz
           </button>
-          <button disabled={isSpectator} onClick={() => sortRack("series")}>
+          <button onClick={() => sortRack("series")}>
             Seri diz
           </button>
         </div>
@@ -3450,22 +3439,24 @@ function Lobby({
 function RoomView({
   room,
   currentSocketId,
+  currentUserId,
   onAddComputer,
   onRemoveComputer,
   onJoinSeat,
   onLeaveSeat,
-  onWatch,
+  onReturnToGame,
   onStart,
   onBack,
   onUpdateProfile,
 }: {
   room: any;
   currentSocketId: string;
+  currentUserId: string;
   onAddComputer: (seat: number) => void;
   onRemoveComputer: (seat: number) => void;
   onJoinSeat: (seat: number) => void;
   onLeaveSeat: () => void;
-  onWatch: () => void;
+  onReturnToGame: () => void;
   onStart: () => void;
   onBack: () => void;
   onUpdateProfile: (name: string, emoji: string) => void;
@@ -3476,8 +3467,11 @@ function RoomView({
   const max = room?.maksimum ?? room?.max ?? 4,
     players = room?.oyuncular ?? [],
     total = players.length,
-    mine = players.find((p: any) => p.socketId === currentSocketId),
-    isSpectator = !mine,
+    mine = players.find(
+      (p: any) =>
+        p.socketId === currentSocketId || p.kullaniciId === currentUserId,
+    ),
+    isMember = Boolean(mine),
     gameInProgress = Boolean(room?.macAktif || room?.oyunBasladi),
     firstEmptySeat = Array.from({ length: max }, (_, i) => i).find(
       (seat) => !players.some((player: any) => player.koltukNo === seat),
@@ -3606,7 +3600,7 @@ function RoomView({
                   <button
                     className="robot-add"
                     onClick={() => onRemoveComputer(i)}
-                    disabled={isSpectator}
+                    disabled={!isMember}
                   >
                     Robot sil
                   </button>
@@ -3646,7 +3640,7 @@ function RoomView({
             {total}/{max}
           </span>
           {gameInProgress && mine ? (
-            <button className="start-game" onClick={onWatch}>
+            <button className="start-game" onClick={onReturnToGame}>
               Oyuna dön
             </button>
           ) : gameInProgress && firstEmptySeat !== undefined ? (
@@ -3656,9 +3650,9 @@ function RoomView({
             >
               Oyuna katıl
             </button>
-          ) : isSpectator && total >= max ? (
-            <button className="start-game room-watch" onClick={onWatch}>
-              İzle
+          ) : !isMember && total >= max ? (
+            <button className="start-game" disabled>
+              Oda dolu
             </button>
           ) : (
             <button className="start-game" onClick={onStart} disabled={!canStart}>

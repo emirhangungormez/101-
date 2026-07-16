@@ -37,6 +37,8 @@ const odaListesi = () =>
   io.emit("oda-listesi", Object.values(aktifOdalar).map(genelDurum));
 const odadaGercekOyuncuVar = (oda) =>
   oda.oyuncular.some((oyuncu) => !oyuncu.bot);
+const odadaBagliGercekOyuncuVar = (oda) =>
+  oda.oyuncular.some((oyuncu) => !oyuncu.bot && oyuncu.socketId);
 const odayiSil = (oda) => {
   clearTimeout(hamleZamanlayicilari.get(oda.odaId));
   clearTimeout(desteBitisZamanlayicilari.get(oda.odaId));
@@ -477,34 +479,6 @@ io.on("connection", (socket) => {
     } catch {
       hata(socket, "Oda olusturulamadi");
     }
-  });
-  socket.on("oda-izle", (odaId) => {
-    const oda = odaBul(odaId);
-    if (!oda) return hata(socket, "Oda bulunamadi");
-    if (oda.gameState.elDurumu === "mac-tamamlandi")
-      return hata(socket, "Bu oyun tamamlandi");
-    const onceki = odaBul(socket.data.oynadigiOdaId);
-    if (onceki && onceki.odaId !== odaId) {
-      odadanCikar(onceki, socket.id);
-      socket.leave(onceki.odaId);
-      socket.data.oynadigiOdaId = null;
-      odaTemizle(onceki);
-      if (aktifOdalar[onceki.odaId]) odaDurumu(onceki);
-    }
-    socket.join(odaId);
-    socket.data.izlenenOdaId = odaId;
-    if (
-      !oda.oyuncular.some((p) => p.socketId === socket.id) &&
-      !oda.izleyiciler.includes(socket.id)
-    )
-      oda.izleyiciler.push(socket.id);
-    odaDurumu(oda);
-    odaListesi();
-    socket.emit("oda-izleniyor", {
-      odaId,
-      oyunBasladi: Boolean(oda.gameState.oyunBasladi),
-      oda: genelDurum(oda),
-    });
   });
   socket.on("oda-sil", (veri) => {
     const odaId = veri?.odaId ?? veri;
@@ -969,16 +943,21 @@ io.on("connection", (socket) => {
         !oda.izleyiciler.includes(socket.id)
       )
         continue;
-      odadanCikar(oda, socket.id);
-      if (!odadaGercekOyuncuVar(oda))
+      const oyuncu = oda.oyuncular.find((p) => p.socketId === socket.id);
+      if (oyuncu && !oyuncu.bot) {
+        oyuncu.socketId = null;
+        if (oyuncu.kullaniciId === oda.kurucuId) oda.kurucuSocketId = null;
+      }
+      oda.izleyiciler = oda.izleyiciler.filter((id) => id !== socket.id);
+      if (!odadaBagliGercekOyuncuVar(oda))
         setTimeout(() => {
           const current = aktifOdalar[oda.odaId];
-          if (current && !odadaGercekOyuncuVar(current)) {
+          if (current && !odadaBagliGercekOyuncuVar(current)) {
             odayiSil(current);
             odaListesi();
           }
-        }, 30000);
-      else odaDurumu(oda);
+        }, 10 * 60 * 1000);
+      odaDurumu(oda);
     }
     odaListesi();
   });

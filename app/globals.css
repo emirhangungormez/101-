@@ -5133,28 +5133,6 @@ input:focus-visible {
   border-color: #2563eb;
   background: #fff;
 }
-.game-shell .spectator-badge {
-  position: absolute !important;
-  top: 18px !important;
-  right: 24px !important;
-  z-index: 30 !important;
-  padding: 6px 10px !important;
-  border: 1px solid #d4d4d4 !important;
-  border-radius: 8px !important;
-  background: #fff !important;
-  color: #525252 !important;
-  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
-  font-size: 11px !important;
-  font-weight: 600 !important;
-}
-.game-shell.spectator-mode > .game-area,
-.game-shell.spectator-mode > .game-center-info,
-.game-shell.spectator-mode > .rack-area {
-  pointer-events: none !important;
-}
-.game-shell.spectator-mode > .rack-area {
-  opacity: 0.58 !important;
-}
 .room-hands-picker {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -6218,6 +6196,7 @@ body > .rack-drag-ghost .tile i {
   54% { transform: translate3d(-3px, 0, 0); }
   72% { transform: translate3d(3px, 1px, 0); }
 }
+
 
 /* Nihai gorunurluk: seri/cift govdesi gizleme kuralindan sonra acilir. */
 .game-shell > .game-area {
