@@ -577,8 +577,12 @@ export default function Home() {
       // Gorunen oyun alanini olcekle; mobil yatayda bos 1600x900 tuvali degil,
       // gercek 1420x620 oyun siniri ekrani doldurur.
       // Yerlesim degismez; sahne tek parca halinde buyur veya kuculur.
-      const scale = Math.min(availableWidth / 1420, availableHeight / 654);
-      const centerOffsetY = 0;
+      const widthScale = availableWidth / 1420;
+      const heightScale = availableHeight / 654;
+      const scale = Math.min(widthScale, heightScale);
+      // Yukseklik sinirliyken eski -10px masaustu ofseti ust kontrolleri
+      // kirpiyordu. Mobil yatayda sahneyi tam gorunen alana ortala.
+      const centerOffsetY = heightScale <= widthScale ? 10 : 0;
       root.style.setProperty("--game-scale", String(scale));
       root.style.setProperty("--game-mobile-scale", String(scale));
       root.style.setProperty("--game-center-offset-y", `${centerOffsetY}px`);
@@ -2297,7 +2301,12 @@ export default function Home() {
       setInstallHint("Safari'de Paylaş'a, ardından Ana Ekrana Ekle'ye dokun");
       return;
     }
-    setInstallHint("Kurulum için siteyi HTTPS adresinden aç");
+    const secure = window.isSecureContext || window.location.protocol === "https:";
+    setInstallHint(
+      secure
+        ? "Tarayıcı menüsünden Uygulamayı yükle veya Ana ekrana ekle'yi seç"
+        : "Kurulum için siteyi HTTPS adresinden aç",
+    );
   };
   if (screen === "menu")
     return (

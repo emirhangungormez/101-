@@ -25,6 +25,10 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
         <meta name="theme-color" content="#35101f" />
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
