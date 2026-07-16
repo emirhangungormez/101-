@@ -395,7 +395,7 @@ export default function Home() {
   const previousTurnSoundRef = useRef(false);
   const previousResultSoundRef = useRef<any>(null);
   const playGameSound = (
-    kind: "click" | "draw" | "discard" | "success" | "error" | "turn",
+    kind: "click" | "draw" | "discard" | "success" | "error" | "turn" | "penalty",
   ) => {
     if (!soundEnabled || typeof window === "undefined") return;
     const AudioContextClass =
@@ -411,15 +411,21 @@ export default function Home() {
       success: [820, 0.16, 0.07],
       error: [135, 0.14, 0.07],
       turn: [720, 0.12, 0.055],
+      penalty: [190, 0.28, 0.11],
     } as const;
     const [frequency, duration, volume] = settings[kind];
     const oscillator = context.createOscillator();
     const gain = context.createGain();
-    oscillator.type = kind === "error" ? "square" : "sine";
+    oscillator.type = kind === "error" || kind === "penalty" ? "square" : "sine";
     oscillator.frequency.setValueAtTime(frequency, context.currentTime);
     if (kind === "draw")
       oscillator.frequency.exponentialRampToValueAtTime(
         900,
+        context.currentTime + duration,
+      );
+    if (kind === "penalty")
+      oscillator.frequency.exponentialRampToValueAtTime(
+        70,
         context.currentTime + duration,
       );
     gain.gain.setValueAtTime(volume, context.currentTime);
@@ -472,6 +478,7 @@ export default function Home() {
   });
   const [notice, setNotice] = useState("Oyun başlamayı bekliyor");
   const [penaltyAlert, setPenaltyAlert] = useState<string | null>(null);
+  const [penaltyShake, setPenaltyShake] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
   const [sideDrawTileId, setSideDrawTileId] = useState<string | null>(null);
   const [turnPhase, setTurnPhase] = useState<"draw" | "discard">("draw");
@@ -1035,6 +1042,14 @@ export default function Home() {
           ? "İşlenecek taşı attın, 101 ceza yazıldı"
           : `${isim || "Oyuncu"}, işlenecek taşı attı; ${Number(cezaToplami || 101)} ceza yedi`;
       setPenaltyAlert(message);
+      if (mine) {
+        playGameSound("penalty");
+        setPenaltyShake(false);
+        window.requestAnimationFrame(() => {
+          setPenaltyShake(true);
+          window.setTimeout(() => setPenaltyShake(false), 380);
+        });
+      }
       window.setTimeout(() => setPenaltyAlert(null), 4200);
       },
     );
@@ -2334,7 +2349,7 @@ export default function Home() {
     );
   }
   return (
-    <div className="game-viewport">
+    <div className={`game-viewport ${penaltyShake ? "penalty-shake" : ""}`}>
       <main
         className={`game-shell game-theme-${gameTheme} ${isSpectator ? "spectator-mode" : ""} ${game.elSonucu ? "round-complete" : ""}`}
       >

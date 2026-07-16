@@ -35,6 +35,16 @@ const odaBul = (id) => aktifOdalar[id];
 const odaDurumu = (oda) => io.to(oda.odaId).emit("oda-durum", genelDurum(oda));
 const odaListesi = () =>
   io.emit("oda-listesi", Object.values(aktifOdalar).map(genelDurum));
+const odadaGercekOyuncuVar = (oda) =>
+  oda.oyuncular.some((oyuncu) => !oyuncu.bot);
+const odayiSil = (oda) => {
+  clearTimeout(hamleZamanlayicilari.get(oda.odaId));
+  clearTimeout(desteBitisZamanlayicilari.get(oda.odaId));
+  hamleZamanlayicilari.delete(oda.odaId);
+  desteBitisZamanlayicilari.delete(oda.odaId);
+  io.in(oda.odaId).socketsLeave(oda.odaId);
+  delete aktifOdalar[oda.odaId];
+};
 const bosKoltuk = (oda) =>
   Array.from({ length: oda.maksimum }, (_, i) => i).find(
     (i) => !oda.oyuncular.some((p) => p.koltukNo === i),
@@ -50,8 +60,7 @@ const odadanCikar = (oda, socketId) => {
   oda.izleyiciler = oda.izleyiciler.filter((id) => id !== socketId);
 };
 const odaTemizle = (oda) => {
-  if (!oda.oyuncular.length && !oda.izleyiciler.length)
-    delete aktifOdalar[oda.odaId];
+  if (!odadaGercekOyuncuVar(oda)) odayiSil(oda);
 };
 const elGonder = (socket, oyuncu) =>
   socket.emit("el-guncelle", {
@@ -158,6 +167,7 @@ const eliBitir = (oda, oyuncu, atilan, options = {}) => {
   });
   oyunDurumu(oda);
   odaDurumu(oda);
+  if (sonuc.macBitti) odayiSil(oda);
   odaListesi();
 };
 const eliBerabereBitir = (oda) => {
@@ -174,6 +184,7 @@ const eliBerabereBitir = (oda) => {
   });
   oyunDurumu(oda);
   odaDurumu(oda);
+  if (sonuc.macBitti) odayiSil(oda);
   odaListesi();
 };
 const desteBittiBildir = (oda, sonOyuncu = null) => {
@@ -470,6 +481,8 @@ io.on("connection", (socket) => {
   socket.on("oda-izle", (odaId) => {
     const oda = odaBul(odaId);
     if (!oda) return hata(socket, "Oda bulunamadi");
+    if (oda.gameState.elDurumu === "mac-tamamlandi")
+      return hata(socket, "Bu oyun tamamlandi");
     const onceki = odaBul(socket.data.oynadigiOdaId);
     if (onceki && onceki.odaId !== odaId) {
       odadanCikar(onceki, socket.id);
@@ -498,8 +511,7 @@ io.on("connection", (socket) => {
     const oda = odaBul(odaId);
     if (!oda || oda.kurucuId !== veri?.kullaniciId)
       return hata(socket, "Oda silinemedi");
-    io.in(odaId).socketsLeave(odaId);
-    delete aktifOdalar[odaId];
+    odayiSil(oda);
     odaListesi();
   });
   socket.on("oda-katil", (veri) => {
@@ -507,6 +519,8 @@ io.on("connection", (socket) => {
       typeof veri === "string" || typeof veri === "number" ? veri : veri?.odaId;
     const oda = odaBul(odaId);
     if (!oda) return hata(socket, "Oda bulunamadi");
+    if (oda.gameState.elDurumu === "mac-tamamlandi")
+      return hata(socket, "Bu oyun tamamlandi");
     const kullaniciId = String(veri?.kullaniciId || socket.id);
     const onceki = odaBul(socket.data.oynadigiOdaId);
     if (onceki && onceki.odaId !== odaId) {
@@ -590,7 +604,8 @@ io.on("connection", (socket) => {
     socket.leave(oda.odaId);
     socket.data.oynadigiOdaId = null;
     socket.data.izlenenOdaId = null;
-    odaDurumu(oda);
+    odaTemizle(oda);
+    if (aktifOdalar[oda.odaId]) odaDurumu(oda);
     odaListesi();
   });
   socket.on("profil-guncelle", (veri) => {
@@ -955,15 +970,11 @@ io.on("connection", (socket) => {
       )
         continue;
       odadanCikar(oda, socket.id);
-      if (!oda.oyuncular.length && !oda.izleyiciler.length)
+      if (!odadaGercekOyuncuVar(oda))
         setTimeout(() => {
           const current = aktifOdalar[oda.odaId];
-          if (
-            current &&
-            !current.oyuncular.length &&
-            !current.izleyiciler.length
-          ) {
-            delete aktifOdalar[oda.odaId];
+          if (current && !odadaGercekOyuncuVar(current)) {
+            odayiSil(current);
             odaListesi();
           }
         }, 30000);

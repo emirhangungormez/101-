@@ -6200,6 +6200,25 @@ body > .rack-drag-ghost .tile i {
   transform: none !important;
 }
 
+/* Oyuncu ceza aldiginda bildirimi belirginlestir ve sahneyi kisa sars. */
+.game-shell .rack-status.penalty {
+  color: #ff334f !important;
+  border-color: rgb(255 51 79 / 72%) !important;
+  text-shadow: 0 0 10px rgb(255 51 79 / 30%) !important;
+}
+
+.game-viewport.penalty-shake {
+  animation: penalty-screen-shake 380ms ease-out both;
+}
+
+@keyframes penalty-screen-shake {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  18% { transform: translate3d(-5px, 1px, 0); }
+  36% { transform: translate3d(5px, -1px, 0); }
+  54% { transform: translate3d(-3px, 0, 0); }
+  72% { transform: translate3d(3px, 1px, 0); }
+}
+
 /* Nihai gorunurluk: seri/cift govdesi gizleme kuralindan sonra acilir. */
 .game-shell > .game-area {
   display: flex !important;
