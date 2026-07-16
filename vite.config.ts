@@ -42,8 +42,14 @@ export default defineConfig(async () => {
 
   // Wrangler snapshots its log path while the Cloudflare plugin is imported.
   const { cloudflare } = await import("@cloudflare/vite-plugin");
+  const appBuildId =
+    process.env.CF_PAGES_COMMIT_SHA ||
+    process.env.RENDER_GIT_COMMIT ||
+    process.env.GITHUB_SHA ||
+    Date.now().toString(36);
 
   return {
+    define: { __APP_BUILD_ID__: JSON.stringify(appBuildId) },
     server: isCodexSeatbeltSandbox
       ? { watch: { useFsEvents: false, usePolling: true } }
       : undefined,

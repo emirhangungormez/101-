@@ -12,6 +12,13 @@ import {
   validatePair,
   validateSeriesGroup,
 } from "../shared/okey-rules.js";
+import {
+  ciftAdaylari,
+  enIyiAyrikGruplar,
+  seriAdaylari,
+} from "../server/bot.js";
+
+declare const __APP_BUILD_ID__: string;
 
 type Color = "red" | "blue" | "black" | "yellow" | "joker";
 type Tile = {
@@ -375,6 +382,8 @@ export default function Home() {
     tile: Tile;
   } | null>(null);
   const [openingMode, setOpeningMode] = useState<Zone>("series");
+  const [selectedOpeningMode, setSelectedOpeningMode] =
+    useState<Zone | null>(null);
   const [selectedRackIndex, setSelectedRackIndex] = useState<number | null>(
     null,
   );
@@ -392,10 +401,13 @@ export default function Home() {
   const rackThrowRef = useRef<HTMLDivElement>(null);
   const seriesGridRef = useRef<HTMLDivElement>(null);
   const pairsGridRef = useRef<HTMLDivElement>(null);
+  const gameShellRef = useRef<HTMLElement>(null);
+  const centerInfoRef = useRef<HTMLElement>(null);
+  const deckDrawPendingRef = useRef(false);
   const previousTurnSoundRef = useRef(false);
   const previousResultSoundRef = useRef<any>(null);
   const playGameSound = (
-    kind: "click" | "draw" | "discard" | "success" | "error" | "turn" | "penalty",
+    kind: "click" | "draw" | "discard" | "success" | "error" | "turn" | "penalty" | "automatic",
   ) => {
     if (!soundEnabled || typeof window === "undefined") return;
     const AudioContextClass =
@@ -412,6 +424,7 @@ export default function Home() {
       error: [135, 0.14, 0.07],
       turn: [720, 0.12, 0.055],
       penalty: [190, 0.28, 0.11],
+      automatic: [330, 0.34, 0.08],
     } as const;
     const [frequency, duration, volume] = settings[kind];
     const oscillator = context.createOscillator();
@@ -428,6 +441,21 @@ export default function Home() {
         70,
         context.currentTime + duration,
       );
+    if (kind === "automatic") {
+      oscillator.type = "triangle";
+      oscillator.frequency.linearRampToValueAtTime(
+        165,
+        context.currentTime + duration,
+      );
+    }
+    if (kind === "turn") {
+      oscillator.type = "triangle";
+      oscillator.frequency.setValueAtTime(660, context.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(
+        1080,
+        context.currentTime + duration,
+      );
+    }
     gain.gain.setValueAtTime(volume, context.currentTime);
     gain.gain.exponentialRampToValueAtTime(
       0.0001,
@@ -529,9 +557,26 @@ export default function Home() {
         "controllerchange",
         reloadForUpdate,
       );
+      const buildKey = "okey-app-build";
+      const previousBuild = window.localStorage.getItem(buildKey);
+      window.localStorage.setItem(buildKey, __APP_BUILD_ID__);
       navigator.serviceWorker
-        .register("/sw.js", { updateViaCache: "none" })
-        .then((registration) => registration.update())
+        .register(`/sw.js?v=${encodeURIComponent(__APP_BUILD_ID__)}`, {
+          updateViaCache: "none",
+        })
+        .then(async (registration) => {
+          await registration.update();
+          if (hadController && previousBuild !== __APP_BUILD_ID__) {
+            if ("caches" in window) {
+              const keys = await window.caches.keys();
+              await Promise.all(keys.map((key) => window.caches.delete(key)));
+            }
+            if (!refreshing) {
+              refreshing = true;
+              window.location.reload();
+            }
+          }
+        })
         .catch(() => undefined);
     }
     return () => {
@@ -554,6 +599,43 @@ export default function Home() {
         .then((registration) => registration?.update())
         .catch(() => undefined);
   }, [screen]);
+  useEffect(() => {
+    if (screen !== "game") return;
+    const shell = gameShellRef.current;
+    const center = centerInfoRef.current;
+    const series = seriesGridRef.current;
+    const pairs = pairsGridRef.current;
+    if (!shell || !center || !series || !pairs) return;
+    const alignCenterPanel = () => {
+      const seriesRect = series.getBoundingClientRect();
+      const pairsRect = pairs.getBoundingClientRect();
+      const centerRect = center.getBoundingClientRect();
+      const desiredCenter = (seriesRect.right + pairsRect.left) / 2;
+      const actualCenter = (centerRect.left + centerRect.right) / 2;
+      const scale = Number.parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--game-scale"),
+      ) || 1;
+      const currentShift = Number.parseFloat(
+        shell.style.getPropertyValue("--game-center-shift-x"),
+      ) || 0;
+      shell.style.setProperty(
+        "--game-center-shift-x",
+        `${currentShift + (desiredCenter - actualCenter) / scale}px`,
+      );
+    };
+    const frame = window.requestAnimationFrame(alignCenterPanel);
+    const observer = new ResizeObserver(alignCenterPanel);
+    observer.observe(series);
+    observer.observe(pairs);
+    observer.observe(center);
+    window.addEventListener("resize", alignCenterPanel);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("resize", alignCenterPanel);
+      shell.style.removeProperty("--game-center-shift-x");
+    };
+  }, [screen, gamePrepared, onlineGame, game.elNo]);
   useEffect(() => {
     setTable((current) => ({
       series: resizeTableCells(current.series, SERIES_TABLE_CELLS),
@@ -761,6 +843,15 @@ export default function Home() {
         rackTiles,
         pendingDrawTargetRef.current,
       );
+      const drawnTarget = pendingDrawTargetRef.current;
+      const revealedDrawnTile =
+        drawnTarget == null ? null : reconciled[drawnTarget] ?? null;
+      if (revealedDrawnTile)
+        setRackPointerDrag((current) =>
+          current?.source === "deck"
+            ? { ...current, index: drawnTarget!, tile: revealedDrawnTile }
+            : current,
+        );
       const pendingTable = pendingSideTableRef.current;
       const sideTileId =
         payload?.yandanAlinanTasId == null
@@ -822,6 +913,7 @@ export default function Home() {
       }
       setRack(reconciled);
       pendingDrawTargetRef.current = null;
+      deckDrawPendingRef.current = false;
       pendingSideTableRef.current = null;
       setSideDrawTileId(
         sideTileId,
@@ -847,11 +939,16 @@ export default function Home() {
       setPlayerDiscardHistories({});
       setTable(blankTable());
       rackSnapshotRef.current = null;
+      setSelectedOpeningMode(null);
     }
   }, [gamePrepared]);
   useEffect(() => {
+    setSelectedOpeningMode(null);
+  }, [game.elNo]);
+  useEffect(() => {
     if (!socket) return;
-    const handleDiscard = ({ koltukNo, tas }: any) => {
+    const handleDiscard = ({ koltukNo, tas, otomatik }: any) => {
+      if (otomatik) playGameSound("automatic");
       const tile = serverTileToTile(tas);
       const player = gameRoster.find((item) => item.koltukNo === koltukNo);
       const self = gameRoster.find((item) => item.socketId === socket.id);
@@ -1080,6 +1177,7 @@ export default function Home() {
     });
     s.on("hata", ({ message }) => {
       pendingDrawTargetRef.current = null;
+      deckDrawPendingRef.current = false;
       setNotice(message);
     });
     s.on(
@@ -1411,6 +1509,30 @@ export default function Home() {
   const openingPreview =
     openingMode === "series" ? seriesOpeningPreview : pairsOpeningPreview;
   const score = openingPreview.score;
+  const rackOpeningEstimate = useMemo(() => {
+    const columns = 19;
+    let seriesScore = 0;
+    let pairCount = 0;
+    for (let rowStart = 0; rowStart < 38; rowStart += columns) {
+      let group: Tile[] = [];
+      const finishGroup = () => {
+        if (group.length >= 3) {
+          const checked = validateSeriesGroup(group, game.gostergeTas);
+          if (checked.valid) seriesScore += checked.score;
+        }
+        if (group.length === 2 && validatePair(group, game.gostergeTas).valid)
+          pairCount += 1;
+        group = [];
+      };
+      for (let index = rowStart; index < rowStart + columns; index += 1) {
+        const tile = rack[index];
+        if (tile) group.push(tile);
+        else finishGroup();
+      }
+      finishGroup();
+    }
+    return { seriesScore, pairCount };
+  }, [rack, game.gostergeTas]);
   const hasOpened = Boolean(ownPlayer?.acilisTipi);
   const initialSeriesReady =
     pendingPlacements.length > 0 &&
@@ -1488,6 +1610,90 @@ export default function Home() {
   const requestSeriesTimeBonus = () => {
     if (onlineGame && socket?.connected) socket.emit("seri-sure-bonusu");
   };
+  const snapshotRackBeforeTableMove = () => {
+    if (rackSnapshotRef.current) return;
+    rackSnapshotRef.current = [...rackOrderRef.current];
+  };
+  const autoArrangeOpening = (mode: Zone) => {
+    if (!isMyTurn) return reject();
+    setOpeningMode(mode);
+    setSelectedOpeningMode(mode);
+    if (pendingPlacements.length) {
+      setNotice("Önce bekleyen taşları işle veya geri topla");
+      return;
+    }
+    const rackTiles = rack.filter(Boolean) as Tile[];
+    const groups = enIyiAyrikGruplar(
+      mode === "series"
+        ? seriAdaylari(rackTiles, game.gostergeTas)
+        : ciftAdaylari(rackTiles, game.gostergeTas),
+    );
+    if (!groups.length) {
+      setNotice(mode === "series" ? "Geçerli seri bulunamadı" : "Geçerli çift bulunamadı");
+      return;
+    }
+    const columns = mode === "series" ? SERIES_COLUMNS : PAIRS_COLUMNS;
+    const nextTable = {
+      series: [...table.series],
+      pairs: [...table.pairs],
+    };
+    const nextRack = [...rack];
+    const occupied = new Set(
+      nextTable[mode].flatMap((tile, index) => (tile ? [index] : [])),
+    );
+    const centerRow = Math.floor(TABLE_ROWS / 2);
+    const rows = Array.from({ length: TABLE_ROWS }, (_, index) => index).sort(
+      (a, b) => Math.abs(a - centerRow) - Math.abs(b - centerRow),
+    );
+    const placedIndices: number[] = [];
+    snapshotRackBeforeTableMove();
+    for (const group of groups) {
+      let destination: number | null = null;
+      for (const row of rows) {
+        const centerStart = Math.floor((columns - group.tiles.length) / 2);
+        const starts = Array.from(
+          { length: columns - group.tiles.length + 1 },
+          (_, index) => index,
+        ).sort((a, b) => Math.abs(a - centerStart) - Math.abs(b - centerStart));
+        const start = starts.find((col) =>
+          group.tiles.every((_: Tile, offset: number) =>
+            !occupied.has(row * columns + col + offset),
+          ),
+        );
+        if (start !== undefined) {
+          destination = row * columns + start;
+          break;
+        }
+      }
+      if (destination == null) continue;
+      group.tiles.forEach((tile: Tile, offset: number) => {
+        const rackIndex = nextRack.findIndex(
+          (item) => item && String(item.id) === String(tile.id),
+        );
+        if (rackIndex < 0) return;
+        const tableIndex = destination! + offset;
+        nextTable[mode][tableIndex] = {
+          ...tile,
+          origin: rackIndex,
+          committed: false,
+        };
+        nextRack[rackIndex] = null;
+        occupied.add(tableIndex);
+        placedIndices.push(tableIndex);
+      });
+    }
+    if (!placedIndices.length) {
+      setNotice("Görünür boş alan bulunamadı");
+      return;
+    }
+    rackOrderRef.current = nextRack;
+    tableOrderRef.current = nextTable;
+    setRack(nextRack);
+    setTable(nextTable);
+    if (mode === "series") requestSeriesTimeBonus();
+    window.setTimeout(() => focusNewTableCells(mode, placedIndices), 0);
+    setNotice(mode === "series" ? "Seriler otomatik dizildi" : "Çiftler otomatik dizildi");
+  };
 
   const dropTable = (e: React.DragEvent, zone: Zone, index: number) => {
     e.preventDefault();
@@ -1496,7 +1702,7 @@ export default function Home() {
       return reject();
     const tile = rack[data.index];
     if (!tile) return;
-    if (!rackSnapshotRef.current) rackSnapshotRef.current = [...rack];
+    snapshotRackBeforeTableMove();
     setRack((old) => old.map((v, i) => (i === data.index ? null : v)));
     setTable((old) => ({
       ...old,
@@ -1505,6 +1711,7 @@ export default function Home() {
       ),
     }));
     setOpeningMode(zone);
+    setSelectedOpeningMode(zone);
     playGameSound("click");
     if (zone === "series") requestSeriesTimeBonus();
     setNotice(
@@ -1675,6 +1882,20 @@ export default function Home() {
       current ? { ...current, x: e.clientX, y: e.clientY } : null,
     );
   };
+  const startDeckDraw = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isMyTurn) return reject();
+    if (hasDrawn || deckDrawPendingRef.current)
+      return setNotice("Taşı zaten çektin, taş atmalısın");
+    const target = rack.findIndex((tile, index) => index < 34 && !tile);
+    if (target < 0) return setNotice("Istakada boş yer yok");
+    deckDrawPendingRef.current = true;
+    startRackPointerDrag(e, "deck", target, {
+      id: "deck-pending",
+      value: "?",
+      color: "black",
+    });
+    drawTile("deck", target);
+  };
   const nearestTableCell = (centerX: number, centerY: number) => {
     let best: { zone: Zone; index: number; distance: number } | null = null;
     for (const [zone, ref] of [
@@ -1752,7 +1973,10 @@ export default function Home() {
       setRackPointerDrag(null);
       return;
     }
-    const tableTarget = nearestTableCell(centerX, centerY);
+    // Istakaya yakin birakma her zaman istaka hareketidir. Masa alanlarinin
+    // genis yakalama payi alt kenarda taslari yanlislikla seri/cifte cekmesin.
+    const rackTarget = nearestRackCell(centerX, centerY);
+    const tableTarget = rackTarget >= 0 ? null : nearestTableCell(centerX, centerY);
     if (
       (rackPointerDrag.source === "rack" ||
         rackPointerDrag.source === "table" ||
@@ -1817,7 +2041,7 @@ export default function Home() {
       } else if (!sameCell && destination)
         setNotice("Bu masa hücresi dolu");
       else if (!sameCell) {
-        if (!rackSnapshotRef.current) rackSnapshotRef.current = [...rack];
+        snapshotRackBeforeTableMove();
         if (rackPointerDrag.source === "rack")
           setRack((old) =>
             old.map((tile, index) => (index === sourceIndex ? null : tile)),
@@ -1840,6 +2064,7 @@ export default function Home() {
           return next;
         });
         setOpeningMode(tableTarget.zone);
+        setSelectedOpeningMode(tableTarget.zone);
         if (
           tableTarget.zone === "series" &&
           !(rackPointerDrag.source === "table" && sourceZone === "series")
@@ -1853,7 +2078,7 @@ export default function Home() {
       return;
     }
     if (rackPointerDrag.source === "table" && rackPointerDrag.zone) {
-      const target = nearestRackCell(centerX, centerY);
+        const target = rackTarget;
       if (target >= 0) {
         const emptyTarget = rack[target]
           ? rack.findIndex((tile) => !tile)
@@ -1886,7 +2111,7 @@ export default function Home() {
     )
       discardRackIndex(rackPointerDrag.index);
     else {
-      const target = nearestRackCell(centerX, centerY);
+      const target = rackTarget;
       if (target >= 0) {
         if (rackPointerDrag.source === "discard") {
           if (isMyTurn && !hasDrawn && !rack[target]) {
@@ -1948,17 +2173,31 @@ export default function Home() {
         centerX <= gridRect.right + 28 &&
         centerY >= gridRect.top - 28 &&
         centerY <= gridRect.bottom + 28 &&
-        target >= 0 &&
-        !rack[target]
+        target >= 0
       ) {
-        pendingDrawTargetRef.current = target;
-        drawTile("deck", target);
+        const source = rackPointerDrag.index;
+        if (
+          source >= 0 &&
+          source !== target &&
+          rack[source] &&
+          !rack[target]
+        )
+          setRack((current) => {
+            const next = [...current];
+            next[target] = next[source];
+            next[source] = null;
+            return next;
+          });
       }
     }
     setRackPointerDrag(null);
   };
   const collect = () => {
-    if (rackSnapshotRef.current) setRack(rackSnapshotRef.current);
+    if (rackSnapshotRef.current) {
+      const restoredRack = [...rackSnapshotRef.current];
+      rackOrderRef.current = restoredRack;
+      setRack(restoredRack);
+    }
     else {
       const next = [...rack];
       pending.forEach((tile) => {
@@ -1973,13 +2212,19 @@ export default function Home() {
             isOkey: tile.isOkey,
           };
       });
+      rackOrderRef.current = next;
       setRack(next);
     }
-    setTable((current) => ({
-      series: current.series.map((tile) => (tile?.committed ? tile : null)),
-      pairs: current.pairs.map((tile) => (tile?.committed ? tile : null)),
-    }));
+    setTable((current) => {
+      const restoredTable = {
+        series: current.series.map((tile) => (tile?.committed ? tile : null)),
+        pairs: current.pairs.map((tile) => (tile?.committed ? tile : null)),
+      };
+      tableOrderRef.current = restoredTable;
+      return restoredTable;
+    });
     rackSnapshotRef.current = null;
+    setSelectedOpeningMode(null);
     returnSideTileIfNeeded();
     setNotice("Bekleyen taşlar ıstakaya geri alındı");
   };
@@ -2015,6 +2260,7 @@ export default function Home() {
           return setNotice(response?.error || "Taşlar işlenemedi");
         setTable(tableFromServer(response.masaZemini, game.gostergeTas));
         rackSnapshotRef.current = null;
+        setSelectedOpeningMode(null);
         setGame((current) => ({
           ...current,
           mevcutBaraj: response.mevcutBaraj ?? current.mevcutBaraj,
@@ -2033,6 +2279,7 @@ export default function Home() {
       ),
     }));
     rackSnapshotRef.current = null;
+    setSelectedOpeningMode(null);
     playGameSound("success");
     setNotice("Taşlar masaya işlendi");
   };
@@ -2392,6 +2639,7 @@ export default function Home() {
       onClickCapture={requestMobileFullscreen}
     >
       <main
+        ref={gameShellRef}
         className={`game-shell game-theme-${gameTheme} ${game.elSonucu ? "round-complete" : ""}`}
       >
       <div className="game-top-actions">
@@ -2642,7 +2890,7 @@ export default function Home() {
           );
         })}
       </section>
-      <section className="game-center-info">
+      <section ref={centerInfoRef} className="game-center-info">
         {gamePrepared ? (
           <button
             className="deal-button"
@@ -2663,14 +2911,7 @@ export default function Home() {
                   <>
                     <div
                       className="center-deck-stack"
-                      onDoubleClick={() => drawTile("deck")}
-                      onPointerDown={(e) =>
-                        startRackPointerDrag(e, "deck", -1, {
-                          id: "deck-hidden",
-                          value: "?",
-                          color: "black",
-                        })
-                      }
+                      onPointerDown={startDeckDraw}
                       onPointerMove={moveRackPointerDrag}
                       onPointerUp={finishDeckPointerDrag}
                       onPointerCancel={() => setRackPointerDrag(null)}
@@ -2725,23 +2966,17 @@ export default function Home() {
                 <div className="table-mode-buttons">
                   <button
                     type="button"
-                    className={openingMode === "series" ? "active" : ""}
-                    aria-pressed={openingMode === "series"}
-                    onClick={() => {
-                      setOpeningMode("series");
-                      setNotice("Seri alanı seçildi");
-                    }}
+                    className={selectedOpeningMode === "series" ? "active" : ""}
+                    aria-pressed={selectedOpeningMode === "series"}
+                    onClick={() => autoArrangeOpening("series")}
                   >
                     Seri Aç
                   </button>
                   <button
                     type="button"
-                    className={openingMode === "pairs" ? "active" : ""}
-                    aria-pressed={openingMode === "pairs"}
-                    onClick={() => {
-                      setOpeningMode("pairs");
-                      setNotice("Çift alanı seçildi");
-                    }}
+                    className={selectedOpeningMode === "pairs" ? "active" : ""}
+                    aria-pressed={selectedOpeningMode === "pairs"}
+                    onClick={() => autoArrangeOpening("pairs")}
                   >
                     Çift Aç
                   </button>
@@ -2811,7 +3046,7 @@ export default function Home() {
               cells={table.series}
               indicator={game.gostergeTas}
               zone="series"
-              active={openingMode === "series"}
+              active={selectedOpeningMode === "series"}
               interactionKey={gridInteractionKey}
               gridRef={seriesGridRef}
               onDrop={dropTable}
@@ -2826,7 +3061,7 @@ export default function Home() {
               cells={table.pairs}
               indicator={game.gostergeTas}
               zone="pairs"
-              active={openingMode === "pairs"}
+              active={selectedOpeningMode === "pairs"}
               interactionKey={gridInteractionKey}
               gridRef={pairsGridRef}
               onDrop={dropTable}
@@ -2893,14 +3128,14 @@ export default function Home() {
           <div className="actions">
             <button
               disabled={!buttonActivity.canSeriAc}
-              onClick={() => setOpeningMode("series")}
+              onClick={() => autoArrangeOpening("series")}
             >
               <b>Seri</b>
               <span>{score || "—"}</span>
             </button>
             <button
               disabled={!buttonActivity.canCiftAc}
-              onClick={() => setOpeningMode("pairs")}
+              onClick={() => autoArrangeOpening("pairs")}
             >
               <b>Çift</b>
               <span>{table.pairs.filter(Boolean).length}/5</span>
@@ -2938,6 +3173,10 @@ export default function Home() {
           />
         </div>
         <div className="rack-board">
+          <output className="rack-opening-bubble" aria-label="Istaka açılış hesabı">
+            <b>{rackOpeningEstimate.seriesScore} / {game.mevcutBaraj}</b>
+            <span>{rackOpeningEstimate.pairCount} / 5 çift</span>
+          </output>
           <div className="rack-discard rack-discard-left">
             <small>Taş çek</small>
             <div className="incoming-discard-stack">

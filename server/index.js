@@ -848,7 +848,12 @@ io.on("connection", (socket) => {
     p.cekildiMi = true;
     p.yandanAlinanTasId = null;
     hamleZamanlayicisiniKur(oda, { mevcutSureyiKoru: true });
-    io.to(oda.odaId).emit("tas-cekildi", {
+    socket.emit("tas-cekildi", {
+      koltukNo: p.koltukNo,
+      kaynak: "deste",
+      tas,
+    });
+    socket.to(oda.odaId).emit("tas-cekildi", {
       koltukNo: p.koltukNo,
       kaynak: "deste",
     });

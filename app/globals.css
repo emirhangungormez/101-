@@ -1441,7 +1441,7 @@ input:focus-visible {
   font-size: 19px;
 }
 .tile-red {
-  color: #737373;
+  color: #e11d48 !important;
 }
 .tile-blue,
 .tile-black,
@@ -6178,6 +6178,62 @@ body > .rack-drag-ghost .tile i {
   transform: none !important;
 }
 
+.game-shell .rack-board {
+  position: relative !important;
+}
+
+.game-shell .rack-opening-bubble {
+  position: absolute !important;
+  top: -50px !important;
+  right: 102px !important;
+  z-index: 30 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  min-width: 132px !important;
+  height: 38px !important;
+  padding: 0 12px !important;
+  border: 1px solid rgb(255 255 255 / 42%) !important;
+  border-radius: 19px !important;
+  background: rgb(14 57 48 / 94%) !important;
+  color: #fff !important;
+  box-shadow: 0 5px 16px rgb(0 0 0 / 18%) !important;
+  font-size: 13px !important;
+  white-space: nowrap !important;
+}
+
+.game-shell .rack-opening-bubble::after {
+  content: "" !important;
+  position: absolute !important;
+  right: 24px !important;
+  bottom: -7px !important;
+  width: 12px !important;
+  height: 12px !important;
+  border-right: 1px solid rgb(255 255 255 / 42%) !important;
+  border-bottom: 1px solid rgb(255 255 255 / 42%) !important;
+  background: rgb(14 57 48 / 94%) !important;
+  transform: rotate(45deg) !important;
+}
+
+.game-shell .rack-opening-bubble b {
+  font-size: 16px !important;
+}
+
+.game-shell .rack-opening-bubble span {
+  opacity: 0.82 !important;
+}
+
+/* Oda olusturma kartlari ayni hizada kalir; renk noktasi kart tabanina oturur. */
+.create-panel .player-tile:hover,
+.create-panel .player-tile.selected {
+  transform: none !important;
+}
+
+.create-panel .player-tile::after {
+  margin: auto auto 4px !important;
+  transform: none !important;
+}
+
 /* Oyuncu ceza aldiginda bildirimi belirginlestir ve sahneyi kisa sars. */
 .game-shell .rack-status.penalty {
   color: #ff334f !important;
@@ -8321,7 +8377,7 @@ body > .rack-drag-ghost .tile i {
 
 /* Orta alan artik piksel duzeltmesi degil, 198px boslugun geometrik merkezidir. */
 .game-shell > .game-center-info {
-  left: calc(50% + 204px) !important;
+  left: calc(50% + 204px + var(--game-center-shift-x, 0px)) !important;
   width: 198px !important;
   min-width: 198px !important;
   max-width: 198px !important;

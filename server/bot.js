@@ -68,7 +68,7 @@ function ayrikGruplar(adaylar, siralama) {
   return secilen;
 }
 
-function enIyiAyrikGruplar(adaylar) {
+export function enIyiAyrikGruplar(adaylar) {
   const denemeler = [
     (a, b) => b.score - a.score || b.tiles.length - a.tiles.length,
     (a, b) => b.tiles.length - a.tiles.length || b.score - a.score,
