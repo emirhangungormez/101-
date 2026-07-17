@@ -223,15 +223,8 @@ const desteBittiBildir = (oda, sonOyuncu = null) => {
   clearTimeout(hamleZamanlayicilari.get(oda.odaId));
   hamleZamanlayicilari.delete(oda.odaId);
   if (!Number.isInteger(g.eliBitirecekKoltukNo)) {
-    const botVar = oda.oyuncular.some((oyuncu) => oyuncu.bot);
-    const kurucuInsan = oda.oyuncular.find(
-      (oyuncu) => !oyuncu.bot && oyuncu.kullaniciId === oda.kurucuId,
-    );
-    const ilkInsan = oda.oyuncular.find((oyuncu) => !oyuncu.bot);
-    g.eliBitirecekKoltukNo = botVar
-      ? (kurucuInsan ?? ilkInsan)?.koltukNo ?? g.siradakiOyuncu
-      : sonOyuncu?.koltukNo ?? g.siradakiOyuncu;
-    g.desteBitisSonZaman = Date.now() + 30_000;
+    g.eliBitirecekKoltukNo = sonOyuncu?.koltukNo ?? g.siradakiOyuncu;
+    g.desteBitisSonZaman = Date.now() + 60_000;
     const beklenenSonZaman = g.desteBitisSonZaman;
     const zamanlayici = setTimeout(() => {
       if (
@@ -241,13 +234,13 @@ const desteBittiBildir = (oda, sonOyuncu = null) => {
         g.desteBitisSonZaman === beklenenSonZaman
       )
         eliBerabereBitir(oda);
-    }, 30_000);
+    }, 60_000);
     desteBitisZamanlayicilari.set(oda.odaId, zamanlayici);
   }
   g.hamleSonZaman = g.desteBitisSonZaman;
-  g.hamleSuresi = 30;
+  g.hamleSuresi = 60;
   io.to(oda.odaId).emit("deste-bitti", {
-    message: "Taş kalmadı, el 30 saniye içinde bitecek",
+    message: "Taş kalmadı; son oyuncu taşlarını dizip eli bitirebilir",
     eliBitirecekKoltukNo: g.eliBitirecekKoltukNo,
     sonZaman: g.desteBitisSonZaman,
   });

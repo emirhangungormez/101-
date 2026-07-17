@@ -6178,11 +6178,37 @@ body > .rack-drag-ghost .tile i {
   transform: none !important;
 }
 
+/* Mobilde surukleme ve masa kaydirma katmanlarini ana oyun agacindan ayir. */
+body > .rack-drag-ghost {
+  pointer-events: none !important;
+  contain: layout paint style !important;
+  will-change: left, top !important;
+  opacity: 1 !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  backface-visibility: hidden !important;
+}
+
+body > .rack-drag-ghost .tile {
+  overflow: hidden !important;
+  border-radius: 6px !important;
+  outline: 0 !important;
+  box-shadow: 0 5px 12px rgb(0 0 0 / 24%) !important;
+}
+
+.game-shell > .game-area .table-matrix > .grid {
+  contain: paint !important;
+  overscroll-behavior: contain !important;
+  will-change: scroll-position !important;
+}
+
 .game-shell .rack-board {
   position: relative !important;
 }
 
 .game-shell .rack-opening-bubble {
+  --status-panel-bg: rgb(22 163 74 / 32%);
+  --status-panel-border: rgb(74 222 128 / 88%);
   position: absolute !important;
   top: -50px !important;
   right: 102px !important;
@@ -6193,13 +6219,18 @@ body > .rack-drag-ghost .tile i {
   min-width: 132px !important;
   height: 38px !important;
   padding: 0 12px !important;
-  border: 1px solid rgb(255 255 255 / 42%) !important;
+  border: 1px solid var(--status-panel-border) !important;
   border-radius: 19px !important;
-  background: rgb(14 57 48 / 94%) !important;
+  background: var(--status-panel-bg) !important;
   color: #fff !important;
   box-shadow: 0 5px 16px rgb(0 0 0 / 18%) !important;
   font-size: 13px !important;
   white-space: nowrap !important;
+}
+
+.game-shell.game-theme-green .rack-opening-bubble {
+  --status-panel-bg: rgb(37 99 235 / 38%);
+  --status-panel-border: rgb(96 165 250 / 90%);
 }
 
 .game-shell .rack-opening-bubble::after {
@@ -6209,9 +6240,9 @@ body > .rack-drag-ghost .tile i {
   bottom: -7px !important;
   width: 12px !important;
   height: 12px !important;
-  border-right: 1px solid rgb(255 255 255 / 42%) !important;
-  border-bottom: 1px solid rgb(255 255 255 / 42%) !important;
-  background: rgb(14 57 48 / 94%) !important;
+  border-right: 1px solid var(--status-panel-border) !important;
+  border-bottom: 1px solid var(--status-panel-border) !important;
+  background: var(--status-panel-bg) !important;
   transform: rotate(45deg) !important;
 }
 
@@ -6221,6 +6252,16 @@ body > .rack-drag-ghost .tile i {
 
 .game-shell .rack-opening-bubble span {
   opacity: 0.82 !important;
+}
+
+.game-shell .rack-opening-bubble.opened-profile {
+  --status-panel-bg: rgb(22 163 74 / 32%);
+  --status-panel-border: rgb(74 222 128 / 88%);
+}
+
+.game-shell.game-theme-green .rack-opening-bubble.opened-profile {
+  --status-panel-bg: rgb(37 99 235 / 38%);
+  --status-panel-border: rgb(96 165 250 / 90%);
 }
 
 body > .rack-drag-ghost.deck-draw-ghost .tile i {

@@ -116,6 +116,8 @@ const blankRack = (): RackCell[] =>
   Array.from({ length: 44 }, (_, i) => initialTiles[i] ?? null);
 const SERIES_TABLE_CELLS = SERIES_COLUMNS * TABLE_ROWS;
 const PAIRS_TABLE_CELLS = PAIRS_COLUMNS * TABLE_ROWS;
+const RACK_COLUMNS = 17;
+const VISIBLE_RACK_CELLS = RACK_COLUMNS * 2;
 const resizeTableCells = (cells: (TableTile | null)[], size: number) => [
   ...cells.slice(0, size),
   ...Array<TableTile | null>(Math.max(0, size - cells.length)).fill(null),
@@ -390,6 +392,9 @@ export default function Home() {
     centerOffsetX: number;
     centerOffsetY: number;
   } | null>(null);
+  const rackDragGhostRef = useRef<HTMLDivElement>(null);
+  const rackDragFrameRef = useRef<number | null>(null);
+  const rackDragPointRef = useRef({ x: 0, y: 0, left: 0, top: 0 });
   const rackGridRef = useRef<HTMLDivElement>(null);
   const rackThrowRef = useRef<HTMLDivElement>(null);
   const seriesGridRef = useRef<HTMLDivElement>(null);
@@ -823,7 +828,9 @@ export default function Home() {
               ? requestedTarget
               : !reconciled[drawnTarget!]
                 ? drawnTarget!
-                : reconciled.findIndex((tile, index) => index < 34 && !tile);
+                : reconciled.findIndex(
+                    (tile, index) => index < VISIBLE_RACK_CELLS && !tile,
+                  );
           if (target >= 0) reconciled[target] = revealedDrawnTile;
           showDrawAnimation(mySeat ?? 0, revealedDrawnTile);
           pendingDeckTileRef.current = null;
@@ -834,7 +841,13 @@ export default function Home() {
         } else {
           setRackPointerDrag((current) =>
             current?.source === "deck"
-              ? { ...current, index: drawnTarget!, tile: revealedDrawnTile }
+              ? {
+                  ...current,
+                  index: drawnTarget!,
+                  tile: revealedDrawnTile,
+                  x: rackDragPointRef.current.x,
+                  y: rackDragPointRef.current.y,
+                }
               : current,
           );
         }
@@ -1168,10 +1181,14 @@ export default function Home() {
     });
     s.on(
       "ceza-uygulandi",
-      ({ socketId, isim, cezaToplami }) => {
+      ({ socketId, isim, cezaToplami, neden }) => {
       const mine = socketId === s.id;
-      const message =
-        mine
+      const jokerTaken = neden === "Masadaki okey degistirildi";
+      const message = jokerTaken
+        ? mine
+          ? "Jokerin alındı, 101 ceza yazıldı"
+          : `${isim || "Oyuncu"} oyuncusunun jokeri alındı; ${Number(cezaToplami || 101)} ceza yedi`
+        : mine
           ? "İşlenecek taşı attın, 101 ceza yazıldı"
           : `${isim || "Oyuncu"}, işlenecek taşı attı; ${Number(cezaToplami || 101)} ceza yedi`;
       setPenaltyAlert(message);
@@ -1198,7 +1215,7 @@ export default function Home() {
             : current.eliBitirecekKoltukNo,
           desteBitisSonZaman: sonZaman ?? current.desteBitisSonZaman,
           hamleSonZaman: sonZaman ?? current.hamleSonZaman,
-          hamleSuresi: 30,
+          hamleSuresi: 60,
         }));
       },
     );
@@ -1455,7 +1472,7 @@ export default function Home() {
     game.eliBitirecekKoltukNo,
     game.desteBitisSonZaman,
   ]);
-  const turnLimit = game.kalanTasSayisi === 0 ? 30 : game.ilkHamle ? 120 : 60;
+  const turnLimit = game.kalanTasSayisi === 0 ? 60 : game.ilkHamle ? 120 : 60;
   const pending = [...table.series, ...table.pairs].filter(
     (tile): tile is TableTile => Boolean(tile && !tile.committed),
   );
@@ -1496,10 +1513,14 @@ export default function Home() {
     openingMode === "series" ? seriesOpeningPreview : pairsOpeningPreview;
   const score = openingPreview.score;
   const rackOpeningEstimate = useMemo(() => {
-    const columns = 19;
+    const columns = RACK_COLUMNS;
     let seriesScore = 0;
     let pairCount = 0;
-    for (let rowStart = 0; rowStart < 38; rowStart += columns) {
+    for (
+      let rowStart = 0;
+      rowStart < VISIBLE_RACK_CELLS;
+      rowStart += columns
+    ) {
       let group: Tile[] = [];
       const finishGroup = () => {
         if (group.length >= 3) {
@@ -1627,32 +1648,40 @@ export default function Home() {
     const occupied = new Set(
       nextTable[mode].flatMap((tile, index) => (tile ? [index] : [])),
     );
-    const centerRow = Math.floor(TABLE_ROWS / 2);
+    const preferredRow = Math.floor(TABLE_ROWS / 2);
     const rows = Array.from({ length: TABLE_ROWS }, (_, index) => index).sort(
       (a, b) => {
-        const distanceA = Math.abs(a - centerRow);
-        const distanceB = Math.abs(b - centerRow);
+        const distanceA = Math.abs(a - preferredRow);
+        const distanceB = Math.abs(b - preferredRow);
         const stepA = distanceA % 3 === 0 ? 0 : 1;
         const stepB = distanceB % 3 === 0 ? 0 : 1;
         return stepA - stepB || distanceA - distanceB || b - a;
       },
     );
     const placedIndices: number[] = [];
+    let batchStartColumn: number | null = null;
     snapshotRackBeforeTableMove();
     for (const group of groups) {
       let destination: number | null = null;
       for (const row of rows) {
-        const centerStart = Math.floor((columns - group.tiles.length) / 2);
-        const starts = Array.from(
-          { length: columns - group.tiles.length + 1 },
-          (_, index) => index,
-        ).sort((a, b) => {
-          const distanceA = Math.abs(a - centerStart);
-          const distanceB = Math.abs(b - centerStart);
-          const stepA = distanceA % 8 === 0 ? 0 : 1;
-          const stepB = distanceB % 8 === 0 ? 0 : 1;
-          return stepA - stepB || distanceA - distanceB;
-        });
+        const centerStart = Math.floor(
+          (columns - group.tiles.length) / 2,
+        );
+        const starts =
+          batchStartColumn == null
+            ? Array.from(
+                { length: columns - group.tiles.length + 1 },
+                (_, index) => index,
+              ).sort((a, b) => {
+                const distanceA = Math.abs(a - centerStart);
+                const distanceB = Math.abs(b - centerStart);
+                const stepA = distanceA % 8 === 0 ? 0 : 1;
+                const stepB = distanceB % 8 === 0 ? 0 : 1;
+                return stepA - stepB || distanceA - distanceB;
+              })
+            : batchStartColumn + group.tiles.length <= columns
+              ? [batchStartColumn]
+              : [];
         const start = starts.find((col) => {
           const endCol = col + group.tiles.length - 1;
           const cellsFree = group.tiles.every((_: Tile, offset: number) =>
@@ -1672,6 +1701,7 @@ export default function Home() {
         });
         if (start !== undefined) {
           destination = row * columns + start;
+          if (batchStartColumn == null) batchStartColumn = start;
           break;
         }
       }
@@ -1775,8 +1805,10 @@ export default function Home() {
       const col = Math.max(
         0,
         Math.min(
-          15,
-          Math.round((e.clientX - grid.left) / (grid.width / 16) - 0.5),
+          RACK_COLUMNS - 1,
+          Math.round(
+            (e.clientX - grid.left) / (grid.width / RACK_COLUMNS) - 0.5,
+          ),
         ),
       );
       const row = Math.max(
@@ -1786,7 +1818,7 @@ export default function Home() {
           Math.round((e.clientY - grid.top) / (grid.height / 2) - 0.5),
         ),
       );
-      targetIndex = row * 16 + col;
+      targetIndex = row * RACK_COLUMNS + col;
     }
     const data = dragData(e);
     if (!data) return;
@@ -1822,15 +1854,17 @@ export default function Home() {
     const col = Math.max(
       0,
       Math.min(
-        15,
-        Math.round((e.clientX - rect.left) / (rect.width / 16) - 0.5),
+        RACK_COLUMNS - 1,
+        Math.round(
+          (e.clientX - rect.left) / (rect.width / RACK_COLUMNS) - 0.5,
+        ),
       ),
     );
     const row = Math.max(
       0,
       Math.min(1, Math.round((e.clientY - rect.top) / (rect.height / 2) - 0.5)),
     );
-    return row * 16 + col;
+    return row * RACK_COLUMNS + col;
   };
   const discardRackIndex = (rackIndex: number) => {
     if (!rack[rackIndex]) return reject();
@@ -1871,6 +1905,14 @@ export default function Home() {
   ) => {
     if (e.button !== 0) return;
     const rect = e.currentTarget.getBoundingClientRect();
+    const centerOffsetX = rect.left + rect.width / 2 - e.clientX;
+    const centerOffsetY = rect.top + rect.height / 2 - e.clientY;
+    rackDragPointRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      left: e.clientX + centerOffsetX,
+      top: e.clientY + centerOffsetY,
+    };
     e.currentTarget.setPointerCapture(e.pointerId);
     e.preventDefault();
     setRackPointerDrag({
@@ -1880,21 +1922,34 @@ export default function Home() {
       tile,
       x: e.clientX,
       y: e.clientY,
-      centerOffsetX: rect.left + rect.width / 2 - e.clientX,
-      centerOffsetY: rect.top + rect.height / 2 - e.clientY,
+      centerOffsetX,
+      centerOffsetY,
     });
   };
   const moveRackPointerDrag = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!rackPointerDrag) return;
-    setRackPointerDrag((current) =>
-      current ? { ...current, x: e.clientX, y: e.clientY } : null,
-    );
+    rackDragPointRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      left: e.clientX + rackPointerDrag.centerOffsetX,
+      top: e.clientY + rackPointerDrag.centerOffsetY,
+    };
+    if (rackDragFrameRef.current !== null) return;
+    rackDragFrameRef.current = requestAnimationFrame(() => {
+      rackDragFrameRef.current = null;
+      const ghost = rackDragGhostRef.current;
+      if (!ghost) return;
+      ghost.style.left = `${rackDragPointRef.current.left}px`;
+      ghost.style.top = `${rackDragPointRef.current.top}px`;
+    });
   };
   const startDeckDraw = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isMyTurn) return reject();
     if (hasDrawn || deckDrawPendingRef.current)
       return setNotice("Taşı zaten çektin, taş atmalısın");
-    const target = rack.findIndex((tile, index) => index < 34 && !tile);
+    const target = rack.findIndex(
+      (tile, index) => index < VISIBLE_RACK_CELLS && !tile,
+    );
     if (target < 0) return setNotice("Istakada boş yer yok");
     deckDrawPendingRef.current = true;
     pendingDeckTileRef.current = null;
@@ -2199,7 +2254,9 @@ export default function Home() {
             ? requestedTarget
             : !next[pendingDeck.initialTarget]
               ? pendingDeck.initialTarget
-              : next.findIndex((tile, index) => index < 34 && !tile);
+              : next.findIndex(
+                  (tile, index) => index < VISIBLE_RACK_CELLS && !tile,
+                );
         if (target >= 0) next[target] = pendingDeck.tile;
         rackOrderRef.current = next;
         return next;
@@ -2318,7 +2375,141 @@ export default function Home() {
   };
   const sortRack = (mode: "series" | "pairs") => {
     const tiles = rack.filter(Boolean) as Tile[];
-    tiles.sort(
+    const candidates =
+      mode === "series"
+        ? seriAdaylari(tiles, game.gostergeTas)
+        : ciftAdaylari(tiles, game.gostergeTas);
+    const tileBits = new Map(
+      tiles.map((tile, index) => [String(tile.id), BigInt(index)]),
+    );
+    const seenMasks = new Set<string>();
+    const indexedCandidates = candidates.flatMap((candidate: any) => {
+      const mask = candidate.tiles.reduce(
+        (value: bigint, tile: Tile) =>
+          value | (1n << (tileBits.get(String(tile.id)) ?? 0n)),
+        0n,
+      );
+      const key = mask.toString();
+      if (!mask || seenMasks.has(key)) return [];
+      seenMasks.add(key);
+      return [{ ...candidate, mask }];
+    });
+    const byTile = tiles.map((_, tileIndex) =>
+      indexedCandidates
+        .map((candidate: any, candidateIndex: number) => ({
+          candidate,
+          candidateIndex,
+        }))
+        .filter(({ candidate }: any) =>
+          Boolean(candidate.mask & (1n << BigInt(tileIndex))),
+        )
+        .map(({ candidateIndex }: any) => candidateIndex),
+    );
+    type RackChoice = { covered: number; score: number; indexes: number[] };
+    const choiceMemo = new Map<bigint, RackChoice>();
+    const isBetterChoice = (left: RackChoice, right: RackChoice) =>
+      left.covered > right.covered ||
+      (left.covered === right.covered && left.score > right.score) ||
+      (left.covered === right.covered &&
+        left.score === right.score &&
+        left.indexes.length < right.indexes.length);
+    const chooseGroups = (available: bigint): RackChoice => {
+      const cached = choiceMemo.get(available);
+      if (cached) return cached;
+      let pivot = -1;
+      let pivotOptions: number[] = [];
+      for (let tileIndex = 0; tileIndex < tiles.length; tileIndex += 1) {
+        const bit = 1n << BigInt(tileIndex);
+        if (!(available & bit)) continue;
+        const options = byTile[tileIndex].filter((candidateIndex) => {
+          const mask = indexedCandidates[candidateIndex].mask as bigint;
+          return (mask & available) === mask;
+        });
+        if (
+          options.length &&
+          (!pivotOptions.length || options.length < pivotOptions.length)
+        ) {
+          pivot = tileIndex;
+          pivotOptions = options;
+        }
+      }
+      if (pivot < 0) return { covered: 0, score: 0, indexes: [] };
+      let best = chooseGroups(available & ~(1n << BigInt(pivot)));
+      for (const candidateIndex of pivotOptions) {
+        const candidate = indexedCandidates[candidateIndex];
+        const child = chooseGroups(available & ~candidate.mask);
+        const next = {
+          covered: child.covered + candidate.tiles.length,
+          score: child.score + Number(candidate.score || 0),
+          indexes: [candidateIndex, ...child.indexes],
+        };
+        if (isBetterChoice(next, best)) best = next;
+      }
+      choiceMemo.set(available, best);
+      return best;
+    };
+    const allTilesMask = (1n << BigInt(tiles.length)) - 1n;
+    const choice = chooseGroups(allTilesMask);
+    let groups: Tile[][] = choice.indexes.map(
+      (index) => [...indexedCandidates[index].tiles],
+    );
+
+    if (mode === "series") {
+      let merged = true;
+      while (merged) {
+        merged = false;
+        for (let left = 0; left < groups.length && !merged; left += 1) {
+          for (let right = left + 1; right < groups.length; right += 1) {
+            const a = groups[left], b = groups[right];
+            const variants = [
+              [...a, ...b],
+              [...b, ...a],
+              [...a, ...[...b].reverse()],
+              [...b, ...[...a].reverse()],
+              [...[...a].reverse(), ...b],
+              [...[...b].reverse(), ...a],
+            ];
+            const combined = variants.find(
+              (variant) =>
+                validateSeriesGroup(variant, game.gostergeTas).valid,
+            );
+            if (!combined) continue;
+            groups[left] = combined;
+            groups.splice(right, 1);
+            merged = true;
+            break;
+          }
+        }
+      }
+    }
+
+    const usedIds = new Set(
+      groups.flat().map((tile) => String(tile.id)),
+    );
+    const leftovers = tiles.filter((tile) => !usedIds.has(String(tile.id)));
+    if (mode === "series") {
+      let extended = true;
+      while (extended) {
+        extended = false;
+        for (let tileIndex = 0; tileIndex < leftovers.length && !extended; tileIndex += 1) {
+          const tile = leftovers[tileIndex];
+          for (let groupIndex = 0; groupIndex < groups.length && !extended; groupIndex += 1) {
+            for (let position = 0; position <= groups[groupIndex].length; position += 1) {
+              const candidate = [...groups[groupIndex]];
+              candidate.splice(position, 0, tile);
+              if (!validateSeriesGroup(candidate, game.gostergeTas).valid) continue;
+              groups[groupIndex] = candidate;
+              leftovers.splice(tileIndex, 1);
+              extended = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    groups.sort((a, b) => b.length - a.length);
+    leftovers.sort(
       mode === "series"
         ? (a, b) =>
             colors.indexOf(a.color) - colors.indexOf(b.color) ||
@@ -2327,20 +2518,27 @@ export default function Home() {
             (Number(a.value) || 99) - (Number(b.value) || 99) ||
             colors.indexOf(a.color) - colors.indexOf(b.color),
     );
-    const arranged: RackCell[] = [];
-    tiles.forEach((tile, index) => {
-      const previous = tiles[index - 1];
-      const groupChanged =
-        index > 0 &&
-        (mode === "series"
-          ? previous.color !== tile.color
-          : previous.value !== tile.value);
-      if (groupChanged) arranged.push(null);
-      arranged.push(tile);
-    });
+    const rows: RackCell[][] = [[], []];
+    for (const group of groups) {
+      const target = [0, 1]
+        .filter((row) => rows[row].length + group.length + (rows[row].length ? 1 : 0) <= RACK_COLUMNS)
+        .sort((a, b) => rows[a].length - rows[b].length)[0];
+      if (target === undefined) break;
+      if (rows[target].length) rows[target].push(null);
+      rows[target].push(...group);
+    }
+    for (const tile of leftovers) {
+      const target = rows[0].length <= rows[1].length ? 0 : 1;
+      if (rows[target].length < RACK_COLUMNS) rows[target].push(tile);
+      else if (rows[1 - target].length < RACK_COLUMNS) rows[1 - target].push(tile);
+    }
+    const visibleRack = rows.flatMap((row) => [
+      ...row,
+      ...Array<RackCell>(RACK_COLUMNS - row.length).fill(null),
+    ]);
     const nextRack = [
-      ...arranged.slice(0, 44),
-      ...Array(Math.max(0, 44 - arranged.length)).fill(null),
+      ...visibleRack,
+      ...Array<RackCell>(44 - visibleRack.length).fill(null),
     ];
     rackOrderRef.current = nextRack;
     setRack(nextRack);
@@ -3208,7 +3406,10 @@ export default function Home() {
           />
         </div>
         <div className="rack-board">
-          <output className="rack-opening-bubble" aria-label="Istaka açılış hesabı">
+          <output
+            className={`rack-opening-bubble ${ownPlayer?.acilisTipi ? "opened-profile" : ""}`}
+            aria-label="Istaka açılış hesabı"
+          >
             <b>{rackOpeningEstimate.seriesScore} / {game.mevcutBaraj}</b>
             <span>{rackOpeningEstimate.pairCount} / 5 çift</span>
           </output>
@@ -3249,7 +3450,7 @@ export default function Home() {
             ref={rackGridRef}
             className={`rack-grid ${dealAnimating ? "deal-animating" : ""}`}
           >
-            {Array.from({ length: 34 }, (_, i) => rack[i] ?? null).map((tile, i) => (
+            {Array.from({ length: VISIBLE_RACK_CELLS }, (_, i) => rack[i] ?? null).map((tile, i) => (
               <div
                 className={`rack-cell ${selectedRackIndex === i ? "selected" : ""}`}
                 key={i}
@@ -3300,6 +3501,7 @@ export default function Home() {
         {rackPointerDrag &&
           createPortal(
             <div
+              ref={rackDragGhostRef}
               className={`rack-drag-ghost ${rackPointerDrag.source === "deck" ? "deck-draw-ghost" : ""}`}
               style={{
                 left: rackPointerDrag.x + rackPointerDrag.centerOffsetX,
@@ -3356,6 +3558,8 @@ function GridView({
     left: number;
     top: number;
   } | null>(null);
+  const panFrameRef = useRef<number | null>(null);
+  const panTargetRef = useRef({ left: 0, top: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const startPan = (event: React.PointerEvent<HTMLDivElement>) => {
     if (
@@ -3373,6 +3577,10 @@ function GridView({
       left: element.scrollLeft,
       top: element.scrollTop,
     };
+    panTargetRef.current = {
+      left: element.scrollLeft,
+      top: element.scrollTop,
+    };
     setIsPanning(true);
     event.preventDefault();
   };
@@ -3380,8 +3588,19 @@ function GridView({
     const pan = panRef.current;
     const element = gridRef.current;
     if (!pan || !element || pan.pointerId !== event.pointerId) return;
-    element.scrollLeft = pan.left - (event.clientX - pan.x);
-    element.scrollTop = pan.top - (event.clientY - pan.y);
+    panTargetRef.current = {
+      left: pan.left - (event.clientX - pan.x),
+      top: pan.top - (event.clientY - pan.y),
+    };
+    if (panFrameRef.current === null) {
+      panFrameRef.current = requestAnimationFrame(() => {
+        panFrameRef.current = null;
+        const currentElement = gridRef.current;
+        if (!currentElement) return;
+        currentElement.scrollLeft = panTargetRef.current.left;
+        currentElement.scrollTop = panTargetRef.current.top;
+      });
+    }
     event.preventDefault();
   };
   const endPan = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -3389,6 +3608,14 @@ function GridView({
     const element = gridRef.current;
     if (element?.hasPointerCapture(event.pointerId))
       element.releasePointerCapture(event.pointerId);
+    if (panFrameRef.current !== null) {
+      cancelAnimationFrame(panFrameRef.current);
+      panFrameRef.current = null;
+      if (element) {
+        element.scrollLeft = panTargetRef.current.left;
+        element.scrollTop = panTargetRef.current.top;
+      }
+    }
     panRef.current = null;
     setIsPanning(false);
   };
