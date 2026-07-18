@@ -295,14 +295,22 @@ export function eliTamamla(
   const okeyleBitti = gercekOkeyMi(bitisTasi, g.gosterge);
   const kazananCift = kazanan.acilisTipi === "pairs";
   const bitisCarpani = (okeyleBitti ? 2 : 1) * (kazananCift ? 2 : 1);
-  const eldenBitisPuani = 202 * (okeyleBitti ? 2 : 1);
+  const eldenBitisCarpani = 2 * (okeyleBitti ? 2 : 1);
   const puanlar = oda.oyuncular.map((oyuncu) => {
     let elFarki;
-    if (eldenBitti)
-      elFarki =
-        oyuncu.koltukNo === kazanan.koltukNo
-          ? -eldenBitisPuani
-          : eldenBitisPuani;
+    if (eldenBitti) {
+      if (oyuncu.koltukNo === kazanan.koltukNo)
+        elFarki = -101 * eldenBitisCarpani;
+      else if (!oyuncu.acilisTipi)
+        elFarki = 101 * eldenBitisCarpani;
+      else {
+        const ciftCarpani = oyuncu.acilisTipi === "pairs" ? 2 : 1;
+        elFarki =
+          eldeKalanTasPuani(oyuncu, g.gosterge) *
+          ciftCarpani *
+          eldenBitisCarpani;
+      }
+    }
     else if (oyuncu.koltukNo === kazanan.koltukNo)
       elFarki = -101 * bitisCarpani;
     else if (!oyuncu.acilisTipi) elFarki = 101 * bitisCarpani;
@@ -616,8 +624,6 @@ function masaHamlesiDogrulaUnsafe(oda, socketId, payload) {
         (placement) => placement.zone === zone,
       );
       if (!additions.length) continue;
-      if (oyuncu.acilisTipi === "pairs" && zone === "series")
-        throw new Error("Cift acan oyuncu seri perlerine tas isleyemez");
       const committed = oda.gameState.masaZemini[zoneKey(zone)] || [];
       const combined = [...committed, ...additions];
       const groups = groupsFromPlacements(
@@ -630,6 +636,16 @@ function masaHamlesiDogrulaUnsafe(oda, socketId, payload) {
         ),
       );
       for (const group of affected) {
+        if (
+          oyuncu.acilisTipi === "pairs" &&
+          zone === "series" &&
+          !group.some((cell) =>
+            committed.some(
+              (placement) => coordKey(placement) === coordKey(cell),
+            ),
+          )
+        )
+          throw new Error("Cift acan oyuncu yeni seri acamaz");
         const existingIds = new Set(
           group
             .filter((cell) => cell.perId)
@@ -736,8 +752,6 @@ export function jokeriDegistir(oda, socketId, payload) {
     throw new Error("Sira sizde degil");
   if (!oyuncu.acilisTipi)
     throw new Error("Okeyi almak icin once el acmalisiniz");
-  if (oyuncu.acilisTipi === "pairs")
-    throw new Error("Cift acan oyuncu seri perlerindeki okeyi alamaz");
   if (payload?.zone !== "series")
     throw new Error("Okey yalniz seri alanindan alinabilir");
 
@@ -792,7 +806,12 @@ export function jokeriDegistir(oda, socketId, payload) {
   if (String(oyuncu.yandanAlinanTasId) === String(replacement.id))
     oyuncu.yandanAlinanTasId = null;
 
-  const cezaKoltukNo = Number(jokerPlacement.ownerKoltukNo);
+  const oncekiSahipKoltukNo = Number(jokerPlacement.ownerKoltukNo);
+  const cezaKoltukNo =
+    Number.isInteger(oncekiSahipKoltukNo) &&
+    oncekiSahipKoltukNo !== oyuncu.koltukNo
+      ? oncekiSahipKoltukNo
+      : null;
   if (Number.isInteger(cezaKoltukNo)) {
     koltukPuaniniGuncelle(oda, cezaKoltukNo, 101);
     koltukCezasiniGuncelle(oda, cezaKoltukNo, 101);
@@ -800,7 +819,7 @@ export function jokeriDegistir(oda, socketId, payload) {
   // Okey degisiminden sonra da mevcut koordinat duzeni korunur.
   return {
     oyuncu,
-    cezaKoltukNo: Number.isInteger(cezaKoltukNo) ? cezaKoltukNo : null,
+    cezaKoltukNo,
     masaZemini: oda.gameState.masaZemini,
   };
 }

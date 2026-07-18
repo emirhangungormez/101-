@@ -82,45 +82,89 @@ export function enIyiAyrikGruplar(adaylar) {
 }
 
 const key = (row, col) => `${row}:${col}`;
-const merkezdenSirala = (length) => {
-  const center = Math.floor(length / 2);
-  return Array.from({ length }, (_, index) => index).sort(
-    (a, b) => Math.abs(a - center) - Math.abs(b - center) || a - b,
-  );
-};
 function gruplariYerlestir(oda, zone, groups) {
   const columns = zone === "pairs" ? PAIRS_COLUMNS : SERIES_COLUMNS;
   const committed = zone === "pairs"
     ? oda.gameState.masaZemini.cift || []
     : oda.gameState.masaZemini.seri || [];
   const occupied = new Set(committed.map((cell) => key(cell.row, cell.col)));
-  const occupiedRows = new Set(committed.map((cell) => cell.row));
   const placements = [];
-  const rows = merkezdenSirala(TABLE_ROWS);
-  for (const group of groups) {
-    let placed = false;
+  const groupsPerBlock = 5;
+  const blocks = Array.from(
+    { length: Math.ceil(groups.length / groupsPerBlock) },
+    (_, blockIndex) =>
+      groups.slice(
+        blockIndex * groupsPerBlock,
+        (blockIndex + 1) * groupsPerBlock,
+      ),
+  );
+  const blockWidths = blocks.map((block) =>
+    Math.max(...block.map((group) => group.tiles.length)),
+  );
+  const blockGap = zone === "series" ? 8 : 4;
+  const totalWidth =
+    blockWidths.reduce((sum, width) => sum + width, 0) +
+    Math.max(0, blocks.length - 1) * blockGap;
+  const firstColumn = Math.max(0, Math.floor((columns - totalWidth) / 2));
+  let columnOffset = 0;
+
+  for (let blockIndex = 0; blockIndex < blocks.length; blockIndex += 1) {
+    const block = blocks[blockIndex];
+    const blockWidth = blockWidths[blockIndex];
+    const preferredColumn = firstColumn + columnOffset;
+    const preferredRow = Math.max(
+      0,
+      Math.floor((TABLE_ROWS - block.length) / 2),
+    );
+    const rows = Array.from(
+      { length: TABLE_ROWS - block.length + 1 },
+      (_, row) => row,
+    ).sort(
+      (a, b) =>
+        Math.abs(a - preferredRow) - Math.abs(b - preferredRow) || a - b,
+    );
+    const columnsByDistance = Array.from(
+      { length: columns - blockWidth + 1 },
+      (_, col) => col,
+    ).sort(
+      (a, b) =>
+        Math.abs(a - preferredColumn) - Math.abs(b - preferredColumn) ||
+        a - b,
+    );
+    let start = null;
     for (const row of rows) {
-      if (placed) break;
-      if (occupiedRows.has(row)) continue;
-      const starts = merkezdenSirala(columns - group.tiles.length + 1);
-      for (const col of starts) {
-        const beforeFree = col === 0 || !occupied.has(key(row, col - 1));
-        const after = col + group.tiles.length;
-        const afterFree = after >= columns || !occupied.has(key(row, after));
-        const cellsFree = group.tiles.every((_, offset) =>
-          !occupied.has(key(row, col + offset)),
-        );
-        if (!beforeFree || !afterFree || !cellsFree) continue;
-        group.tiles.forEach((tile, offset) => {
-          placements.push({ zone, row, col: col + offset, tasId: tile.id });
-          occupied.add(key(row, col + offset));
-        });
-        occupiedRows.add(row);
-        placed = true;
+      const col = columnsByDistance.find((candidateColumn) =>
+        block.every((group, groupIndex) => {
+          const groupRow = row + groupIndex;
+          const groupEnd = candidateColumn + group.tiles.length;
+          const beforeFree =
+            candidateColumn === 0 ||
+            !occupied.has(key(groupRow, candidateColumn - 1));
+          const afterFree =
+            groupEnd >= columns ||
+            !occupied.has(key(groupRow, groupEnd));
+          const cellsFree = group.tiles.every(
+            (_, offset) =>
+              !occupied.has(key(groupRow, candidateColumn + offset)),
+          );
+          return beforeFree && afterFree && cellsFree;
+        }),
+      );
+      if (col !== undefined) {
+        start = { row, col };
         break;
       }
     }
-    if (!placed) return [];
+    if (!start) return [];
+    block.forEach((group, groupIndex) => {
+      const row = start.row + groupIndex;
+      group.tiles.forEach((tile, offset) => {
+        const col = start.col + offset;
+        placements.push({ zone, row, col, tasId: tile.id });
+        occupied.add(key(row, col));
+      });
+    });
+    columnOffset += blockWidth + blockGap;
   }
   return placements;
 }

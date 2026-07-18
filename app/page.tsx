@@ -399,6 +399,7 @@ export default function Home() {
   const rackThrowRef = useRef<HTMLDivElement>(null);
   const seriesGridRef = useRef<HTMLDivElement>(null);
   const pairsGridRef = useRef<HTMLDivElement>(null);
+  const gameCenterInfoRef = useRef<HTMLElement>(null);
   const deckDrawPendingRef = useRef(false);
   const pendingDeckTileRef = useRef<{ tile: Tile; initialTarget: number } | null>(null);
   const pendingDeckDropTargetRef = useRef<number | null>(null);
@@ -1455,24 +1456,47 @@ export default function Home() {
     previousResultSoundRef.current = game.elSonucu;
   }, [game.elSonucu]);
   useEffect(() => {
-    if (
-      onlineGame &&
-      socket?.connected &&
-      game.kalanTasSayisi === 0 &&
-      game.elDurumu === "oynaniyor" &&
-      !Number.isInteger(game.eliBitirecekKoltukNo) &&
-      !game.desteBitisSonZaman
-    )
-      socket.emit("deste-bitti-hazirla");
-  }, [
-    onlineGame,
-    socket,
-    game.kalanTasSayisi,
-    game.elDurumu,
-    game.eliBitirecekKoltukNo,
-    game.desteBitisSonZaman,
-  ]);
-  const turnLimit = game.kalanTasSayisi === 0 ? 60 : game.ilkHamle ? 120 : 60;
+    if (screen !== "game") return;
+    let frame = 0;
+    const alignGameCenter = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const center = gameCenterInfoRef.current;
+        const series = seriesGridRef.current;
+        const pairs = pairsGridRef.current;
+        const shell = center?.closest<HTMLElement>(".game-shell");
+        if (!center || !series || !pairs || !shell) return;
+        const shellRect = shell.getBoundingClientRect();
+        const seriesRect = series.getBoundingClientRect();
+        const pairsRect = pairs.getBoundingClientRect();
+        const scaleX = shell.offsetWidth
+          ? shellRect.width / shell.offsetWidth
+          : 1;
+        if (!Number.isFinite(scaleX) || scaleX <= 0) return;
+        const gapCenter = (seriesRect.right + pairsRect.left) / 2;
+        const localLeft = (gapCenter - shellRect.left) / scaleX;
+        center.style.setProperty("left", `${localLeft}px`, "important");
+      });
+    };
+    alignGameCenter();
+    const observer = new ResizeObserver(alignGameCenter);
+    if (seriesGridRef.current) observer.observe(seriesGridRef.current);
+    if (pairsGridRef.current) observer.observe(pairsGridRef.current);
+    window.addEventListener("resize", alignGameCenter);
+    window.addEventListener("orientationchange", alignGameCenter);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("resize", alignGameCenter);
+      window.removeEventListener("orientationchange", alignGameCenter);
+    };
+  }, [screen, game.elDurumu, gamePrepared, onlineGame]);
+  const turnLimit =
+    game.kalanTasSayisi === 0 && Number.isInteger(game.eliBitirecekKoltukNo)
+      ? 30
+      : game.ilkHamle
+        ? 120
+        : 60;
   const pending = [...table.series, ...table.pairs].filter(
     (tile): tile is TableTile => Boolean(tile && !tile.committed),
   );
@@ -1648,79 +1672,102 @@ export default function Home() {
     const occupied = new Set(
       nextTable[mode].flatMap((tile, index) => (tile ? [index] : [])),
     );
-    const preferredRow = Math.floor(TABLE_ROWS / 2);
-    const rows = Array.from({ length: TABLE_ROWS }, (_, index) => index).sort(
-      (a, b) => {
-        const distanceA = Math.abs(a - preferredRow);
-        const distanceB = Math.abs(b - preferredRow);
-        const stepA = distanceA % 3 === 0 ? 0 : 1;
-        const stepB = distanceB % 3 === 0 ? 0 : 1;
-        return stepA - stepB || distanceA - distanceB || b - a;
-      },
-    );
     const placedIndices: number[] = [];
-    let batchStartColumn: number | null = null;
+    const groupsPerBlock = 5;
+    const blocks = Array.from(
+      { length: Math.ceil(groups.length / groupsPerBlock) },
+      (_, blockIndex) =>
+        groups.slice(
+          blockIndex * groupsPerBlock,
+          (blockIndex + 1) * groupsPerBlock,
+        ),
+    );
+    const blockWidths = blocks.map((block) =>
+      Math.max(...block.map((group: any) => group.tiles.length)),
+    );
+    const blockGap = mode === "series" ? 8 : 4;
+    const totalLayoutWidth =
+      blockWidths.reduce((sum, width) => sum + width, 0) +
+      Math.max(0, blocks.length - 1) * blockGap;
+    const firstBlockColumn = Math.max(
+      0,
+      Math.floor((columns - totalLayoutWidth) / 2),
+    );
+    let blockColumnOffset = 0;
     snapshotRackBeforeTableMove();
-    for (const group of groups) {
-      let destination: number | null = null;
-      for (const row of rows) {
-        const centerStart = Math.floor(
-          (columns - group.tiles.length) / 2,
+    for (let blockIndex = 0; blockIndex < blocks.length; blockIndex += 1) {
+      const block = blocks[blockIndex];
+      const blockWidth = blockWidths[blockIndex];
+      const preferredColumn = firstBlockColumn + blockColumnOffset;
+      const preferredRow = Math.max(
+        0,
+        Math.floor((TABLE_ROWS - block.length) / 2),
+      );
+      const rowCandidates = Array.from(
+        { length: TABLE_ROWS - block.length + 1 },
+        (_, row) => row,
+      ).sort(
+        (a, b) =>
+          Math.abs(a - preferredRow) - Math.abs(b - preferredRow) || a - b,
+      );
+      const columnCandidates = Array.from(
+        { length: columns - blockWidth + 1 },
+        (_, column) => column,
+      ).sort(
+        (a, b) =>
+          Math.abs(a - preferredColumn) -
+            Math.abs(b - preferredColumn) ||
+          a - b,
+      );
+      let blockStart: { row: number; col: number } | null = null;
+      for (const row of rowCandidates) {
+        const col = columnCandidates.find((candidateColumn) =>
+          block.every((group: any, groupIndex: number) => {
+            const groupRow = row + groupIndex;
+            const groupEnd = candidateColumn + group.tiles.length;
+            const beforeFree =
+              candidateColumn === 0 ||
+              !occupied.has(groupRow * columns + candidateColumn - 1);
+            const afterFree =
+              groupEnd >= columns ||
+              !occupied.has(groupRow * columns + groupEnd);
+            return (
+              beforeFree &&
+              afterFree &&
+              group.tiles.every(
+                (_: Tile, offset: number) =>
+                  !occupied.has(
+                    groupRow * columns + candidateColumn + offset,
+                  ),
+              )
+            );
+          }),
         );
-        const starts =
-          batchStartColumn == null
-            ? Array.from(
-                { length: columns - group.tiles.length + 1 },
-                (_, index) => index,
-              ).sort((a, b) => {
-                const distanceA = Math.abs(a - centerStart);
-                const distanceB = Math.abs(b - centerStart);
-                const stepA = distanceA % 8 === 0 ? 0 : 1;
-                const stepB = distanceB % 8 === 0 ? 0 : 1;
-                return stepA - stepB || distanceA - distanceB;
-              })
-            : batchStartColumn + group.tiles.length <= columns
-              ? [batchStartColumn]
-              : [];
-        const start = starts.find((col) => {
-          const endCol = col + group.tiles.length - 1;
-          const cellsFree = group.tiles.every((_: Tile, offset: number) =>
-            !occupied.has(row * columns + col + offset),
-          );
-          if (!cellsFree) return false;
-          return [...occupied].every((index) => {
-            const occupiedRow = Math.floor(index / columns);
-            const occupiedCol = index % columns;
-            const verticallyClear = Math.abs(row - occupiedRow) >= 3;
-            const horizontallyClear =
-              occupiedCol < col
-                ? col - occupiedCol >= 8
-                : occupiedCol - endCol >= 8;
-            return verticallyClear || horizontallyClear;
-          });
-        });
-        if (start !== undefined) {
-          destination = row * columns + start;
-          if (batchStartColumn == null) batchStartColumn = start;
-          break;
-        }
+        if (col === undefined) continue;
+        blockStart = { row, col };
+        break;
       }
-      if (destination == null) continue;
-      group.tiles.forEach((tile: Tile, offset: number) => {
-        const rackIndex = nextRack.findIndex(
-          (item) => item && String(item.id) === String(tile.id),
-        );
-        if (rackIndex < 0) return;
-        const tableIndex = destination! + offset;
-        nextTable[mode][tableIndex] = {
-          ...tile,
-          origin: rackIndex,
-          committed: false,
-        };
-        nextRack[rackIndex] = null;
-        occupied.add(tableIndex);
-        placedIndices.push(tableIndex);
+      if (!blockStart) continue;
+      block.forEach((group: any, groupIndex: number) => {
+        const destination =
+          (blockStart!.row + groupIndex) * columns + blockStart!.col;
+        group.tiles.forEach((tile: Tile, offset: number) => {
+          const rackIndex = nextRack.findIndex(
+            (item) => item && String(item.id) === String(tile.id),
+          );
+          if (rackIndex < 0) return;
+          const tableIndex = destination + offset;
+          nextTable[mode][tableIndex] = {
+            ...tile,
+            origin: rackIndex,
+            committed: false,
+          };
+          nextRack[rackIndex] = null;
+          occupied.add(tableIndex);
+          placedIndices.push(tableIndex);
+        });
       });
+      blockColumnOffset += blockWidth + blockGap;
     }
     if (!placedIndices.length) {
       setNotice("Görünür boş alan bulunamadı");
@@ -3123,7 +3170,7 @@ export default function Home() {
           );
         })}
       </section>
-      <section className="game-center-info">
+      <section ref={gameCenterInfoRef} className="game-center-info">
         {gamePrepared ? (
           <button
             className="deal-button"
@@ -3169,18 +3216,7 @@ export default function Home() {
                     </div>
                   </>
                 ) : (
-                  game.eliBitirecekKoltukNo === mySeat ? (
-                    <button
-                      className="finish-empty-hand"
-                      onClick={() => socket?.emit("eli-bitir")}
-                    >
-                      Eli Bitir
-                    </button>
-                  ) : (
-                    <span className="finish-empty-wait">
-                      El otomatik bitecek
-                    </span>
-                  )
+                  <span className="finish-empty-wait">0</span>
                 )}
               </div>
               {game.kalanTasSayisi <= 0 &&

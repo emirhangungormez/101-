@@ -211,11 +211,11 @@ test("does not let a pair opener create a new series", () => {
           tasId: tas.id,
         })),
       }),
-    /Cift acan oyuncu seri perlerine tas isleyemez/,
+    /Cift acan oyuncu yeni seri acamaz/,
   );
 });
 
-test("does not let a pair opener extend an existing series or take its okey", () => {
+test("lets a pair opener extend an existing series and take its okey", () => {
   const wildcard = tile("pair-opener-okey", "kirmizi", 6);
   const committed = [tile("blue-4-x", "mavi", 4), wildcard, tile("blue-6-x", "mavi", 6)].map(
     (tas, col) => ({
@@ -234,25 +234,25 @@ test("does not let a pair opener extend an existing series or take its okey", ()
     openingType: "pairs",
     table: { seri: committed, cift: [] },
   });
-  assert.throws(
-    () =>
-      masaHamlesiDogrula(room, "player-1", {
-        mode: "series",
-        placements: [
-          { zone: "series", row: 0, col: 3, tasId: extension.id },
-        ],
-      }),
-    /seri perlerine tas isleyemez/,
-  );
-  assert.throws(
-    () =>
-      jokeriDegistir(room, "player-1", {
-        zone: "series",
-        row: 0,
-        col: 1,
-        tasId: replacement.id,
-      }),
-    /seri perlerindeki okeyi alamaz/,
+  masaHamlesiDogrula(room, "player-1", {
+    mode: "series",
+    placements: [
+      { zone: "series", row: 0, col: 3, tasId: extension.id },
+    ],
+  });
+  assert.equal(room.gameState.masaZemini.seri.length, 4);
+  const result = jokeriDegistir(room, "player-1", {
+    zone: "series",
+    row: 0,
+    col: 1,
+    tasId: replacement.id,
+  });
+  assert.equal(result.cezaKoltukNo, 1);
+  assert.ok(room.oyuncular[0].eldekiTaslar.some((tas) => tas.id === wildcard.id));
+  assert.ok(
+    room.gameState.masaZemini.seri.some(
+      (placement) => placement.tas.id === replacement.id,
+    ),
   );
 });
 
@@ -377,6 +377,41 @@ test("replaces a committed real okey, returns it to the rack and penalizes its o
       (cell) => cell.tas.id === replacement.id,
     ),
   );
+});
+
+test("does not penalize a player for taking back their own committed okey", () => {
+  const wildcard = tile("own-real-okey", "kirmizi", 6);
+  const committed = [
+    tile("own-blue-4", "mavi", 4),
+    wildcard,
+    tile("own-blue-6", "mavi", 6),
+  ].map((tas, index) => ({
+    zone: "series",
+    row: 1,
+    col: index + 2,
+    perId: "own-series",
+    tasId: tas.id,
+    tas,
+    ownerSocketId: "player-1",
+    ownerKoltukNo: 0,
+  }));
+  const replacement = tile("own-blue-5", "mavi", 5);
+  const room = roomWithHand([replacement], {
+    openingType: "series",
+    table: { seri: committed, cift: [] },
+  });
+
+  const result = jokeriDegistir(room, "player-1", {
+    zone: "series",
+    row: 1,
+    col: 3,
+    tasId: replacement.id,
+  });
+
+  assert.equal(result.cezaKoltukNo, null);
+  assert.equal(room.koltukPuanlari[0], 0);
+  assert.equal(room.koltukCezaPuanlari[0], 0);
+  assert.equal(room.oyuncular[0].eldekiTaslar[0].id, wildcard.id);
 });
 
 test("replaces a committed real okey before drawing and commits the replacement immediately", () => {

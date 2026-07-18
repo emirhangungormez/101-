@@ -36,6 +36,48 @@ test("bot finds a server-valid 101 opening instead of discarding randomly", () =
   assert.ok(plan.placements.length >= 9);
   assert.ok(plan.placements.length < hand.length);
   assert.equal(new Set(plan.placements.map((item) => item.row)).size, 3);
+  assert.deepEqual(
+    [...new Set(plan.placements.map((item) => item.row))].sort((a, b) => a - b),
+    [8, 9, 10],
+  );
+  assert.equal(new Set(plan.placements.map((item) => item.col)).size, 3);
+});
+
+test("bot stacks a pair opening vertically and leaves processing to one plan", () => {
+  const room = yeniOda(
+    "pair-bot-room",
+    "Bot",
+    { socketId: "owner", kullaniciId: "owner" },
+    2,
+  );
+  const hand = [
+    ...Array.from({ length: 5 }, (_, value) => [
+      tile(`p-${value}-a`, "kirmizi", value + 1),
+      tile(`p-${value}-b`, "kirmizi", value + 1),
+    ]).flat(),
+    tile("pair-spare", "sari", 13),
+  ];
+  const bot = {
+    socketId: "robot-pair",
+    isim: "Robot",
+    bot: true,
+    koltukNo: 1,
+    eldekiTaslar: hand,
+    cekildiMi: true,
+    acilisTipi: null,
+  };
+  room.oyuncular = [bot];
+  room.gameState.gosterge = tile("pair-indicator", "mavi", 8);
+  room.gameState.siradakiOyuncu = 1;
+  room.gameState.oyunBasladi = true;
+  const plan = botMasaPlani(room, bot);
+  assert.equal(plan?.mode, "pairs");
+  assert.equal(plan.placements.length, 10);
+  assert.deepEqual(
+    [...new Set(plan.placements.map((item) => item.row))].sort((a, b) => a - b),
+    [7, 8, 9, 10, 11],
+  );
+  assert.equal(new Set(plan.placements.map((item) => item.col)).size, 2);
 });
 
 test("bot protects the real okey when choosing a discard", () => {

@@ -154,18 +154,59 @@ test("scores an exhausted deck as 101 for unopened and rack total for opened pla
   assert.equal(room.gameState.oyunBasladi, false);
 });
 
+test("doubles every opponent penalty when the winner finishes with an okey", () => {
+  const room = yeniOda(
+    "okey-finish-room",
+    "Okeyle bitis",
+    { socketId: "player-0", kullaniciId: "user-0" },
+    4,
+  );
+  room.oyuncular = [
+    player(0, "Biten", "series", []),
+    player(1, "Seri acan", "series", [
+      { id: "red-8", renk: "kirmizi", deger: 8 },
+      { id: "blue-9", renk: "mavi", deger: 9 },
+    ]),
+    player(2, "Cift acan", "pairs", [
+      { id: "black-3", renk: "siyah", deger: 3 },
+    ]),
+    player(3, "Acmayan", null, [
+      { id: "yellow-4", renk: "sari", deger: 4 },
+    ]),
+  ];
+  room.gameState.oyunBasladi = true;
+  room.gameState.elNo = 1;
+  room.gameState.gosterge = {
+    id: "okey-finish-indicator",
+    renk: "sari",
+    deger: 4,
+  };
+
+  const result = eliTamamla(
+    room,
+    room.oyuncular[0],
+    { id: "finishing-okey", renk: "sari", deger: 5 },
+  );
+
+  assert.equal(result.okeyleBitti, true);
+  assert.deepEqual(room.koltukPuanlari, [-202, 34, 12, 202]);
+});
+
 test("scores an elden finish as -202/+202 and doubles it with an okey finish", () => {
   const makeRoom = () => {
     const room = yeniOda(
       "elden-room",
       "Elden",
       { socketId: "player-0", kullaniciId: "user-0" },
-      3,
+      4,
     );
     room.oyuncular = [
       player(0, "Biten", "series", []),
       player(1, "Acan", "series", [{ id: "blue-3", renk: "mavi", deger: 3 }]),
-      player(2, "Acmayan", null, [{ id: "red-9", renk: "kirmizi", deger: 9 }]),
+      player(2, "Cift acan", "pairs", [
+        { id: "yellow-4", renk: "sari", deger: 4 },
+      ]),
+      player(3, "Acmayan", null, [{ id: "red-9", renk: "kirmizi", deger: 9 }]),
     ];
     room.gameState.oyunBasladi = true;
     room.gameState.elNo = 1;
@@ -181,7 +222,7 @@ test("scores an elden finish as -202/+202 and doubles it with an okey finish", (
     { eldenBitti: true },
   );
   assert.equal(normalResult.eldenBitti, true);
-  assert.deepEqual(normal.koltukPuanlari, [-202, 202, 202]);
+  assert.deepEqual(normal.koltukPuanlari, [-202, 6, 16, 202]);
 
   const withOkey = makeRoom();
   eliTamamla(
@@ -190,7 +231,7 @@ test("scores an elden finish as -202/+202 and doubles it with an okey finish", (
     { id: "last-okey", renk: "sari", deger: 5 },
     { eldenBitti: true },
   );
-  assert.deepEqual(withOkey.koltukPuanlari, [-404, 404, 404]);
+  assert.deepEqual(withOkey.koltukPuanlari, [-404, 12, 32, 404]);
 });
 
 test("shows in-hand penalties in the round delta without adding them twice", () => {

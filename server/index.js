@@ -224,7 +224,8 @@ const desteBittiBildir = (oda, sonOyuncu = null) => {
   hamleZamanlayicilari.delete(oda.odaId);
   if (!Number.isInteger(g.eliBitirecekKoltukNo)) {
     g.eliBitirecekKoltukNo = sonOyuncu?.koltukNo ?? g.siradakiOyuncu;
-    g.desteBitisSonZaman = Date.now() + 60_000;
+    g.siradakiOyuncu = g.eliBitirecekKoltukNo;
+    g.desteBitisSonZaman = Date.now() + 30_000;
     const beklenenSonZaman = g.desteBitisSonZaman;
     const zamanlayici = setTimeout(() => {
       if (
@@ -234,11 +235,11 @@ const desteBittiBildir = (oda, sonOyuncu = null) => {
         g.desteBitisSonZaman === beklenenSonZaman
       )
         eliBerabereBitir(oda);
-    }, 60_000);
+    }, 30_000);
     desteBitisZamanlayicilari.set(oda.odaId, zamanlayici);
   }
   g.hamleSonZaman = g.desteBitisSonZaman;
-  g.hamleSuresi = 60;
+  g.hamleSuresi = 30;
   io.to(oda.odaId).emit("deste-bitti", {
     message: "Taş kalmadı; son oyuncu taşlarını dizip eli bitirebilir",
     eliBitirecekKoltukNo: g.eliBitirecekKoltukNo,
@@ -273,7 +274,11 @@ const hamleZamanlayicisiniKur = (
   const oyuncu = oda?.oyuncular.find(
     (item) => item.koltukNo === g?.siradakiOyuncu,
   );
-  if (!g?.oyunBasladi || !oyuncu || g.deste.length === 0) {
+  if (
+    !g?.oyunBasladi ||
+    !oyuncu ||
+    (g.deste.length === 0 && !oyuncu.cekildiMi)
+  ) {
     if (g && g.deste.length > 0) {
       g.hamleSonZaman = null;
       g.hamleSuresi = null;
@@ -353,6 +358,10 @@ const hamleZamanlayicisiniKur = (
     elGonder(io.to(aktifOyuncu.socketId), aktifOyuncu);
     if (bitiriyor)
       return eliBitir(aktifOda, aktifOyuncu, atilan, { eldenBitti });
+    if (aktifOda.gameState.deste.length === 0) {
+      desteBittiBildir(aktifOda, aktifOyuncu);
+      return;
+    }
     sonrakiOyuncu(aktifOda);
     oyunDurumu(aktifOda);
     odaDurumu(aktifOda);
@@ -445,6 +454,10 @@ const robotTurunuBaslat = (oda) => {
       });
       if (bitiriyor) {
         eliBitir(oda, robot, atilan, { eldenBitti });
+        return;
+      }
+      if (oda.gameState.deste.length === 0) {
+        desteBittiBildir(oda, robot);
         return;
       }
       sonrakiOyuncu(oda);
@@ -871,15 +884,20 @@ io.on("connection", (socket) => {
   });
   socket.on("deste-bitti-hazirla", () => {
     const oda = odaBul(socket.data.oynadigiOdaId);
-    const oyuncu = oda?.oyuncular.find((item) => item.socketId === socket.id);
+    const aktifOyuncu = oda?.oyuncular.find(
+      (item) => item.koltukNo === oda?.gameState.siradakiOyuncu,
+    );
     if (
       !oda ||
-      !oyuncu ||
       !oda.gameState.oyunBasladi ||
-      oda.gameState.deste.length > 0
+      oda.gameState.deste.length > 0 ||
+      aktifOyuncu?.cekildiMi
     )
       return;
-    desteBittiBildir(oda, oyuncu);
+    const sonOyuncu = oda.oyuncular.find(
+      (item) => item.koltukNo === oda.gameState.sonAtanKoltukNo,
+    );
+    if (sonOyuncu) desteBittiBildir(oda, sonOyuncu);
   });
   socket.on("yandan-tas-iade", () => {
     try {
@@ -920,6 +938,10 @@ io.on("connection", (socket) => {
     elGonder(socket, p);
     if (bitiriyor) {
       eliBitir(oda, p, atilan, { eldenBitti });
+      return;
+    }
+    if (oda.gameState.deste.length === 0) {
+      desteBittiBildir(oda, p);
       return;
     }
     sonrakiOyuncu(oda);
