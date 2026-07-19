@@ -505,10 +505,14 @@ io.on("connection", (socket) => {
         veri?.kuralTipi,
         veri?.toplamEl,
       );
+      oda.erisimTipi = veri?.erisimTipi === "davet" ? "davet" : "yakin";
       aktifOdalar[odaId] = oda;
       socket.join(odaId);
       socket.data.izlenenOdaId = odaId;
-      socket.emit("oda-olusturuldu", { odaId });
+      socket.emit("oda-olusturuldu", {
+        odaId,
+        oda: genelDurum(oda),
+      });
       odaDurumu(oda);
       odaListesi();
     } catch {
@@ -641,6 +645,25 @@ io.on("connection", (socket) => {
       oyunBasladi: Boolean(oda.gameState.oyunBasladi),
       oda: genelDurum(oda),
     });
+    odaDurumu(oda);
+    odaListesi();
+  });
+  socket.on("koltuk-ayril", (odaId) => {
+    const oda = odaBul(odaId);
+    if (!oda) return hata(socket, "Oda bulunamadi");
+    if (oda.gameState.macAktif || oda.gameState.oyunBasladi)
+      return hata(socket, "Oyun sirasinda koltuk birakilamaz");
+    const ayrilan = oda.oyuncular.find((p) => p.socketId === socket.id);
+    if (!ayrilan || ayrilan.bot) return;
+    koltukDurumunuSakla(oda, ayrilan);
+    if (ayrilan.kullaniciId) {
+      oda.kullaniciKoltuklari ||= {};
+      oda.kullaniciKoltuklari[ayrilan.kullaniciId] = ayrilan.koltukNo;
+    }
+    oda.oyuncular = oda.oyuncular.filter((p) => p.socketId !== socket.id);
+    socket.data.oynadigiOdaId = null;
+    socket.data.izlenenOdaId = odaId;
+    socket.join(odaId);
     odaDurumu(oda);
     odaListesi();
   });

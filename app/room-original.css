@@ -1,0 +1,1022 @@
+.room-original {
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 100dvh !important;
+  overflow: auto !important;
+  background: #fff !important;
+  color: #171717 !important;
+  overflow-anchor: none !important;
+}
+
+.room-original .room-content {
+  position: relative !important;
+  inset: auto !important;
+  display: grid !important;
+  grid-template-rows: auto auto auto !important;
+  align-content: center !important;
+  align-items: start !important;
+  width: min(1040px, calc(100% - 56px)) !important;
+  min-width: 0 !important;
+  min-height: 100dvh !important;
+  margin: 0 auto !important;
+  padding: 42px 0 !important;
+  background: #fff !important;
+  transform: none !important;
+}
+
+.room-original-heading {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  height: 112px !important;
+  min-height: 112px !important;
+  margin: 0 !important;
+  text-align: center !important;
+}
+
+.room-original-heading small {
+  color: #7b2946 !important;
+  font: 750 10px/1 "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+  letter-spacing: .14em !important;
+}
+
+.room-original-heading h1 {
+  margin: 7px 0 0 !important;
+  color: #171717 !important;
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+  font-size: 34px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: -.05em !important;
+}
+
+.room-original-heading .room-invite-reference {
+  position: static !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  align-self: center !important;
+  justify-content: center !important;
+  width: fit-content !important;
+  transform: none !important;
+  margin: 14px auto 0 !important;
+}
+
+.room-original .room-profile-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  width: 100% !important;
+  height: 310px !important;
+  min-height: 310px !important;
+  margin: 0 !important;
+}
+
+.room-original .room-profile {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  min-height: 300px !important;
+  padding: 16px 16px 14px !important;
+  border: 1px solid #e3e3e3 !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  transition: border-color 200ms ease, background-color 200ms ease !important;
+}
+
+.room-original .room-profile:hover {
+  border-color: #caa8b4 !important;
+  background: #fffafb !important;
+}
+
+.room-original .room-seat-title {
+  align-self: flex-start !important;
+  margin: 0 0 10px !important;
+  color: #777 !important;
+  font: 750 11px/1 "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+  letter-spacing: .04em !important;
+  text-transform: uppercase !important;
+}
+
+.room-original .room-rack-visual {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  width: 100% !important;
+  height: 112px !important;
+  padding: 12px 12px 27px !important;
+  border: 1px solid #845030 !important;
+  border-radius: 12px !important;
+  background: #a96940 !important;
+  box-shadow: inset 0 -14px 0 rgb(91 49 26 / 18%) !important;
+}
+
+.room-original .room-preview-tile {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 38px !important;
+  height: 65px !important;
+  padding: 7px 4px 6px !important;
+  border: 1px solid #ddd8cf !important;
+  border-radius: 6px !important;
+  background: #fffdf8 !important;
+  box-shadow: none !important;
+  font-style: normal !important;
+}
+
+.room-original .room-preview-tile b {
+  color: #2563eb !important;
+  font: 750 18px/1 "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+.room-original .room-preview-tile em {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background: #2563eb !important;
+}
+
+.room-original .room-preview-tile.preview-color-1 b {
+  color: #e11d48 !important;
+}
+
+.room-original .room-preview-tile.preview-color-1 em {
+  background: #e11d48 !important;
+}
+
+.room-original .room-preview-tile.preview-color-2 b {
+  color: #16a34a !important;
+}
+
+.room-original .room-preview-tile.preview-color-2 em {
+  background: #16a34a !important;
+}
+
+.room-original .profile-box {
+  position: relative !important;
+  z-index: 2 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  min-width: 132px !important;
+  min-height: 82px !important;
+  margin: -24px 0 8px !important;
+  padding: 9px 15px !important;
+  border: 1px solid #dedede !important;
+  border-radius: 14px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  color: #171717 !important;
+}
+
+.room-original .profile-box.player {
+  border-color: #7b2946 !important;
+  background: #fff8fa !important;
+}
+
+.room-original .profile-box.empty-profile {
+  color: #888 !important;
+}
+
+.room-original .profile-box .avatar {
+  display: grid !important;
+  width: 38px !important;
+  height: 38px !important;
+  margin: 0 auto 5px !important;
+  place-items: center !important;
+  border: 1px solid #e1e1e1 !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  font-size: 21px !important;
+}
+
+.room-original .profile-box > b,
+.room-original .room-name-edit b {
+  color: #222 !important;
+  font: 750 13px/1.1 "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+.room-original .profile-box > small {
+  margin-top: 5px !important;
+  color: #888 !important;
+  font: 600 10px/1 "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+.room-original .room-profile-identity {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.room-original .room-emoji-edit,
+.room-original .room-name-edit {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.room-original .room-edit-pencil {
+  margin-left: 5px !important;
+  color: #7b2946 !important;
+  font-size: 11px !important;
+}
+
+.room-original .room-name-input {
+  width: 110px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-bottom: 1px solid #7b2946 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  color: #222 !important;
+  text-align: center !important;
+  font: 750 13px/1 "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+.room-original .room-profile > button,
+.room-original .room-actions button,
+.room-original .room-invite-reference button,
+.room-original .room-back {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 92px !important;
+  height: 38px !important;
+  padding: 0 13px !important;
+  border: 1px solid #dedede !important;
+  border-radius: 11px !important;
+  background: #fff !important;
+  color: #333 !important;
+  box-shadow: none !important;
+  font: 750 13px/1 "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+  transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease, transform 180ms ease !important;
+}
+
+.room-original .room-profile > button + button {
+  margin-top: 6px !important;
+}
+
+.room-original .room-profile > button:hover,
+.room-original .room-invite-reference button:hover,
+.room-original .room-back:hover {
+  border-color: #caa8b4 !important;
+  background: #fff8fa !important;
+  color: #7b2946 !important;
+  transform: translateY(-1px) !important;
+}
+
+.room-original .room-profile > button:disabled {
+  opacity: .42 !important;
+  transform: none !important;
+}
+
+.room-original .room-actions {
+  position: static !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  height: 66px !important;
+  min-height: 66px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.room-original .room-actions > span {
+  position: static !important;
+  inset: auto !important;
+  margin: 0 !important;
+  transform: none !important;
+  color: #666 !important;
+  font: 750 13px/1 "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+.room-original .room-actions .start-game {
+  min-width: 132px !important;
+  border-color: #7b2946 !important;
+  background: #7b2946 !important;
+  color: #fff !important;
+}
+
+.room-original .room-actions .start-game:disabled {
+  border-color: #ddd !important;
+  background: #eee !important;
+  color: #999 !important;
+}
+
+.room-original .room-invite-reference {
+  position: static !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  width: auto !important;
+  margin: 20px auto 0 !important;
+  padding: 8px 10px !important;
+  border: 1px solid #e3e3e3 !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+.room-original .room-invite-reference span {
+  color: #888 !important;
+  font: 600 11px/1 "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+.room-original .room-invite-reference b {
+  color: #222 !important;
+  font: 750 13px/1 "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+  letter-spacing: .08em !important;
+}
+
+.room-original .room-invite-reference button {
+  min-width: 68px !important;
+  height: 32px !important;
+}
+
+.room-original .room-back {
+  position: absolute !important;
+  z-index: 10 !important;
+  top: 28px !important;
+  left: 28px !important;
+  bottom: auto !important;
+  width: 82px !important;
+  min-width: 82px !important;
+  transform: none !important;
+}
+
+.room-original .room-back span {
+  margin: 0 !important;
+  font: inherit !important;
+}
+
+.room-original .room-back.shared-back-button:hover {
+  transform: none !important;
+}
+
+.room-original .room-emoji-popover {
+  z-index: 30 !important;
+  top: 48px !important;
+  left: 50% !important;
+  display: grid !important;
+  grid-template-columns: repeat(6, 34px) !important;
+  gap: 5px !important;
+  width: auto !important;
+  padding: 10px !important;
+  transform: translateX(-50%) !important;
+  border: 1px solid #dedede !important;
+  border-radius: 14px !important;
+  background: #fff !important;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 10%) !important;
+}
+
+.room-original .room-emoji-popover button {
+  width: 34px !important;
+  height: 34px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: #f7f7f7 !important;
+}
+
+@media (max-width: 760px) {
+  .room-original .room-content {
+    display: flex !important;
+    flex-direction: column !important;
+    width: min(520px, calc(100% - 24px)) !important;
+    padding: 74px 0 30px !important;
+    justify-content: flex-start !important;
+  }
+
+  .room-original .room-profile-grid {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .room-original-heading {
+    height: auto !important;
+    min-height: 0 !important;
+    margin-bottom: 12px !important;
+  }
+
+  .room-original .room-actions {
+    height: auto !important;
+    min-height: 0 !important;
+    margin-top: 20px !important;
+  }
+
+  .room-original .room-back {
+    position: fixed !important;
+    top: 14px !important;
+    left: 14px !important;
+  }
+
+  .room-original-heading h1 {
+    font-size: 29px !important;
+  }
+
+  .room-original .room-rack-visual {
+    height: 105px !important;
+  }
+}
+
+/* Dengeli oda yerleşimi ve oyun kontrolü görünümü */
+.room-original .room-content {
+  grid-template-rows: 126px 314px 78px !important;
+  row-gap: 18px !important;
+  width: min(920px, calc(100% - 56px)) !important;
+  padding-block: 34px !important;
+}
+
+.room-original-heading {
+  height: 126px !important;
+  min-height: 126px !important;
+}
+
+.room-original-heading h1 {
+  font-size: 36px !important;
+}
+
+.room-original-heading .room-invite-reference {
+  margin-top: 18px !important;
+}
+
+.room-original .room-seat-grid-simple {
+  grid-template-columns: repeat(var(--seat-count), 156px) !important;
+  gap: 24px !important;
+  height: 314px !important;
+  min-height: 314px !important;
+}
+
+.room-original .room-seat-simple {
+  width: 156px !important;
+}
+
+.room-original .simple-seat-actions {
+  width: 124px !important;
+}
+
+.room-original .simple-seat-actions > .seat-action {
+  width: 120px !important;
+  min-height: 40px !important;
+  border: 2px solid #8f2f53 !important;
+  border-radius: 12px !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  transition: transform 140ms ease, background-color 140ms ease, color 140ms ease !important;
+}
+
+.room-original .simple-seat-actions > .seat-action.primary {
+  background: #8f2f53 !important;
+  color: #fff !important;
+}
+
+.room-original .simple-seat-actions > .seat-action.secondary {
+  background: #fff7fa !important;
+  color: #7b2946 !important;
+}
+
+.room-original .simple-seat-actions > .seat-action:not(:disabled):hover {
+  transform: translateY(-2px) !important;
+}
+
+.room-original .simple-seat-actions > .seat-action:not(:disabled):active {
+  transform: translateY(1px) scale(.98) !important;
+}
+
+.room-original .room-actions {
+  flex-direction: column !important;
+  gap: 9px !important;
+  height: 78px !important;
+  min-height: 78px !important;
+}
+
+.room-original .room-actions > span {
+  color: #7b2946 !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+}
+
+.room-original .room-actions .start-game {
+  width: 220px !important;
+  min-width: 220px !important;
+  height: 50px !important;
+  min-height: 50px !important;
+  border: 2px solid #8f2f53 !important;
+  border-radius: 13px !important;
+  background: #8f2f53 !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
+  letter-spacing: .01em !important;
+  transition: transform 140ms ease, filter 140ms ease !important;
+}
+
+.room-original .room-actions .start-game:not(:disabled):hover {
+  filter: brightness(1.06) !important;
+  transform: none !important;
+}
+
+.room-original .room-actions .start-game:not(:disabled):active {
+  transform: translateY(1px) scale(.99) !important;
+}
+
+@media (max-width: 760px) {
+  .room-original .room-content {
+    display: grid !important;
+    grid-template-rows: auto auto auto !important;
+    row-gap: 18px !important;
+    width: min(520px, calc(100% - 24px)) !important;
+    padding: 72px 0 30px !important;
+  }
+
+  .room-original-heading {
+    height: 116px !important;
+    min-height: 116px !important;
+    margin: 0 !important;
+  }
+
+  .room-original .room-seat-grid-simple.count-3,
+  .room-original .room-seat-grid-simple.count-4 {
+    grid-template-columns: repeat(2, 156px) !important;
+    gap: 20px 16px !important;
+    height: 624px !important;
+    min-height: 624px !important;
+  }
+
+  .room-original .room-seat-grid-simple.count-2 {
+    grid-template-columns: repeat(2, 156px) !important;
+    gap: 16px !important;
+  }
+}
+
+/* Oyuncu koltukları: durum değişse de ölçüsü ve hizası sabit kalır. */
+.room-original .room-seat-grid-simple {
+  display: grid !important;
+  grid-template-columns: repeat(var(--seat-count), 150px) !important;
+  justify-content: center !important;
+  align-items: start !important;
+  gap: 18px !important;
+  width: 100% !important;
+  height: 310px !important;
+  min-height: 310px !important;
+  margin: 0 auto !important;
+  overflow-anchor: none !important;
+}
+
+.room-original .room-seat-grid-simple.count-2 { --seat-count: 2; }
+.room-original .room-seat-grid-simple.count-3 { --seat-count: 3; }
+.room-original .room-seat-grid-simple.count-4 { --seat-count: 4; }
+
+.room-original .room-seat-simple {
+  position: relative !important;
+  display: grid !important;
+  grid-template-rows: 64px 30px 96px 76px !important;
+  row-gap: 12px !important;
+  justify-items: center !important;
+  align-items: center !important;
+  width: 150px !important;
+  height: 302px !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.room-original .simple-seat-avatar {
+  position: relative !important;
+  display: grid !important;
+  place-items: center !important;
+  width: 64px !important;
+  height: 64px !important;
+  aspect-ratio: 1 !important;
+  border: 1px solid #dedede !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  color: #999 !important;
+  font-size: 30px !important;
+  line-height: 1 !important;
+}
+
+.room-original .simple-seat-avatar > button {
+  display: grid !important;
+  place-items: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  font-size: 30px !important;
+}
+
+.room-original .simple-seat-name {
+  display: grid !important;
+  place-items: center !important;
+  width: 140px !important;
+  height: 30px !important;
+  color: #202020 !important;
+  font: 650 16px/1 "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+  text-align: center !important;
+}
+
+.room-original .simple-seat-name > button,
+.room-original .simple-seat-name > input {
+  width: 100% !important;
+  height: 30px !important;
+  padding: 0 4px !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+  font: inherit !important;
+  text-align: center !important;
+}
+
+.room-original .simple-seat-tile {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 68px !important;
+  height: 96px !important;
+  padding: 14px 8px 12px !important;
+  box-sizing: border-box !important;
+  border: 1px solid #cfcfcf !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+}
+
+.room-original .simple-seat-tile b {
+  font: 550 38px/1 "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+.room-original .simple-seat-tile i {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  background: currentColor !important;
+}
+
+.room-original .simple-seat-color-1 { color: #2563eb !important; }
+.room-original .simple-seat-color-2 { color: #e6194b !important; }
+.room-original .simple-seat-color-3 { color: #12a84f !important; }
+.room-original .simple-seat-color-4 { color: #171717 !important; }
+
+.room-original .simple-seat-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  width: 120px !important;
+  height: 76px !important;
+  padding-top: 0 !important;
+}
+
+.room-original .room-invite-reference button {
+  min-width: 82px !important;
+  transform: none !important;
+}
+
+.room-original .room-invite-reference button:hover {
+  transform: none !important;
+}
+
+.room-original .room-invite-reference button.copied {
+  border-color: #168447 !important;
+  background: #168447 !important;
+  color: #fff !important;
+  transform: none !important;
+}
+
+.room-original .room-invite-reference button.copied:hover {
+  transform: none !important;
+}
+
+.room-original .simple-seat-actions > button {
+  width: 112px !important;
+  min-height: 36px !important;
+  padding: 0 12px !important;
+  border: 1px solid #7b2946 !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  color: #7b2946 !important;
+  font: 750 12px/1 "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+.room-original .simple-seat-actions > button:first-child:not(:disabled) {
+  background: #7b2946 !important;
+  color: #fff !important;
+}
+
+.room-original .simple-seat-actions > button:disabled {
+  display: none !important;
+}
+
+.room-original .simple-emoji-picker {
+  position: absolute !important;
+  z-index: 20 !important;
+  top: 70px !important;
+  left: 50% !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, 34px) !important;
+  gap: 4px !important;
+  padding: 8px !important;
+  border: 1px solid #dedede !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+  transform: translateX(-50%) !important;
+}
+
+.room-original .simple-emoji-picker button {
+  width: 34px !important;
+  height: 34px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  font-size: 21px !important;
+}
+
+@media (max-width: 760px) {
+  .room-original .room-seat-grid-simple.count-3,
+  .room-original .room-seat-grid-simple.count-4 {
+    grid-template-columns: repeat(2, 150px) !important;
+    height: 600px !important;
+    min-height: 600px !important;
+  }
+}
+
+.room-original .room-invite-reference {
+  display: grid !important;
+  grid-template-columns: repeat(3, 88px) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  width: 306px !important;
+  padding: 6px 14px !important;
+  box-sizing: border-box !important;
+}
+
+.room-original .room-invite-reference > span,
+.room-original .room-invite-reference > b {
+  width: 100% !important;
+  text-align: center !important;
+}
+
+.room-original .room-invite-reference > button {
+  place-self: center !important;
+  position: relative !important;
+  inset: auto !important;
+  display: grid !important;
+  place-items: center !important;
+  width: 88px !important;
+  min-width: 88px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+}
+
+/* Sade oyuncu alanı: profil, isim ve tek oyuncu taşı */
+.room-original .room-profile-grid.count-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  width: min(420px, 100%) !important;
+  margin-inline: auto !important;
+}
+
+.room-original .room-profile-grid.count-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  width: min(600px, 100%) !important;
+  margin-inline: auto !important;
+}
+
+.room-original .room-profile-grid.count-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  width: min(760px, 100%) !important;
+  margin-inline: auto !important;
+}
+
+.room-original .room-profile {
+  min-height: 310px !important;
+  height: 310px !important;
+  overflow-anchor: none !important;
+  padding: 18px 8px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+}
+
+.room-original .room-profile:hover {
+  border: 0 !important;
+  background: #fff !important;
+}
+
+.room-original .room-seat-title {
+  display: none !important;
+}
+
+.room-original .profile-box {
+  order: 1 !important;
+  min-width: 0 !important;
+  min-height: 98px !important;
+  height: 98px !important;
+  flex: 0 0 98px !important;
+  margin: 0 0 18px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.room-original .profile-box.player {
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.room-original .profile-box .avatar {
+  width: 66px !important;
+  min-width: 66px !important;
+  height: 66px !important;
+  min-height: 66px !important;
+  flex: 0 0 66px !important;
+  aspect-ratio: 1 !important;
+  margin: 0 auto 12px !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  border: 1px solid #dedede !important;
+  font-size: 34px !important;
+  line-height: 1 !important;
+}
+
+.room-original .profile-box > b,
+.room-original .room-name-edit b {
+  font-size: 17px !important;
+  font-weight: 650 !important;
+}
+
+.room-original .profile-box.empty-profile > span:last-of-type {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+
+.room-original .profile-box > small {
+  display: none !important;
+}
+
+.room-original .room-rack-visual {
+  order: 2 !important;
+  display: grid !important;
+  width: 76px !important;
+  height: 108px !important;
+  margin: 0 0 16px !important;
+  padding: 0 !important;
+  place-items: center !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.room-original .room-preview-tile {
+  width: 68px !important;
+  height: 96px !important;
+  padding: 14px 8px 12px !important;
+  border: 1px solid #cfcfcf !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+}
+
+.room-original .room-preview-tile b {
+  font-size: 38px !important;
+  font-weight: 550 !important;
+}
+
+.room-original .room-preview-tile em {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.room-original .room-preview-tile.room-seat-tile-4 b {
+  color: #171717 !important;
+}
+
+.room-original .room-preview-tile.room-seat-tile-4 em {
+  background: #171717 !important;
+}
+
+.room-original .room-profile > button {
+  order: 3 !important;
+  min-width: 104px !important;
+  min-height: 40px !important;
+  height: 40px !important;
+  flex: 0 0 40px !important;
+  padding: 0 16px !important;
+  border-color: #7b2946 !important;
+  background: #fff !important;
+  color: #7b2946 !important;
+  font-size: 13px !important;
+}
+
+.room-original .room-profile > button:disabled {
+  display: none !important;
+}
+
+.room-original .room-profile > .room-join-seat:hover {
+  border-color: #7b2946 !important;
+  background: #7b2946 !important;
+  color: #fff !important;
+}
+
+.room-original-heading {
+  margin-bottom: 0 !important;
+}
+
+.room-original .room-actions .start-game {
+  min-width: 180px !important;
+  min-height: 46px !important;
+  height: 46px !important;
+  border-radius: 11px !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+}
+
+@media (max-width: 760px) {
+  .room-original-heading {
+    margin-bottom: 12px !important;
+  }
+
+  .room-original .room-profile-grid.count-3,
+  .room-original .room-profile-grid.count-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .room-original .room-profile {
+    min-height: 310px !important;
+    height: 310px !important;
+  }
+}
+
+/* Son oda oranları */
+.room-original .room-seat-grid-simple {
+  grid-template-columns: repeat(var(--seat-count), 156px) !important;
+  gap: 24px !important;
+  height: 314px !important;
+  min-height: 314px !important;
+}
+
+.room-original .room-seat-simple {
+  width: 156px !important;
+}
+
+.room-original .room-actions .start-game {
+  width: 220px !important;
+  min-width: 220px !important;
+  height: 50px !important;
+  min-height: 50px !important;
+  border: 2px solid #8f2f53 !important;
+  border-radius: 13px !important;
+  background: #8f2f53 !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
+}
+
+@media (max-width: 760px) {
+  .room-original .room-seat-grid-simple.count-3,
+  .room-original .room-seat-grid-simple.count-4 {
+    grid-template-columns: repeat(2, 156px) !important;
+    gap: 20px 16px !important;
+    height: 624px !important;
+    min-height: 624px !important;
+  }
+
+  .room-original .room-seat-grid-simple.count-2 {
+    grid-template-columns: repeat(2, 156px) !important;
+    gap: 16px !important;
+  }
+}

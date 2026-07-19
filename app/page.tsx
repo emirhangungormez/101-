@@ -4,6 +4,33 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { io, type Socket } from "socket.io-client";
 import {
+  IonApp,
+  IonBadge,
+  IonButton,
+  IonContent,
+  IonFooter,
+  IonHeader,
+  IonIcon,
+  IonInput,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonPage,
+  IonSegment,
+  IonSegmentButton,
+  IonToolbar,
+} from "@ionic/react";
+import {
+  addCircleOutline,
+  arrowBackOutline,
+  keyOutline,
+  peopleOutline,
+  radioOutline,
+  trashOutline,
+  volumeHighOutline,
+  volumeMuteOutline,
+} from "ionicons/icons";
+import {
   groupsFromPlacements,
   PAIRS_COLUMNS,
   SERIES_COLUMNS,
@@ -36,20 +63,21 @@ type TableTile = Tile & {
 };
 type Zone = "series" | "pairs";
 type RoomRule = "sabit" | "katlamali";
+type RoomAccess = "yakin" | "davet";
 type MatchHands = 5 | 10 | 20;
-type GameTheme = "burgundy" | "blue" | "green";
+type GameTheme = "blue" | "green";
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
 const colors: Color[] = ["red", "blue", "black", "yellow"];
-const gameThemes: GameTheme[] = ["burgundy", "blue", "green"];
+const gameThemes: GameTheme[] = ["green", "blue"];
 const gameThemeNames: Record<GameTheme, string> = {
-  burgundy: "Bordo",
-  blue: "Mavi",
-  green: "Yeşil",
+  blue: "Karanlık",
+  green: "Soft",
 };
+const gameThemeStorageKey = "okey-game-theme-v2";
 const createClientId = () => {
   const webCrypto = globalThis.crypto;
   if (typeof webCrypto?.randomUUID === "function") return webCrypto.randomUUID();
@@ -274,10 +302,10 @@ export default function Home() {
   const [routeReady, setRouteReady] = useState(false);
   const [userId] = useState(() => {
     if (typeof window === "undefined") return "server";
-    const saved = window.localStorage.getItem("okey-user-id");
+    const saved = window.sessionStorage.getItem("okey-session-user-id");
     if (saved) return saved;
     const id = createClientId();
-    window.localStorage.setItem("okey-user-id", id);
+    window.sessionStorage.setItem("okey-session-user-id", id);
     return id;
   });
   const [profileName, setProfileName] = useState(
@@ -291,15 +319,10 @@ export default function Home() {
   const [mobileInstallTarget, setMobileInstallTarget] = useState(false);
   const [iosInstallTarget, setIosInstallTarget] = useState(false);
   const [installHint, setInstallHint] = useState("");
-  const [gameTheme, setGameTheme] = useState<GameTheme>(() => {
-    if (typeof window === "undefined") return "burgundy";
-    const saved = window.localStorage.getItem("okey-game-theme");
-    return gameThemes.includes(saved as GameTheme)
-      ? (saved as GameTheme)
-      : "burgundy";
-  });
+  const [gameTheme, setGameTheme] = useState<GameTheme>("green");
   const [roomSize, setRoomSize] = useState<2 | 3 | 4>(4);
   const [roomRule, setRoomRule] = useState<RoomRule>("sabit");
+  const [roomAccess, setRoomAccess] = useState<RoomAccess>("yakin");
   const [roomHands, setRoomHands] = useState<MatchHands>(5);
   const [roomName, setRoomName] = useState("101 Masası");
   const [rooms, setRooms] = useState<
@@ -311,6 +334,7 @@ export default function Home() {
       max: number;
       status: string;
       rule?: RoomRule;
+      access?: RoomAccess;
       hands?: MatchHands;
       started?: boolean;
       currentHand?: number;
@@ -643,12 +667,7 @@ export default function Home() {
       } else {
         root.style.removeProperty("--lobby-create-scale");
       }
-      if (screen === "menu") {
-        const menuScale = Math.min(2, availableWidth / 640, availableHeight / 520);
-        root.style.setProperty("--menu-scale", String(menuScale));
-      } else {
-        root.style.removeProperty("--menu-scale");
-      }
+      root.style.removeProperty("--menu-scale");
       if (screen === "lobby" || screen === "room") {
         const pageUiScale = Math.min(2, availableWidth / 960, availableHeight / 500);
         root.style.setProperty("--page-ui-scale", String(pageUiScale));
@@ -1091,6 +1110,7 @@ export default function Home() {
           max: d.maksimum || 4,
           status: "",
           rule: d.kuralTipi === "katlamali" ? "katlamali" : "sabit",
+          access: d.erisimTipi === "davet" ? "davet" : "yakin",
           hands: Number(d.toplamEl || 5) as MatchHands,
           started: Boolean(d.macAktif || d.oyunBasladi),
           currentHand: d.oyunBasladi
@@ -1250,8 +1270,16 @@ export default function Home() {
         setScreen("game");
       }
     });
-    s.on("oda-olusturuldu", ({ odaId }) => {
+    s.on("oda-olusturuldu", ({ odaId, oda }) => {
       setSelectedRoom(odaId);
+      if (oda) {
+        setRoomSnapshots((current) => [
+          ...current.filter(
+            (room) => String(room.odaId) !== String(odaId),
+          ),
+          oda,
+        ]);
+      }
       setScreen("room");
     });
     return () => {
@@ -1436,7 +1464,12 @@ export default function Home() {
     window.localStorage.setItem("okey-selected-room", String(selectedRoom));
   }, [selectedRoom]);
   useEffect(() => {
-    window.localStorage.setItem("okey-game-theme", gameTheme);
+    const saved = window.localStorage.getItem(gameThemeStorageKey);
+    if (gameThemes.includes(saved as GameTheme))
+      setGameTheme(saved as GameTheme);
+  }, []);
+  useEffect(() => {
+    window.localStorage.setItem(gameThemeStorageKey, gameTheme);
   }, [gameTheme]);
   useEffect(() => {
     if (!routeReady) return;
@@ -1672,6 +1705,16 @@ export default function Home() {
     const occupied = new Set(
       nextTable[mode].flatMap((tile, index) => (tile ? [index] : [])),
     );
+    const existingCells = [...occupied].map((index) => ({
+      row: Math.floor(index / columns),
+      col: index % columns,
+    }));
+    // Mevcut perlerin iki ucuna da tas islenebilmesi icin arada dort tam
+    // bos hucre kalir; bu nedenle koordinat uzakligi en az bes olmalidir.
+    const hasOpeningClearance = (row: number, col: number) =>
+      existingCells.every(
+        (cell) => Math.max(Math.abs(cell.row - row), Math.abs(cell.col - col)) >= 5,
+      );
     const placedIndices: number[] = [];
     const groupsPerBlock = 5;
     const blocks = Array.from(
@@ -1736,8 +1779,10 @@ export default function Home() {
               afterFree &&
               group.tiles.every(
                 (_: Tile, offset: number) =>
-                  !occupied.has(
-                    groupRow * columns + candidateColumn + offset,
+                  !occupied.has(groupRow * columns + candidateColumn + offset) &&
+                  hasOpeningClearance(
+                    groupRow,
+                    candidateColumn + offset,
                   ),
               )
             );
@@ -2565,19 +2610,54 @@ export default function Home() {
             (Number(a.value) || 99) - (Number(b.value) || 99) ||
             colors.indexOf(a.color) - colors.indexOf(b.color),
     );
-    const rows: RackCell[][] = [[], []];
-    for (const group of groups) {
-      const target = [0, 1]
-        .filter((row) => rows[row].length + group.length + (rows[row].length ? 1 : 0) <= RACK_COLUMNS)
-        .sort((a, b) => rows[a].length - rows[b].length)[0];
-      if (target === undefined) break;
-      if (rows[target].length) rows[target].push(null);
-      rows[target].push(...group);
-    }
+    const leftoverSections: Tile[][] = [];
+    let previousLeftoverKey = "";
     for (const tile of leftovers) {
-      const target = rows[0].length <= rows[1].length ? 0 : 1;
-      if (rows[target].length < RACK_COLUMNS) rows[target].push(tile);
-      else if (rows[1 - target].length < RACK_COLUMNS) rows[1 - target].push(tile);
+      const sectionKey =
+        mode === "series" ? String(tile.color) : String(tile.value);
+      if (!leftoverSections.length || sectionKey !== previousLeftoverKey)
+        leftoverSections.push([]);
+      leftoverSections[leftoverSections.length - 1].push(tile);
+      previousLeftoverKey = sectionKey;
+    }
+    const sections = [...groups, ...leftoverSections].filter(
+      (section) => section.length > 0,
+    );
+    const assignmentMemo = new Set<string>();
+    const assignSections = (
+      sectionIndex: number,
+      lengths: [number, number],
+    ): number[] | null => {
+      if (sectionIndex >= sections.length) return [];
+      const memoKey = `${sectionIndex}:${lengths[0]}:${lengths[1]}`;
+      if (assignmentMemo.has(memoKey)) return null;
+      const section = sections[sectionIndex];
+      const rowOrder = lengths[0] <= lengths[1] ? [0, 1] : [1, 0];
+      for (const row of rowOrder) {
+        const required = section.length + (lengths[row] ? 1 : 0);
+        if (lengths[row] + required > RACK_COLUMNS) continue;
+        const nextLengths: [number, number] = [...lengths];
+        nextLengths[row] += required;
+        const rest = assignSections(sectionIndex + 1, nextLengths);
+        if (rest) return [row, ...rest];
+      }
+      assignmentMemo.add(memoKey);
+      return null;
+    };
+    const assignment = assignSections(0, [0, 0]);
+    const rows: RackCell[][] = [[], []];
+    if (assignment) {
+      sections.forEach((section, sectionIndex) => {
+        const row = assignment[sectionIndex];
+        if (rows[row].length) rows[row].push(null);
+        rows[row].push(...section);
+      });
+    } else {
+      for (const tile of tiles) {
+        const row = rows[0].length <= rows[1].length ? 0 : 1;
+        if (rows[row].length < RACK_COLUMNS) rows[row].push(tile);
+        else rows[1 - row].push(tile);
+      }
     }
     const visibleRack = rows.flatMap((row) => [
       ...row,
@@ -2747,6 +2827,7 @@ export default function Home() {
         maksimum: roomSize,
         kullaniciId: userId,
         kuralTipi: roomRule,
+        erisimTipi: roomAccess,
         toplamEl: roomHands,
       });
       return;
@@ -2762,6 +2843,7 @@ export default function Home() {
         max: roomSize,
         status: "",
         rule: roomRule,
+        access: roomAccess,
         hands: roomHands,
         started: false,
       },
@@ -2793,7 +2875,6 @@ export default function Home() {
       kullaniciId: userId,
     });
   const joinSeat = (seat = 0) => {
-    requestMobileFullscreen();
     socket?.emit("oda-katil", {
       odaId: selectedRoom,
       koltukNo: seat,
@@ -2804,7 +2885,7 @@ export default function Home() {
   };
   const leaveSeat = () => {
     window.localStorage.removeItem("okey-joined-room");
-    socket?.emit("oda-ayril", selectedRoom);
+    socket?.emit("koltuk-ayril", selectedRoom);
   };
   const updateRoomProfile = (name: string, emoji: string) => {
     const nextName = name.trim().slice(0, 20) || profileName;
@@ -2867,10 +2948,6 @@ export default function Home() {
           requestMobileFullscreen();
           setScreen("lobby");
         }}
-        onInstall={installApp}
-        showInstall={mobileInstallTarget}
-        installHint={installHint}
-        notice={notice}
       />
     );
   if (screen === "lobby")
@@ -2884,6 +2961,8 @@ export default function Home() {
         setRoomSize={setRoomSize}
         roomRule={roomRule}
         setRoomRule={setRoomRule}
+        roomAccess={roomAccess}
+        setRoomAccess={setRoomAccess}
         roomHands={roomHands}
         setRoomHands={setRoomHands}
         onCreate={createRoom}
@@ -2955,7 +3034,10 @@ export default function Home() {
             if (next) window.setTimeout(() => playGameSound("click"), 0);
           }}
         >
-          {soundEnabled ? "🔊" : "🔇"}
+          <IonIcon
+            aria-hidden="true"
+            icon={soundEnabled ? volumeHighOutline : volumeMuteOutline}
+          />
         </button>
       </div>
       <div className="game-top-info">
@@ -2969,8 +3051,14 @@ export default function Home() {
           {penaltyAlert || notice}
         </p>
       </div>
-      {game.elSonucu && (
-        <section className="round-result" role="dialog" aria-modal="true">
+      {game.elSonucu &&
+        typeof document !== "undefined" &&
+        createPortal(
+        <section
+          className={`round-result round-result-portal game-theme-${gameTheme}`}
+          role="dialog"
+          aria-modal="true"
+        >
           <div className="round-result-content">
             <small>
               {game.elSonucu.macBitti
@@ -3023,7 +3111,8 @@ export default function Home() {
               </button>
             )}
           </div>
-        </section>
+        </section>,
+        document.body,
       )}
       {false && (
       <section className="game-player-strip" aria-label="Oyuncular">
@@ -3076,7 +3165,7 @@ export default function Home() {
           .filter(Boolean)
           .map((player: any) => (
             <div
-              className={`minimal-side-profile minimal-side-profile-${player.profileSide} ${player.acilisTipi ? "opened-profile" : ""}`}
+              className={`minimal-side-profile minimal-side-profile-${player.profileSide} ${player.acilisTipi ? "opened-profile" : ""} ${game.siradakiOyuncu === player.koltukNo ? "active-turn-profile" : ""}`}
               key={`${player.profileSide}-${player.socketId ?? player.koltukNo}`}
             >
               <span className="minimal-side-profile-order">
@@ -3098,7 +3187,7 @@ export default function Home() {
           ))}
         {topPlayers.slice(0, 1).map((player: any) => (
           <div
-            className={`minimal-top-profile ${player.acilisTipi ? "opened-profile" : ""}`}
+            className={`minimal-top-profile ${player.acilisTipi ? "opened-profile" : ""} ${game.siradakiOyuncu === player.koltukNo ? "active-turn-profile" : ""}`}
             key={`top-${player.socketId ?? player.koltukNo}`}
           >
             <span className="minimal-top-profile-order">
@@ -3187,7 +3276,9 @@ export default function Home() {
                 <TileView tile={game.gostergeTas} />
               </div>
               <div className="deck-info">
-                {game.kalanTasSayisi > 0 ? (
+                {game.kalanTasSayisi > 0 ||
+                rackPointerDrag?.source === "deck" ||
+                deckDrawPendingRef.current ? (
                   <>
                     <div
                       className="center-deck-stack"
@@ -3199,7 +3290,7 @@ export default function Home() {
                       <i />
                       <i />
                       <div className="center-deck-tile">
-                        {game.kalanTasSayisi}
+                        {Math.max(0, game.kalanTasSayisi)}
                       </div>
                       {drawAnimation?.source === "deste" && (
                         <div
@@ -3446,8 +3537,14 @@ export default function Home() {
             className={`rack-opening-bubble ${ownPlayer?.acilisTipi ? "opened-profile" : ""}`}
             aria-label="Istaka açılış hesabı"
           >
-            <b>{rackOpeningEstimate.seriesScore} / {game.mevcutBaraj}</b>
-            <span>{rackOpeningEstimate.pairCount} / 5 çift</span>
+            <span>
+              <small>Seri</small>
+              <b>{rackOpeningEstimate.seriesScore} / {game.mevcutBaraj}</b>
+            </span>
+            <span>
+              <small>Çift</small>
+              <b>{rackOpeningEstimate.pairCount} / 5</b>
+            </span>
           </output>
           <div className="rack-discard rack-discard-left">
             <small>Taş çek</small>
@@ -3780,44 +3877,71 @@ function Opponent({
 
 function StartMenu({
   onStart,
-  onInstall,
-  showInstall,
-  installHint,
 }: {
   onStart: () => void;
-  onInstall: () => void;
-  showInstall: boolean;
-  installHint: string;
-  notice: string;
 }) {
+  const games = [
+    {
+      name: "101",
+      image: "/game-cards/101-tower.webp",
+      available: true,
+    },
+    {
+      name: "Okey",
+      image: "/game-cards/okey.webp",
+      available: false,
+    },
+    {
+      name: "Pişti",
+      image: "/game-cards/pisti.webp",
+      available: false,
+    },
+    {
+      name: "Poker",
+      image: "/game-cards/poker.webp",
+      available: false,
+    },
+  ];
   return (
-    <main className="start-screen">
-      <div className="start-menu-content">
-        <div className="start-mark">
-          <div className="start-number" aria-hidden="true">
-            101
-          </div>
-          <span className="start-plus" aria-hidden="true">
-            +
-          </span>
-        </div>
-        <nav className="menu-actions" aria-label="Ana menü">
-          <button className="primary-action" onClick={onStart}>
-            Başla
-          </button>
-          {showInstall && (
-            <button className="pwa-install-action" onClick={onInstall}>
-              Oyunu indir
+    <main className="start-screen game-hub">
+      <section className="game-hub-content">
+        <h1 className="game-hub-title">Han Games</h1>
+
+        <div className="hub-game-grid">
+          {games.map((game) => (
+            <button
+              type="button"
+              key={game.name}
+              className={`hub-game-card ${game.available ? "available" : "locked"}`}
+              onClick={game.available ? onStart : undefined}
+              disabled={!game.available}
+              aria-label={
+                game.available
+                  ? `${game.name} oyununa gir`
+                  : `${game.name} henüz açılmadı`
+              }
+            >
+              <img src={game.image} alt="" />
+              <span className="hub-card-shade" />
+              <span className="hub-card-copy">
+                <strong>{game.name}</strong>
+              </span>
+              {game.available ? (
+                <span className="hub-card-action" aria-hidden="true">
+                  Oyna →
+                </span>
+              ) : (
+                <span className="hub-lock-watermark" aria-hidden="true" />
+              )}
             </button>
-          )}
-        </nav>
-        {installHint && <p className="pwa-install-hint">{installHint}</p>}
-      </div>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }
 
-function Lobby({
+function RedesignedLobby({
   rooms,
   joinedRoomId,
   roomName,
@@ -3826,6 +3950,8 @@ function Lobby({
   setRoomSize,
   roomRule,
   setRoomRule,
+  roomAccess,
+  setRoomAccess,
   roomHands,
   setRoomHands,
   onCreate,
@@ -3841,8 +3967,10 @@ function Lobby({
     max: number;
     status: string;
     rule?: RoomRule;
+    access?: RoomAccess;
     hands?: MatchHands;
     started?: boolean;
+    currentHand?: number;
   }[];
   joinedRoomId: number | string | null;
   roomName: string;
@@ -3851,6 +3979,8 @@ function Lobby({
   setRoomSize: (v: 2 | 3 | 4) => void;
   roomRule: RoomRule;
   setRoomRule: (v: RoomRule) => void;
+  roomAccess: RoomAccess;
+  setRoomAccess: (v: RoomAccess) => void;
   roomHands: MatchHands;
   setRoomHands: (v: MatchHands) => void;
   onCreate: () => void;
@@ -3858,24 +3988,78 @@ function Lobby({
   onJoin: (id: number | string) => void;
   onBack: () => void;
 }) {
+  const [inviteCode, setInviteCode] = useState("");
+  const [inviteError, setInviteError] = useState("");
+  const nearbyRooms = rooms.filter(
+    (room) => room.access !== "davet" || room.id === joinedRoomId,
+  );
+  const joinWithCode = () => {
+    const value = inviteCode.trim().toLowerCase();
+    if (!value) {
+      setInviteError("Davet kodunu yazmalısın");
+      return;
+    }
+    const normalized = value.startsWith("oda-") ? value : `oda-${value}`;
+    const room = rooms.find(
+      (item) => String(item.id).toLowerCase() === normalized,
+    );
+    if (!room) {
+      setInviteError("Bu kodla eşleşen bir masa bulunamadı");
+      return;
+    }
+    setInviteError("");
+    onJoin(room.id);
+  };
   return (
-    <main className="lobby-screen">
+    <main className="lobby-screen lobby-redesign">
       <button
         className="back-link lobby-back"
         onClick={onBack}
         aria-label="Geri"
       >
-        <span className="back-arrow">‹</span> Geri
+        <span aria-hidden="true">←</span> Geri
       </button>
       <section className="lobby-content">
+        <header className="lobby-hero">
+          <span>Han Games</span>
+          <strong>101</strong>
+          <p>Yeni bir masa kur veya arkadaşının masasına katıl.</p>
+        </header>
         <div className="create-panel">
-          <h1>Oyun oluştur</h1>
-          <span className="create-field-label">Oda adı</span>
+          <span className="lobby-card-kicker">Yeni masa</span>
+          <h1>Kendi masanı kur</h1>
+          <p className="lobby-card-description">
+            Oyun ayarlarını seç, masanı oluştur ve arkadaşlarını çağır.
+          </p>
+          <span className="create-field-label">Masa adı</span>
           <input
-            aria-label="Oda adı"
+            aria-label="Masa adı"
             value={roomName}
             onChange={(e) => setRoomName(e.target.value)}
           />
+          <span className="create-field-label">Katılım şekli</span>
+          <div className="room-access-picker" aria-label="Katılım şekli">
+            <button
+              className={roomAccess === "yakin" ? "selected" : ""}
+              onClick={() => setRoomAccess("yakin")}
+            >
+              <i aria-hidden="true">⌁</i>
+              <span>
+                <b>Yakındaki cihazlar</b>
+                <small>Açık masalarda görünür</small>
+              </span>
+            </button>
+            <button
+              className={roomAccess === "davet" ? "selected" : ""}
+              onClick={() => setRoomAccess("davet")}
+            >
+              <i aria-hidden="true">#</i>
+              <span>
+                <b>Davet kodu</b>
+                <small>Yalnızca kodu bilenler</small>
+              </span>
+            </button>
+          </div>
           <span className="create-field-label">Oyuncu sayısı</span>
           <div className="tile-picker" aria-label="Oyuncu sayısı">
             {[2, 3, 4].map((value) => (
@@ -3884,12 +4068,8 @@ function Lobby({
                 className={`player-tile tile-choice-${value} ${roomSize === value ? "selected" : ""}`}
                 onClick={() => setRoomSize(value as 2 | 3 | 4)}
               >
-                <span className="tile-pips">
-                  {Array.from({ length: value }, (_, i) => (
-                    <i key={i} />
-                  ))}
-                </span>
                 <b>{value}</b>
+                <i className="player-tile-dot" aria-hidden="true" />
               </button>
             ))}
           </div>
@@ -3921,17 +4101,49 @@ function Lobby({
             ))}
           </div>
           <button className="create-button" onClick={onCreate}>
-            Oluştur
+            Masayı oluştur
           </button>
         </div>
         <div className="lobby-divider" />
         <div className="rooms-panel">
-          <h1>Odalar</h1>
+          <span className="lobby-card-kicker">Oyuna katıl</span>
+          <h1>Bir masa bul</h1>
+          <p className="lobby-card-description">
+            Davet kodunu yaz veya açık masalardan birini seç.
+          </p>
+          <div className="invite-code-box">
+            <label htmlFor="invite-code">Davet kodu</label>
+            <div>
+              <input
+                id="invite-code"
+                value={inviteCode}
+                placeholder="Örn. A1B2C3"
+                maxLength={10}
+                onChange={(event) => {
+                  setInviteCode(event.target.value);
+                  setInviteError("");
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") joinWithCode();
+                }}
+              />
+              <button onClick={joinWithCode}>Kodla katıl</button>
+            </div>
+            {inviteError && <small>{inviteError}</small>}
+          </div>
+          <div className="nearby-rooms-head">
+            <span>
+              <i aria-hidden="true" /> Yakındaki masalar
+            </span>
+            <small>{nearbyRooms.length} masa</small>
+          </div>
           <div className="room-list">
-            {rooms.length === 0 ? (
-              <p className="rooms-footnote">Henüz oda yok.</p>
+            {nearbyRooms.length === 0 ? (
+              <p className="rooms-footnote">
+                Şu anda katılabileceğin açık bir masa yok.
+              </p>
             ) : (
-              rooms.map((room) => {
+              nearbyRooms.map((room) => {
                 const joined = room.id === joinedRoomId;
                 return (
                   <div
@@ -3961,6 +4173,9 @@ function Lobby({
                             {room.rule === "katlamali"
                               ? "Katlamalı"
                               : "Sabit"}
+                          </small>
+                          <small className="room-code">
+                            #{String(room.id).replace(/^oda-/i, "").toUpperCase()}
                           </small>
                           {joined && (
                             <small className="joined-label">Katılındı</small>
@@ -4008,6 +4223,630 @@ function Lobby({
   );
 }
 
+function Lobby(props: Parameters<typeof RedesignedLobby>[0]) {
+  const {
+    rooms,
+    joinedRoomId,
+    roomName,
+    setRoomName,
+    roomSize,
+    setRoomSize,
+    roomRule,
+    setRoomRule,
+    roomHands,
+    setRoomHands,
+    onCreate,
+    onDelete,
+    onJoin,
+    onBack,
+  } = props;
+  const [inviteCode, setInviteCode] = useState("");
+  const [inviteError, setInviteError] = useState("");
+  const visibleRooms = rooms.filter(
+    (room) => room.access !== "davet" || room.id === joinedRoomId,
+  );
+  const joinWithCode = () => {
+    const value = inviteCode.trim().toLowerCase();
+    const normalized = value.startsWith("oda-") ? value : `oda-${value}`;
+    const room = rooms.find(
+      (item) => String(item.id).toLowerCase() === normalized,
+    );
+    if (!value || !room) {
+      setInviteError("Geçerli bir davet kodu yaz");
+      return;
+    }
+    setInviteError("");
+    onJoin(room.id);
+  };
+  return (
+    <main className="lobby-screen lobby-original">
+      <button className="back-link lobby-back shared-back-button" onClick={onBack} aria-label="Geri">
+        <span aria-hidden="true">←</span>
+        Geri
+      </button>
+      <section className="lobby-content">
+        <div className="create-panel">
+          <h1>Oyun oluştur</h1>
+          <span className="create-field-label">Oda adı</span>
+          <input
+            aria-label="Oda adı"
+            value={roomName}
+            onChange={(event) => setRoomName(event.target.value)}
+          />
+
+          <span className="create-field-label">Bağlantı</span>
+          <div className="original-access-picker">
+            <button
+              type="button"
+              className="local-game-locked"
+              disabled
+              aria-label="Yerel oyun yakında"
+            >
+              <span aria-hidden="true">🔒</span>
+              Yerel oyun yakında
+            </button>
+          </div>
+
+          <span className="create-field-label">Oyuncu sayısı</span>
+          <div className="tile-picker" aria-label="Oyuncu sayısı">
+            {[2, 3, 4].map((value) => (
+              <button
+                key={value}
+                className={`player-tile tile-choice-${value} ${roomSize === value ? "selected" : ""}`}
+                onClick={() => setRoomSize(value as 2 | 3 | 4)}
+              >
+                <b>{value}</b>
+                <i className="player-tile-dot" aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+
+          <span className="create-field-label">Oyun türü</span>
+          <div className="room-rule-picker" aria-label="Oyun kuralı">
+            <button
+              className={roomRule === "sabit" ? "selected" : ""}
+              onClick={() => setRoomRule("sabit")}
+            >
+              Sabit 101
+            </button>
+            <button
+              className={roomRule === "katlamali" ? "selected" : ""}
+              onClick={() => setRoomRule("katlamali")}
+            >
+              Katlamalı
+            </button>
+          </div>
+
+          <span className="create-field-label">El sayısı</span>
+          <div className="room-hands-picker" aria-label="El sayısı">
+            {[5, 10, 20].map((value) => (
+              <button
+                key={value}
+                className={roomHands === value ? "selected" : ""}
+                onClick={() => setRoomHands(value as MatchHands)}
+              >
+                {value} el
+              </button>
+            ))}
+          </div>
+          <button className="create-button" onClick={onCreate}>Oluştur</button>
+        </div>
+
+        <div className="lobby-divider" />
+
+        <div className="rooms-panel">
+          <h1>Odalar</h1>
+          <div className="original-invite-row">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="8" cy="12" r="3" />
+              <path d="M11 12h9M17 12v3M14 12v2" />
+            </svg>
+            <input
+              aria-label="Davet kodu"
+              placeholder="Davet kodu"
+              maxLength={10}
+              value={inviteCode}
+              onChange={(event) => {
+                setInviteCode(event.target.value);
+                setInviteError("");
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") joinWithCode();
+              }}
+            />
+            <button onClick={joinWithCode}>Katıl</button>
+          </div>
+          {inviteError && <small className="original-invite-error">{inviteError}</small>}
+          <div className="room-list">
+            {visibleRooms.length === 0 ? (
+              <p className="rooms-footnote">Henüz oda yok.</p>
+            ) : (
+              visibleRooms.map((room) => {
+                const joined = room.id === joinedRoomId;
+                return (
+                  <div
+                    className="room-row room-row-open"
+                    key={room.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => onJoin(room.id)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") onJoin(room.id);
+                    }}
+                  >
+                    <span className="original-room-icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="9" cy="8" r="3" />
+                        <circle cx="17" cy="10" r="2" />
+                        <path d="M3 19c.5-4 2.5-6 6-6s5.5 2 6 6M15 15c3 0 4.5 1.3 5 4" />
+                      </svg>
+                    </span>
+                    <span className="room-main">
+                      <b>{room.name}</b>
+                      <small>
+                        {room.rule === "katlamali" ? "Katlamalı" : "Sabit 101"}
+                        {" · "}{room.hands || 5} el
+                      </small>
+                    </span>
+                    {joined && <small className="joined-label">Katıldın</small>}
+                    <span className="room-count">{room.players}/{room.max}</span>
+                    {room.owner === "Siz" && (
+                      <button
+                        className="room-delete"
+                        aria-label={`${room.name} odasını sil`}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onDelete(room.id as number);
+                        }}
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function IonicLobby(props: Parameters<typeof Lobby>[0]) {
+  const {
+    rooms,
+    joinedRoomId,
+    roomName,
+    setRoomName,
+    roomSize,
+    setRoomSize,
+    roomRule,
+    setRoomRule,
+    roomAccess,
+    setRoomAccess,
+    roomHands,
+    setRoomHands,
+    onCreate,
+    onDelete,
+    onJoin,
+    onBack,
+  } = props;
+  const [inviteCode, setInviteCode] = useState("");
+  const [inviteError, setInviteError] = useState("");
+  const [lobbyMode, setLobbyMode] = useState<"create" | "join">("create");
+  const nearbyRooms = rooms.filter(
+    (room) => room.access !== "davet" || room.id === joinedRoomId,
+  );
+  const joinWithCode = () => {
+    const value = inviteCode.trim().toLowerCase();
+    if (!value) {
+      setInviteError("Davet kodunu yazmalısın");
+      return;
+    }
+    const normalized = value.startsWith("oda-") ? value : `oda-${value}`;
+    const room = rooms.find(
+      (item) => String(item.id).toLowerCase() === normalized,
+    );
+    if (!room) {
+      setInviteError("Bu kodla eşleşen bir masa bulunamadı");
+      return;
+    }
+    setInviteError("");
+    onJoin(room.id);
+  };
+
+  return (
+    <IonApp className="ionic-lobby-app">
+      <IonPage className="ionic-lobby-page">
+        <IonHeader className="ionic-lobby-header">
+          <IonToolbar>
+            <IonButton
+              slot="start"
+              fill="clear"
+              className="ionic-back-button"
+              onClick={onBack}
+              aria-label="Geri"
+            >
+              <IonIcon icon={arrowBackOutline} slot="icon-only" />
+            </IonButton>
+            <div className="ionic-lobby-title">
+              <small>HAN GAMES</small>
+              <b>101 Okey</b>
+            </div>
+          </IonToolbar>
+        </IonHeader>
+
+        <IonContent fullscreen className="ionic-lobby-content">
+          <div className="ionic-lobby-shell">
+            <section className="ionic-lobby-intro">
+              <span className="ionic-game-mark">101</span>
+              <div>
+                <h1>Masaya otur</h1>
+                <p>Yeni bir oyun kur veya arkadaşlarının masasına katıl.</p>
+              </div>
+            </section>
+
+            <IonSegment
+              className="ionic-lobby-tabs"
+              value={lobbyMode}
+              onIonChange={(event) =>
+                setLobbyMode(event.detail.value === "join" ? "join" : "create")
+              }
+            >
+              <IonSegmentButton value="create">
+                <IonIcon icon={addCircleOutline} />
+                <IonLabel>Masa kur</IonLabel>
+              </IonSegmentButton>
+              <IonSegmentButton value="join">
+                <IonIcon icon={peopleOutline} />
+                <IonLabel>Oyuna katıl</IonLabel>
+              </IonSegmentButton>
+            </IonSegment>
+
+            <div className="ionic-lobby-grid">
+              <section
+                className={`ionic-lobby-panel ionic-create-panel ${lobbyMode !== "create" ? "mobile-hidden-panel" : ""}`}
+              >
+                <div className="ionic-panel-heading">
+                  <div><small>YENİ OYUN</small><h2>Masanı oluştur</h2></div>
+                  <IonIcon icon={addCircleOutline} />
+                </div>
+
+                <IonItem className="ionic-field" lines="none">
+                  <IonInput
+                    label="Masa adı"
+                    labelPlacement="stacked"
+                    value={roomName}
+                    onIonInput={(event) =>
+                      setRoomName(String(event.detail.value || ""))
+                    }
+                  />
+                </IonItem>
+
+                <span className="ionic-field-title">Katılım şekli</span>
+                <IonSegment
+                  className="ionic-choice-segment"
+                  value={roomAccess}
+                  onIonChange={(event) =>
+                    setRoomAccess(
+                      event.detail.value === "davet" ? "davet" : "yakin",
+                    )
+                  }
+                >
+                  <IonSegmentButton value="yakin">
+                    <IonIcon icon={radioOutline} />
+                    <IonLabel>Yakındaki</IonLabel>
+                  </IonSegmentButton>
+                  <IonSegmentButton value="davet">
+                    <IonIcon icon={keyOutline} />
+                    <IonLabel>Davet kodlu</IonLabel>
+                  </IonSegmentButton>
+                </IonSegment>
+
+                <span className="ionic-field-title">Oyuncu sayısı</span>
+                <div className="ionic-tile-picker" aria-label="Oyuncu sayısı">
+                  {[2, 3, 4].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={`player-tile tile-choice-${value} ${roomSize === value ? "selected" : ""}`}
+                      onClick={() => setRoomSize(value as 2 | 3 | 4)}
+                    >
+                      <b>{value}</b>
+                      <i className="player-tile-dot" aria-hidden="true" />
+                    </button>
+                  ))}
+                </div>
+
+                <span className="ionic-field-title">Oyun türü</span>
+                <IonSegment
+                  className="ionic-choice-segment"
+                  value={roomRule}
+                  onIonChange={(event) =>
+                    setRoomRule(
+                      event.detail.value === "katlamali"
+                        ? "katlamali"
+                        : "sabit",
+                    )
+                  }
+                >
+                  <IonSegmentButton value="sabit">
+                    <IonLabel>Sabit 101</IonLabel>
+                  </IonSegmentButton>
+                  <IonSegmentButton value="katlamali">
+                    <IonLabel>Katlamalı</IonLabel>
+                  </IonSegmentButton>
+                </IonSegment>
+
+                <span className="ionic-field-title">El sayısı</span>
+                <IonSegment
+                  className="ionic-choice-segment ionic-hands-segment"
+                  value={String(roomHands)}
+                  onIonChange={(event) =>
+                    setRoomHands(
+                      Number(event.detail.value || 5) as MatchHands,
+                    )
+                  }
+                >
+                  {[5, 10, 20].map((value) => (
+                    <IonSegmentButton value={String(value)} key={value}>
+                      <IonLabel>{value} el</IonLabel>
+                    </IonSegmentButton>
+                  ))}
+                </IonSegment>
+
+                <IonButton
+                  expand="block"
+                  className="ionic-primary-action desktop-panel-action"
+                  onClick={onCreate}
+                >
+                  Masayı oluştur
+                </IonButton>
+              </section>
+
+              <section
+                className={`ionic-lobby-panel ionic-join-panel ${lobbyMode !== "join" ? "mobile-hidden-panel" : ""}`}
+              >
+                <div className="ionic-panel-heading">
+                  <div><small>MASA BUL</small><h2>Oyuna katıl</h2></div>
+                  <IonBadge>{nearbyRooms.length}</IonBadge>
+                </div>
+
+                <div className="ionic-invite-box">
+                  <IonItem className="ionic-field" lines="none">
+                    <IonInput
+                      label="Davet kodu"
+                      labelPlacement="stacked"
+                      placeholder="Örn. A1B2C3"
+                      maxlength={10}
+                      value={inviteCode}
+                      onIonInput={(event) => {
+                        setInviteCode(String(event.detail.value || ""));
+                        setInviteError("");
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") joinWithCode();
+                      }}
+                    />
+                  </IonItem>
+                  <IonButton onClick={joinWithCode}>Katıl</IonButton>
+                  {inviteError && (
+                    <small className="ionic-invite-error">{inviteError}</small>
+                  )}
+                </div>
+
+                <div className="ionic-nearby-title">
+                  <span><IonIcon icon={radioOutline} /> Yakındaki masalar</span>
+                  <small>CANLI</small>
+                </div>
+
+                <IonList className="ionic-room-list">
+                  {nearbyRooms.length === 0 ? (
+                    <div className="ionic-empty-rooms">
+                      <IonIcon icon={radioOutline} />
+                      <b>Açık masa yok</b>
+                      <small>Yeni bir masa kurarak oyunu başlatabilirsin.</small>
+                    </div>
+                  ) : (
+                    nearbyRooms.map((room) => {
+                      const joined = room.id === joinedRoomId;
+                      return (
+                        <IonItem
+                          button
+                          detail
+                          className="ionic-room-item"
+                          key={room.id}
+                          onClick={() => onJoin(room.id)}
+                        >
+                          <IonLabel>
+                            <h3>{room.name}</h3>
+                            <p>
+                              {room.rule === "katlamali" ? "Katlamalı" : "Sabit 101"}
+                              {" · "}
+                              {room.started
+                                ? `${Math.min(room.currentHand || 1, room.hands || 5)}/${room.hands || 5} el`
+                                : `${room.hands || 5} el`}
+                              {" · #"}
+                              {String(room.id).replace(/^oda-/i, "").toUpperCase()}
+                            </p>
+                          </IonLabel>
+                          {joined && <IonBadge color="success">Katıldın</IonBadge>}
+                          <IonBadge color="light">{room.players}/{room.max}</IonBadge>
+                          {room.owner === "Siz" && (
+                            <IonButton
+                              fill="clear"
+                              color="danger"
+                              aria-label={`${room.name} odasını sil`}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                onDelete(room.id as number);
+                              }}
+                            >
+                              <IonIcon icon={trashOutline} slot="icon-only" />
+                            </IonButton>
+                          )}
+                        </IonItem>
+                      );
+                    })
+                  )}
+                </IonList>
+              </section>
+            </div>
+          </div>
+        </IonContent>
+
+        <IonFooter className="ionic-lobby-footer">
+          <IonToolbar>
+            <IonButton
+              expand="block"
+              className="ionic-primary-action"
+              onClick={lobbyMode === "create" ? onCreate : joinWithCode}
+            >
+              {lobbyMode === "create" ? "Masayı oluştur" : "Kodla katıl"}
+            </IonButton>
+          </IonToolbar>
+        </IonFooter>
+      </IonPage>
+    </IonApp>
+  );
+}
+
+function SimpleRoomSeat({
+  seat,
+  player,
+  currentSocketId,
+  mine,
+  isMember,
+  canAddRobot,
+  isReturnRobot,
+  onJoinSeat,
+  onLeaveSeat,
+  onAddComputer,
+  onRemoveComputer,
+  onUpdateProfile,
+}: {
+  seat: number;
+  player: any;
+  currentSocketId: string;
+  mine: any;
+  isMember: boolean;
+  canAddRobot: boolean;
+  isReturnRobot: boolean;
+  onJoinSeat: (seat: number) => void;
+  onLeaveSeat: () => void;
+  onAddComputer: (seat: number) => void;
+  onRemoveComputer: (seat: number) => void;
+  onUpdateProfile: (name: string, emoji: string) => void;
+}) {
+  const [editingName, setEditingName] = useState(false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const [name, setName] = useState(player?.isim || "");
+  const isMine = player?.socketId === currentSocketId;
+  const saveName = () => {
+    if (player && isMine) onUpdateProfile(name, player.avatar);
+    setEditingName(false);
+  };
+  return (
+    <div className={`room-seat-simple ${player ? "occupied" : "empty"}`}>
+      <div className="simple-seat-avatar">
+        {player?.bot ? (
+          <span aria-hidden="true">🤖</span>
+        ) : player ? (
+          <button
+            type="button"
+            disabled={!isMine}
+            aria-label="Emojiyi düzenle"
+            onClick={() => setEmojiOpen((open) => !open)}
+          >
+            {player.avatar || "🙂"}
+          </button>
+        ) : (
+          <span aria-hidden="true">+</span>
+        )}
+        {player && isMine && emojiOpen && (
+          <div className="simple-emoji-picker" aria-label="Emoji seç">
+            {profileEmojis.map((emoji) => (
+              <button
+                type="button"
+                key={emoji}
+                onPointerDown={(event) => {
+                  event.preventDefault();
+                  onUpdateProfile(player.isim, emoji);
+                  setEmojiOpen(false);
+                }}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="simple-seat-name">
+        {player?.bot ? (
+          <b>Robot</b>
+        ) : player && editingName ? (
+          <input
+            value={name}
+            maxLength={20}
+            autoFocus
+            aria-label="Oyuncu adı"
+            onChange={(event) => setName(event.target.value)}
+            onBlur={saveName}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") event.currentTarget.blur();
+            }}
+          />
+        ) : player ? (
+          <button
+            type="button"
+            disabled={!isMine}
+            onClick={() => {
+              setName(player.isim || "");
+              setEditingName(true);
+            }}
+          >
+            {player.isim}
+          </button>
+        ) : (
+          <b>Oyuncu {seat + 1}</b>
+        )}
+      </div>
+
+      <div className={`simple-seat-tile simple-seat-color-${seat + 1}`}>
+        <b>{seat + 1}</b>
+        <i />
+      </div>
+
+      <div className="simple-seat-actions">
+        {player?.bot ? (
+          isReturnRobot ? (
+            <button className="seat-action primary" onClick={() => onJoinSeat(seat)}>Oyuna dön</button>
+          ) : (
+            <button className="seat-action secondary" onClick={() => onRemoveComputer(seat)} disabled={!isMember}>
+              Robot sil
+            </button>
+          )
+        ) : isMine ? (
+          <button className="seat-action secondary" onClick={onLeaveSeat}>Ayrıl</button>
+        ) : !player ? (
+          <>
+            <button className="seat-action primary" onClick={() => onJoinSeat(seat)} disabled={Boolean(mine)}>
+              Katıl
+            </button>
+            <button className="seat-action secondary" onClick={() => onAddComputer(seat)} disabled={!canAddRobot}>
+              Robot ekle
+            </button>
+          </>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function RoomView({
   room,
   currentSocketId,
@@ -4033,9 +4872,8 @@ function RoomView({
   onBack: () => void;
   onUpdateProfile: (name: string, emoji: string) => void;
 }) {
-  const [editingName, setEditingName] = useState(false);
-  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
-  const [draftName, setDraftName] = useState("");
+  const [inviteCopied, setInviteCopied] = useState(false);
+  const roomId = room?.odaId ?? room?.id;
   const max = room?.maksimum ?? room?.max ?? 4,
     players = room?.oyuncular ?? [],
     total = players.length,
@@ -4063,162 +4901,52 @@ function RoomView({
       room?.kurucuSocketId === currentSocketId &&
       total === max;
   return (
-    <main className="room-screen">
+    <main className="room-screen room-original">
       <section className="room-content">
-        <div className={`room-profile-grid count-${max}`}>
+        <header className="room-original-heading">
+          <h1>{room?.ad || room?.name || "Oyun odası"}</h1>
+          {roomId && (
+            <div className="room-invite-reference">
+              <span>Davet kodu</span>
+              <b>{String(roomId).replace(/^oda-/i, "").toUpperCase()}</b>
+              <button
+                type="button"
+                className={inviteCopied ? "copied" : ""}
+                aria-live="polite"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(
+                      String(roomId).replace(/^oda-/i, "").toUpperCase(),
+                    );
+                    setInviteCopied(true);
+                    window.setTimeout(() => setInviteCopied(false), 1600);
+                  } catch {}
+                }}
+              >
+                {inviteCopied ? "Kopyalandı" : "Kopyala"}
+              </button>
+            </div>
+          )}
+        </header>
+        <div className={`room-seat-grid-simple count-${max}`}>
           {Array.from({ length: max }, (_, i) => {
             const player = players.find((p: any) => p.koltukNo === i);
             return (
-              <div className="room-profile" key={i}>
-                <div
-                  className={`profile-box ${player?.bot ? "bot" : ""} ${player?.socketId === currentSocketId ? "player" : ""} ${!player ? "empty-profile" : ""}`}
-                >
-                  {player?.bot ? (
-                    <>
-                      <span className="avatar avatar-bot" aria-hidden="true">
-                        🤖
-                      </span>
-                      <b>Robot</b>
-                      <small>{Number(player.puan || 0)} puan</small>
-                    </>
-                  ) : player ? (
-                    <>
-                      <div className="room-profile-identity">
-                        <button
-                          type="button"
-                          className="room-emoji-edit"
-                          aria-label="Emojiyi düzenle"
-                          disabled={player.socketId !== currentSocketId}
-                          onClick={() => setEmojiPickerOpen((open) => !open)}
-                        >
-                          <span className="avatar avatar-player" aria-hidden="true">
-                            {player.avatar || "🙂"}
-                          </span>
-                          {player.socketId === currentSocketId && (
-                            <span className="room-edit-pencil" aria-hidden="true">✎</span>
-                          )}
-                        </button>
-                        {player.socketId === currentSocketId && emojiPickerOpen && (
-                          <div className="room-emoji-popover" aria-label="Emoji seç">
-                            {profileEmojis.map((emoji) => (
-                              <button
-                                type="button"
-                                key={emoji}
-                                className={player.avatar === emoji ? "selected" : ""}
-                                onPointerDown={(event) => {
-                                  event.preventDefault();
-                                  event.stopPropagation();
-                                  onUpdateProfile(player.isim, emoji);
-                                  setEmojiPickerOpen(false);
-                                }}
-                              >
-                                {emoji}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                        {player.socketId === currentSocketId && editingName ? (
-                          <input
-                            className="room-name-input"
-                            aria-label="Oyuncu adı"
-                            value={draftName}
-                            maxLength={20}
-                            autoFocus
-                            enterKeyHint="done"
-                            onChange={(event) => setDraftName(event.target.value)}
-                            onBlur={() => {
-                              onUpdateProfile(draftName, player.avatar);
-                              setEditingName(false);
-                            }}
-                            onKeyDown={(event) => {
-                              if (event.key === "Enter") {
-                                event.preventDefault();
-                                event.currentTarget.blur();
-                              }
-                              if (event.key === "Escape") {
-                                setDraftName(player.isim || "");
-                                setEditingName(false);
-                              }
-                            }}
-                          />
-                        ) : (
-                          <button
-                            type="button"
-                            className="room-name-edit"
-                            aria-label="İsmi düzenle"
-                            onClick={() => {
-                              if (player.socketId !== currentSocketId) return;
-                              setDraftName(player.isim || "");
-                              setEditingName(true);
-                            }}
-                            disabled={player.socketId !== currentSocketId}
-                          >
-                            <b>{player.isim}</b>
-                            {player.socketId === currentSocketId && (
-                              <span className="room-edit-pencil" aria-hidden="true">✎</span>
-                            )}
-                          </button>
-                        )}
-                      </div>
-                      <small>{Number(player.puan || 0)} puan</small>
-                    </>
-                  ) : (
-                    <>
-                      <span className="avatar avatar-empty" aria-hidden="true">
-                        +
-                      </span>
-                      <span>Boş profil</span>
-                      {Number(room?.koltukPuanlari?.[i] || 0) !== 0 && (
-                        <small>{Number(room.koltukPuanlari[i])} puan</small>
-                      )}
-                    </>
-                  )}
-                </div>
-                {player?.bot ? (
-                  player === returnRobot ? (
-                    <button
-                      className="robot-add room-join-seat"
-                      onClick={() => onJoinSeat(i)}
-                    >
-                      Oyuna dön
-                    </button>
-                  ) : (
-                    <button
-                      className="robot-add"
-                      onClick={() => onRemoveComputer(i)}
-                      disabled={!isMember}
-                    >
-                      Robot sil
-                    </button>
-                  )
-                ) : player?.socketId === currentSocketId ? (
-                  <button
-                    className="robot-add room-leave-seat"
-                    onClick={onLeaveSeat}
-                  >
-                    Ayrıl
-                  </button>
-                ) : (
-                  !player && (
-                    <>
-                      <button
-                        className="robot-add room-join-seat"
-                        onClick={() => onJoinSeat(i)}
-                        disabled={Boolean(mine)}
-                      >
-                        Katıl
-                      </button>
-                      <button
-                        className="robot-add"
-                        onClick={() => onAddComputer(i)}
-                        disabled={!canAddRobot}
-                      >
-                        Robot ekle
-                      </button>
-                    </>
-                  )
-                )}
-              </div>
+              <SimpleRoomSeat
+                key={i}
+                seat={i}
+                player={player}
+                currentSocketId={currentSocketId}
+                mine={mine}
+                isMember={isMember}
+                canAddRobot={canAddRobot}
+                isReturnRobot={player === returnRobot}
+                onJoinSeat={onJoinSeat}
+                onLeaveSeat={onLeaveSeat}
+                onAddComputer={onAddComputer}
+                onRemoveComputer={onRemoveComputer}
+                onUpdateProfile={onUpdateProfile}
+              />
             );
           })}
         </div>
@@ -4250,17 +4978,17 @@ function RoomView({
             </button>
           ) : (
             <button className="start-game" onClick={onStart} disabled={!canStart}>
-              Başlat
+              Oyunu başlat
             </button>
           )}
         </div>
       </section>
       <button
-        className="back-link room-back"
+        className="back-link room-back shared-back-button"
         onClick={onBack}
         aria-label="Geri"
       >
-        <span className="back-arrow">‹</span> Geri
+        <span aria-hidden="true">←</span> Geri
       </button>
     </main>
   );

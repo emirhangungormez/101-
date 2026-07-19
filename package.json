@@ -15,8 +15,14 @@
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@ionic/react": "^8.8.14",
     "drizzle-orm": "0.45.2",
     "express": "^5.2.1",
+    "ionicons": "^8.0.13",
+    "motion": "^12.42.2",
     "next": "16.2.6",
     "react": "19.2.6",
     "react-dom": "19.2.6",

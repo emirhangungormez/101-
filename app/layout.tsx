@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./lobby-original.css";
+import "./room-original.css";
 
 export const metadata: Metadata = {
   title: "101 Okey — Minimal Oyun Masası",
@@ -31,12 +33,6 @@ export default function RootLayout({
         />
         <meta name="theme-color" content="#35101f" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              'document.documentElement.style.setProperty("--menu-scale",String(Math.min(2,innerWidth/640,innerHeight/520)))',
-          }}
-        />
       </head>
       <body className="antialiased">{children}</body>
     </html>

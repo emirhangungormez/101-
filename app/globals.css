@@ -6446,6 +6446,15 @@ body > .rack-drag-ghost.deck-draw-ghost .tile i {
   background: #256a91 !important;
 }
 
+.game-shell.game-theme-blue > .game-area,
+.game-shell.game-theme-blue .game-center-info,
+.game-shell.game-theme-blue :is(.indicator-tile, .deck-info),
+.game-shell.game-theme-blue .rack-discard > :is(span, small),
+.game-shell.game-theme-blue .rack-status,
+.game-shell.game-theme-blue .turn-timer small {
+  color: var(--dark-text) !important;
+}
+
 .game-shell.game-theme-green .game-theme-button i {
   background: #27785d !important;
 }
@@ -9279,6 +9288,14 @@ body:has(.game-shell.round-complete),
   transform: none !important;
 }
 
+.game-shell > .game-top-actions .game-sound-button ion-icon {
+  width: 21px !important;
+  height: 21px !important;
+  color: currentColor !important;
+  font-size: 21px !important;
+  stroke-width: 2px !important;
+}
+
 /* Ust tas yuvalari acma izgaralarinin gorunen ust kenariyla hizalidir. */
 .game-shell .opponent-discard-corner {
   top: 98px !important;
@@ -9403,4 +9420,2575 @@ body:has(.game-shell.round-complete),
   max-height: 132px !important;
   flex-basis: 132px !important;
   transform: none !important;
+}
+
+/* Oyun merkezi */
+.start-screen.game-hub {
+  --hub-bg: #f4f5f1;
+  --hub-panel: rgb(255 255 255 / 86%);
+  --hub-ink: #18201c;
+  --hub-muted: #6d756f;
+  --hub-line: rgb(24 32 28 / 12%);
+  --hub-accent: #176b4d;
+  --hub-accent-soft: #dcecdf;
+  display: block !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  overflow: auto !important;
+  padding: 0 !important;
+  color: var(--hub-ink) !important;
+  background:
+    radial-gradient(circle at 12% 8%, rgb(197 224 204 / 52%), transparent 30%),
+    var(--hub-bg) !important;
+}
+
+.start-screen.game-hub.hub-theme-green {
+  --hub-bg: #fff6ea;
+  --hub-panel: rgb(255 253 247 / 90%);
+  --hub-ink: #513b32;
+  --hub-muted: #8a7369;
+  --hub-line: rgb(119 84 65 / 14%);
+  --hub-accent: #dd7658;
+  --hub-accent-soft: #f9dacb;
+  background:
+    radial-gradient(circle at 12% 8%, rgb(255 211 190 / 60%), transparent 31%),
+    radial-gradient(circle at 91% 28%, rgb(201 226 207 / 55%), transparent 28%),
+    var(--hub-bg) !important;
+}
+
+.game-hub-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  width: 100%;
+  height: 72px;
+  padding: 0 max(24px, calc((100vw - 1180px) / 2));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--hub-line);
+  background: color-mix(in srgb, var(--hub-bg) 82%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.game-hub-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--hub-ink);
+  text-decoration: none;
+  font-size: 20px;
+  letter-spacing: -0.04em;
+}
+
+.game-hub-brand > span {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #fff;
+  background: var(--hub-accent);
+  font-size: 11px;
+}
+
+.hub-theme-green .game-hub-brand > span {
+  border-radius: 50% 50% 44% 56%;
+  transform: rotate(-7deg);
+}
+
+.game-hub-tools,
+.hub-theme-switch {
+  display: flex;
+  align-items: center;
+}
+
+.game-hub-tools {
+  gap: 10px;
+}
+
+.hub-theme-switch {
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid var(--hub-line);
+  border-radius: 12px;
+  background: var(--hub-panel);
+}
+
+.hub-theme-switch button,
+.game-hub .pwa-install-action {
+  height: 34px !important;
+  border: 0 !important;
+  font-weight: 650 !important;
+}
+
+.hub-theme-switch button {
+  min-width: 76px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--hub-muted);
+  background: transparent;
+}
+
+.hub-theme-switch button.selected {
+  color: var(--hub-ink);
+  background: var(--hub-accent-soft);
+}
+
+.game-hub .pwa-install-action {
+  position: static !important;
+  width: auto !important;
+  padding: 0 15px !important;
+  border-radius: 10px !important;
+  color: #fff !important;
+  background: var(--hub-accent) !important;
+}
+
+.game-hub-content {
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: clamp(30px, 5vh, 58px) 0 48px;
+}
+
+.game-hub-intro {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: clamp(22px, 3vh, 34px);
+}
+
+.hub-kicker {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--hub-accent);
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.game-hub-intro h1 {
+  margin: 0;
+  color: var(--hub-ink);
+  font-size: clamp(34px, 4vw, 58px);
+  font-weight: 650;
+  line-height: 0.98;
+  letter-spacing: -0.065em;
+}
+
+.game-hub-intro p {
+  max-width: 330px;
+  margin: 0 0 4px;
+  color: var(--hub-muted);
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.hub-game-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 24px);
+}
+
+.hub-game-card {
+  position: relative;
+  min-width: 0;
+  height: clamp(210px, 28vw, 320px);
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--hub-line);
+  border-radius: 22px;
+  color: #fff;
+  background: #d7d8d5;
+  box-shadow: 0 18px 55px rgb(28 35 31 / 8%);
+  text-align: left;
+  isolation: isolate;
+}
+
+.hub-theme-green .hub-game-card {
+  border-radius: 30px 22px 30px 22px;
+  box-shadow: 0 18px 45px rgb(126 79 55 / 11%);
+}
+
+.hub-game-card > img,
+.hub-card-shade {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hub-game-card > img {
+  z-index: -2;
+  object-fit: cover;
+  transition: transform 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hub-card-shade {
+  z-index: -1;
+  background: linear-gradient(
+    90deg,
+    rgb(17 24 20 / 74%) 0%,
+    rgb(17 24 20 / 32%) 52%,
+    transparent 78%
+  );
+}
+
+.hub-game-card.locked .hub-card-shade {
+  background: linear-gradient(
+    90deg,
+    rgb(42 42 42 / 68%) 0%,
+    rgb(42 42 42 / 25%) 64%,
+    transparent
+  );
+}
+
+.hub-game-card:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.hub-game-card.available:hover > img {
+  transform: scale(1.035);
+}
+
+.hub-game-card.available:hover {
+  border-color: var(--hub-line);
+}
+
+.hub-card-copy {
+  position: absolute;
+  left: clamp(20px, 3vw, 34px);
+  bottom: clamp(20px, 3vw, 32px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.hub-card-status {
+  margin-bottom: 10px;
+  padding: 6px 9px;
+  border: 1px solid rgb(255 255 255 / 28%);
+  border-radius: 999px;
+  color: rgb(255 255 255 / 90%);
+  background: rgb(255 255 255 / 13%);
+  backdrop-filter: blur(9px);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hub-game-card.available .hub-card-status {
+  color: #eaffef;
+  border-color: rgb(205 255 217 / 35%);
+  background: rgb(20 104 72 / 55%);
+}
+
+.hub-card-copy strong {
+  color: #fff;
+  font-size: clamp(30px, 4vw, 48px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.hub-card-copy small {
+  max-width: 250px;
+  margin-top: 8px;
+  color: rgb(255 255 255 / 76%);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.hub-card-action {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  min-width: 54px;
+  height: 38px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  color: var(--hub-ink);
+  background: rgb(255 255 255 / 90%);
+  font-size: 13px;
+  font-weight: 750;
+  backdrop-filter: blur(12px);
+}
+
+.hub-game-card.locked .hub-card-action {
+  min-width: 38px;
+  padding: 0;
+  color: #555;
+}
+
+.game-hub > .game-hub-content > .pwa-install-hint {
+  margin: 16px 0 0;
+  color: var(--hub-muted);
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .game-hub-header {
+    height: 58px;
+    padding-inline: 16px;
+  }
+
+  .game-hub-brand {
+    font-size: 17px;
+  }
+
+  .game-hub-brand > span {
+    width: 26px;
+    height: 26px;
+  }
+
+  .hub-theme-switch button {
+    min-width: 60px;
+    padding-inline: 8px;
+    font-size: 11px;
+  }
+
+  .game-hub-content {
+    width: calc(100% - 28px);
+    padding-top: 24px;
+  }
+
+  .game-hub-intro {
+    align-items: start;
+    margin-bottom: 18px;
+  }
+
+  .game-hub-intro p {
+    display: none;
+  }
+
+  .game-hub-intro h1 {
+    font-size: 32px;
+  }
+
+  .hub-game-grid {
+    gap: 12px;
+  }
+
+  .hub-game-card {
+    height: 190px;
+    border-radius: 17px;
+  }
+
+  .hub-card-copy {
+    left: 16px;
+    bottom: 16px;
+  }
+
+  .hub-card-copy strong {
+    font-size: 29px;
+  }
+
+  .hub-card-copy small {
+    display: none;
+  }
+
+  .hub-card-action {
+    right: 12px;
+    bottom: 12px;
+  }
+}
+
+/* Yeni 101 lobisi */
+.lobby-screen.lobby-redesign {
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  overflow: auto !important;
+  color: #1d2521 !important;
+  background:
+    radial-gradient(circle at 10% 5%, rgb(206 231 212 / 58%), transparent 29%),
+    #f4f5f1 !important;
+}
+
+.lobby-redesign .lobby-content {
+  position: relative !important;
+  inset: auto !important;
+  width: min(1120px, calc(100% - 48px)) !important;
+  min-width: 0 !important;
+  max-width: 1120px !important;
+  height: auto !important;
+  min-height: 100dvh !important;
+  margin: 0 auto !important;
+  padding: 34px 0 60px !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-rows: auto auto !important;
+  align-content: start !important;
+  align-items: stretch !important;
+  gap: 24px !important;
+  transform: none !important;
+}
+
+.lobby-redesign .lobby-hero {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 13px;
+  padding: 0 6px 8px;
+}
+
+.lobby-redesign .lobby-hero > span {
+  grid-column: 1 / -1;
+  margin-bottom: 16px;
+  color: #176b4d;
+  font-size: 16px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+}
+
+.lobby-redesign .lobby-hero > strong {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  color: #fff;
+  background: #176b4d;
+  font-size: 21px;
+  letter-spacing: -0.04em;
+}
+
+.lobby-redesign .lobby-hero > p {
+  margin: 0;
+  color: #68716c;
+  font-size: 17px;
+  font-weight: 520;
+}
+
+.lobby-redesign .create-panel,
+.lobby-redesign .rooms-panel {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 650px !important;
+  margin: 0 !important;
+  padding: 30px !important;
+  align-self: stretch !important;
+  justify-self: stretch !important;
+  border: 1px solid rgb(29 37 33 / 10%) !important;
+  border-radius: 25px !important;
+  background: rgb(255 255 255 / 88%) !important;
+  box-shadow: 0 22px 65px rgb(29 44 35 / 8%) !important;
+  transform: none !important;
+}
+
+.lobby-redesign .lobby-divider {
+  display: none !important;
+}
+
+.lobby-redesign .lobby-card-kicker {
+  display: block;
+  margin-bottom: 8px;
+  color: #176b4d;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.lobby-redesign :is(.create-panel, .rooms-panel) > h1 {
+  height: auto !important;
+  margin: 0 !important;
+  color: #19221e !important;
+  font-size: 30px !important;
+  font-weight: 690 !important;
+  line-height: 1.1 !important;
+  letter-spacing: -0.055em !important;
+}
+
+.lobby-redesign .lobby-card-description {
+  margin: 9px 0 22px;
+  color: #7a837e;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.lobby-redesign .create-field-label,
+.lobby-redesign .invite-code-box > label {
+  display: block !important;
+  margin: 17px 0 7px !important;
+  color: #555f59 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+}
+
+.lobby-redesign .create-panel > input,
+.lobby-redesign .invite-code-box input {
+  width: 100% !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 13px !important;
+  border: 1px solid #dce1dd !important;
+  border-radius: 12px !important;
+  color: #1e2722 !important;
+  background: #fff !important;
+  font-size: 13px !important;
+  outline: 0 !important;
+}
+
+.lobby-redesign :is(.create-panel > input, .invite-code-box input):focus {
+  border-color: #70a68e !important;
+  box-shadow: 0 0 0 3px rgb(23 107 77 / 10%) !important;
+}
+
+.room-access-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.room-access-picker > button {
+  min-width: 0;
+  min-height: 68px;
+  padding: 10px 11px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #dfe4e0;
+  border-radius: 13px;
+  color: #5d6761;
+  background: #fff;
+  text-align: left;
+}
+
+.room-access-picker > button.selected {
+  border-color: #176b4d;
+  color: #174c39;
+  background: #eef7f1;
+  box-shadow: inset 0 0 0 1px #176b4d;
+}
+
+.room-access-picker > button > i {
+  flex: 0 0 31px;
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: #edf0ee;
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 750;
+}
+
+.room-access-picker > button.selected > i {
+  color: #fff;
+  background: #176b4d;
+}
+
+.room-access-picker > button span,
+.room-access-picker > button b,
+.room-access-picker > button small {
+  min-width: 0;
+  display: block;
+}
+
+.room-access-picker > button b {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.room-access-picker > button small {
+  margin-top: 3px;
+  overflow: hidden;
+  color: #8a928d;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lobby-redesign .tile-picker {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 9px !important;
+}
+
+.lobby-redesign .player-tile {
+  width: 100% !important;
+  height: 74px !important;
+  min-width: 0 !important;
+  min-height: 74px !important;
+  padding: 9px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  border: 1px solid #dfe4e0 !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+.lobby-redesign .player-tile.selected {
+  border-color: #176b4d !important;
+  background: #eef7f1 !important;
+  box-shadow: inset 0 0 0 1px #176b4d !important;
+}
+
+.lobby-redesign .player-tile > b {
+  order: -1;
+  color: #27312c !important;
+  font-size: 21px !important;
+  line-height: 1 !important;
+}
+
+.lobby-redesign .player-tile.selected > b {
+  color: #176b4d !important;
+}
+
+.lobby-redesign .player-tile::after {
+  display: none !important;
+}
+
+.lobby-redesign .tile-pips {
+  height: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+}
+
+.lobby-redesign .tile-pips i {
+  position: static !important;
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50% !important;
+  background: #91a099 !important;
+  transform: none !important;
+}
+
+.lobby-redesign .room-rule-picker,
+.lobby-redesign .room-hands-picker {
+  margin: 0 !important;
+  gap: 9px !important;
+}
+
+.lobby-redesign :is(.room-rule-picker, .room-hands-picker) button {
+  height: 41px !important;
+  border: 1px solid #dfe4e0 !important;
+  border-radius: 11px !important;
+  color: #66706a !important;
+  background: #fff !important;
+  font-size: 11px !important;
+}
+
+.lobby-redesign :is(.room-rule-picker, .room-hands-picker) button.selected {
+  border-color: #176b4d !important;
+  color: #176b4d !important;
+  background: #eef7f1 !important;
+  box-shadow: inset 0 0 0 1px #176b4d !important;
+}
+
+.lobby-redesign .create-button {
+  width: 100% !important;
+  height: 48px !important;
+  margin: 22px 0 0 !important;
+  border: 0 !important;
+  border-radius: 13px !important;
+  color: #fff !important;
+  background: #176b4d !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+}
+
+.invite-code-box {
+  padding: 15px;
+  border: 1px solid #dce3de;
+  border-radius: 15px;
+  background: #f8faf8;
+}
+
+.lobby-redesign .invite-code-box > label {
+  margin-top: 0 !important;
+}
+
+.invite-code-box > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.invite-code-box > div > button {
+  height: 44px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 11px;
+  color: #fff;
+  background: #176b4d;
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.invite-code-box > small {
+  display: block;
+  margin-top: 7px;
+  color: #d14343;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.nearby-rooms-head {
+  margin: 22px 2px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #29332e;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.nearby-rooms-head > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.nearby-rooms-head i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #25a46f;
+  box-shadow: 0 0 0 4px rgb(37 164 111 / 12%);
+}
+
+.nearby-rooms-head small {
+  color: #8a938e;
+  font-size: 10px;
+}
+
+.lobby-redesign .room-list {
+  width: 100% !important;
+  max-height: 355px !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  overflow: auto !important;
+}
+
+.lobby-redesign .room-row {
+  min-height: 68px !important;
+  padding: 12px 13px !important;
+  border: 1px solid #e0e5e1 !important;
+  border-radius: 14px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+.lobby-redesign .room-row:hover,
+.lobby-redesign .room-row:focus-visible {
+  border-color: #91b9a6 !important;
+  background: #f7fbf8 !important;
+  box-shadow: none !important;
+}
+
+.lobby-redesign .room-title-line {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-wrap: wrap !important;
+}
+
+.lobby-redesign .room-title-line > b {
+  width: 100%;
+  color: #26302b !important;
+  font-size: 12px !important;
+}
+
+.lobby-redesign .room-title-line > small {
+  margin: 0 !important;
+  padding: 3px 6px;
+  border-radius: 999px;
+  color: #76807a !important;
+  background: #f0f3f1;
+  font-size: 8px !important;
+}
+
+.lobby-redesign .room-title-line .room-code {
+  color: #176b4d !important;
+  background: #eaf5ee !important;
+  letter-spacing: 0.05em;
+}
+
+.lobby-redesign .room-count {
+  min-width: 45px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  color: #176b4d;
+  background: #eaf5ee;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.lobby-redesign .room-delete {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 9px !important;
+}
+
+.lobby-redesign .rooms-footnote {
+  min-height: 150px;
+  margin: 0 !important;
+  display: grid;
+  place-items: center;
+  border: 1px dashed #dce3de;
+  border-radius: 14px;
+  color: #919a95 !important;
+  text-align: center;
+}
+
+.lobby-redesign .lobby-back {
+  position: fixed !important;
+  top: 22px !important;
+  bottom: auto !important;
+  left: 22px !important;
+  z-index: 100 !important;
+  width: auto !important;
+  min-width: 68px !important;
+  height: 36px !important;
+  padding: 0 12px !important;
+  border: 1px solid rgb(29 37 33 / 12%) !important;
+  border-radius: 11px !important;
+  color: #56605a !important;
+  background: rgb(255 255 255 / 82%) !important;
+  font-size: 11px !important;
+  transform: none !important;
+  backdrop-filter: blur(12px);
+}
+
+.room-invite-reference {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  z-index: 5;
+  height: 40px;
+  padding: 0 6px 0 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #dde3df;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 92%);
+  transform: translateX(-50%);
+}
+
+.room-invite-reference > span {
+  color: #848d88;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.room-invite-reference > b {
+  color: #176b4d;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+.room-invite-reference > button {
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: #176b4d;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+@media (max-width: 820px) {
+  .lobby-redesign .lobby-content {
+    width: min(560px, calc(100% - 28px)) !important;
+    padding-top: 76px !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .lobby-redesign .lobby-hero {
+    grid-column: 1;
+  }
+
+  .lobby-redesign .create-panel,
+  .lobby-redesign .rooms-panel {
+    min-height: 0 !important;
+    padding: 23px !important;
+  }
+
+  .room-access-picker {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Soft oyun teması — sıcak krem, pudra, mint ve açık ahşap. */
+.game-shell.game-theme-green {
+  background:
+    radial-gradient(circle at 18% 18%, rgb(255 247 224 / 82%), transparent 32%),
+    radial-gradient(circle at 84% 16%, rgb(211 247 236 / 90%), transparent 34%),
+    linear-gradient(135deg, #fbf3df 0%, #eef7e9 52%, #d9f4e9 100%) !important;
+  border-color: #ded3bd !important;
+  color: #49372d !important;
+}
+
+html:has(.game-shell.game-theme-green),
+body:has(.game-shell.game-theme-green),
+html.game-mobile-portrait:has(.game-shell.game-theme-green),
+html.game-mobile-landscape:has(.game-shell.game-theme-green),
+html.game-mobile-portrait:has(.game-shell.game-theme-green) body,
+html.game-mobile-landscape:has(.game-shell.game-theme-green) body {
+  background: #f2ecd9 !important;
+}
+
+.game-shell.game-theme-green > .game-area {
+  color: #49372d !important;
+}
+
+.game-shell.game-theme-green .table-matrix > .grid.series,
+.game-shell.game-theme-green .table-matrix > .grid.series.active-zone {
+  border-color: #c9a77e !important;
+  background:
+    repeating-linear-gradient(3deg, rgb(117 77 41 / 5%) 0 1px, transparent 1px 9px),
+    linear-gradient(180deg, #f0ddbf 0%, #e5c79e 100%) !important;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 58%) !important;
+}
+
+.game-shell.game-theme-green .table-matrix > .grid.pairs,
+.game-shell.game-theme-green .table-matrix > .grid.pairs.active-zone {
+  border-color: #c9a77e !important;
+  background:
+    repeating-linear-gradient(3deg, rgb(117 77 41 / 5%) 0 1px, transparent 1px 9px),
+    linear-gradient(180deg, #f0ddbf 0%, #e5c79e 100%) !important;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 62%) !important;
+}
+
+.game-shell.game-theme-green .table-matrix > .grid {
+  background-image:
+    linear-gradient(rgb(117 143 126 / 14%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(117 143 126 / 14%) 1px, transparent 1px) !important;
+}
+
+.game-shell.game-theme-green .table-head,
+.game-shell.game-theme-green .table-head span {
+  color: #49372d !important;
+}
+
+.game-shell.game-theme-green .rack-board {
+  border-color: #c89f72 !important;
+  background:
+    repeating-linear-gradient(3deg, rgb(122 78 39 / 5%) 0 1px, transparent 1px 8px),
+    linear-gradient(180deg, #efd2a8 0%, #e5bd8b 100%) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 48%) !important;
+}
+
+.game-shell.game-theme-green .rack-grid::after {
+  border-color: rgb(124 81 42 / 30%) !important;
+}
+
+.game-shell.game-theme-green :is(.rack-cell .tile, .rack-discard .tile, .grid .tile, .indicator-tile .tile, .draw-fly .tile) {
+  border-color: #b9a88e !important;
+  background: #fffaf0 !important;
+  box-shadow: 0 2px 4px rgb(89 65 39 / 16%) !important;
+}
+
+.game-shell.game-theme-green .rack-discard {
+  border-color: #dac6a7 !important;
+  background: rgb(255 249 235 / 72%) !important;
+}
+
+.game-shell.game-theme-green .rack-discard-right {
+  border-color: #b8ded3 !important;
+  background: rgb(231 248 242 / 78%) !important;
+}
+
+.game-shell.game-theme-green .rack-discard > :is(span, small),
+.game-shell.game-theme-green .rack-status,
+.game-shell.game-theme-green .turn-timer small {
+  color: #49372d !important;
+}
+
+.game-shell.game-theme-green .turn-timer-track {
+  background: rgb(105 82 59 / 18%) !important;
+}
+
+.game-shell.game-theme-green .turn-timer-track span {
+  background: #63b985 !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile) {
+  border-color: rgb(179 160 134 / 52%) !important;
+  background: rgb(255 252 244 / 78%) !important;
+  box-shadow: 0 4px 12px rgb(87 65 42 / 9%) !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile-order, .minimal-side-profile > strong, .minimal-side-profile > small, .minimal-top-profile-order, .minimal-top-profile > strong, .minimal-top-profile > small) {
+  color: #49372d !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile) :is(.minimal-side-profile-opening, .minimal-top-profile-opening) {
+  color: #6c5a4d !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).opened-profile {
+  border-color: #72aab7 !important;
+  background: rgb(213 238 244 / 92%) !important;
+}
+
+.game-shell.game-theme-green .opened-profile :is(.minimal-side-profile-opening, .minimal-top-profile-opening) {
+  color: #256d7b !important;
+}
+
+.game-shell.game-theme-green .opponent-discard-corner-left {
+  border-color: #ead9bd !important;
+  background: rgb(255 247 230 / 72%) !important;
+}
+
+.game-shell.game-theme-green .opponent-discard-corner-right {
+  border-color: #bfe3d8 !important;
+  background: rgb(229 248 242 / 76%) !important;
+}
+
+.game-shell.game-theme-green > .game-top-actions :is(.game-leave-button, .game-theme-button),
+.game-shell.game-theme-green > .game-top-actions .game-sound-button,
+.game-shell.game-theme-green > .game-top-info :is(.game-top-round, .rack-status) {
+  border-color: rgb(194 175 146 / 46%) !important;
+  background: rgb(255 252 244 / 72%) !important;
+  color: #49372d !important;
+  box-shadow: 0 2px 8px rgb(88 66 42 / 7%) !important;
+}
+
+.game-shell.game-theme-green .game-theme-button i {
+  border-color: #9e8267 !important;
+  background: #efb78f !important;
+}
+
+.game-shell.game-theme-green .game-center-info {
+  color: #49372d !important;
+}
+
+.game-shell.game-theme-green :is(.indicator-tile, .deck-info) {
+  color: #49372d !important;
+}
+
+.game-shell.game-theme-green .center-deck-tile,
+.game-shell.game-theme-green .center-deck-stack > i {
+  border-color: #b9a88e !important;
+  background: #fffaf0 !important;
+  color: #49372d !important;
+  box-shadow: 0 2px 4px rgb(89 65 39 / 15%) !important;
+}
+
+.game-shell.game-theme-green .table-controls :is(button, output) {
+  border-color: rgb(150 122 91 / 38%) !important;
+  color: #49372d !important;
+  box-shadow: 0 2px 5px rgb(94 67 42 / 10%) !important;
+}
+
+.game-shell.game-theme-green .table-mode-buttons button:nth-child(1) {
+  background: #f7c3c8 !important;
+}
+
+.game-shell.game-theme-green .table-mode-buttons button:nth-child(2) {
+  background: #f8dfa0 !important;
+}
+
+.game-shell.game-theme-green .table-action-buttons button:nth-child(1) {
+  background: #bfdded !important;
+}
+
+.game-shell.game-theme-green .table-action-buttons button:nth-child(2) {
+  background: #ead9c9 !important;
+}
+
+.game-shell.game-theme-green .table-controls button:disabled {
+  background: #dedbd2 !important;
+  color: #8d887e !important;
+  opacity: .78 !important;
+}
+
+.game-shell.game-theme-green .opening-counter,
+.game-shell.game-theme-green .rack-opening-bubble {
+  border-color: rgb(183 163 137 / 45%) !important;
+  background: rgb(255 252 244 / 86%) !important;
+  color: #49372d !important;
+}
+
+.game-shell.game-theme-green .rack-opening-bubble.opened-profile,
+.game-shell.game-theme-green .opening-counter.complete {
+  border-color: #73acbb !important;
+  background: #d9eef3 !important;
+  color: #246879 !important;
+}
+
+.game-shell.game-theme-green .rack-actions button {
+  border-color: #b99b7b !important;
+  background: #fff8eb !important;
+  color: #49372d !important;
+}
+
+.game-shell.game-theme-green .rack-actions button:hover {
+  background: #f7e5c9 !important;
+}
+
+.game-shell.game-theme-green .round-result {
+  background: rgb(248 242 225 / 88%) !important;
+}
+
+.game-shell.game-theme-green .round-result-content {
+  border-color: #d5c1a3 !important;
+  background: #fffaf0 !important;
+  color: #49372d !important;
+}
+
+/* Sade Han Games giriş düzeni */
+.game-hub-content {
+  padding-top: clamp(26px, 4vh, 44px);
+}
+
+.game-hub-title {
+  margin: 0 0 clamp(24px, 4vh, 42px);
+  color: var(--hub-ink);
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(30px, 4.2vw, 54px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.065em;
+  text-align: center;
+}
+
+.hub-game-card.locked > img {
+  filter: grayscale(1) saturate(0) contrast(0.9);
+}
+
+.hub-game-card.locked .hub-card-shade {
+  background: rgb(24 28 25 / 22%);
+  backdrop-filter: grayscale(0.18);
+}
+
+.hub-lock-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  width: clamp(58px, 8vw, 92px);
+  height: clamp(48px, 6.5vw, 76px);
+  border: 2px solid rgb(255 255 255 / 65%);
+  border-radius: 18px;
+  background: rgb(22 27 24 / 26%);
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 12%),
+    0 10px 34px rgb(0 0 0 / 12%);
+  transform: translate(-50%, -37%);
+  backdrop-filter: blur(5px);
+}
+
+.hub-lock-watermark::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 8px);
+  width: 52%;
+  height: 58%;
+  border: clamp(5px, 0.6vw, 8px) solid rgb(255 255 255 / 68%);
+  border-bottom: 0;
+  border-radius: 999px 999px 0 0;
+  transform: translateX(-50%);
+}
+
+.hub-lock-watermark::after {
+  content: "";
+  position: absolute;
+  top: 43%;
+  left: 50%;
+  width: 9px;
+  height: 16px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 72%);
+  transform: translate(-50%, -50%);
+}
+
+@media (max-width: 760px) {
+  .game-hub-content {
+    padding-top: 20px;
+  }
+
+  .game-hub-title {
+    margin-bottom: 20px;
+    font-size: 30px;
+  }
+
+  .hub-game-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hub-game-card {
+    height: min(58vw, 260px);
+  }
+}
+
+/* Hyper-casual 101 lobi görünümü */
+.lobby-screen.lobby-redesign {
+  background: #eaf6ef !important;
+}
+
+.lobby-redesign *,
+.lobby-redesign *::before,
+.lobby-redesign *::after {
+  box-shadow: none !important;
+}
+
+.lobby-redesign .lobby-content {
+  width: min(1080px, calc(100% - 40px)) !important;
+  max-width: 1080px !important;
+  gap: 18px !important;
+  padding-top: 24px !important;
+}
+
+.lobby-redesign .lobby-hero {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 0 0 14px !important;
+  text-align: center !important;
+}
+
+.lobby-redesign .lobby-hero > span {
+  order: 2;
+  margin: 0 !important;
+  color: #6d8979 !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.13em !important;
+  text-transform: uppercase !important;
+}
+
+.lobby-redesign .lobby-hero > strong {
+  order: 1;
+  width: auto !important;
+  height: auto !important;
+  color: #176b4d !important;
+  background: transparent !important;
+  font-size: 48px !important;
+  font-weight: 850 !important;
+  line-height: 0.9 !important;
+  letter-spacing: -0.085em !important;
+}
+
+.lobby-redesign .lobby-hero > p {
+  order: 3;
+  color: #527060 !important;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+}
+
+.lobby-redesign .create-panel,
+.lobby-redesign .rooms-panel {
+  min-height: 630px !important;
+  padding: 26px !important;
+  border: 2px solid #d7eadf !important;
+  border-radius: 28px !important;
+  background: #fff !important;
+}
+
+.lobby-redesign .rooms-panel {
+  background: #fffaf0 !important;
+  border-color: #efe3c7 !important;
+}
+
+.lobby-redesign .lobby-card-kicker {
+  margin-bottom: 5px !important;
+  color: #2c8b67 !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+}
+
+.lobby-redesign :is(.create-panel, .rooms-panel) > h1 {
+  font-size: 27px !important;
+  font-weight: 820 !important;
+}
+
+.lobby-redesign .lobby-card-description {
+  margin: 7px 0 18px !important;
+  font-size: 12px !important;
+}
+
+.lobby-redesign .create-field-label,
+.lobby-redesign .invite-code-box > label {
+  margin: 14px 0 7px !important;
+  color: #40584b !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+}
+
+.lobby-redesign .create-panel > input,
+.lobby-redesign .invite-code-box input {
+  height: 48px !important;
+  min-height: 48px !important;
+  border: 2px solid #dce9e1 !important;
+  border-radius: 14px !important;
+  font-size: 13px !important;
+}
+
+.lobby-redesign :is(.create-panel > input, .invite-code-box input):focus {
+  border-color: #23845f !important;
+}
+
+.room-access-picker {
+  gap: 8px !important;
+}
+
+.room-access-picker > button {
+  min-height: 64px !important;
+  border: 2px solid #e1ebe5 !important;
+  border-radius: 16px !important;
+  font-weight: 750 !important;
+}
+
+.room-access-picker > button.selected {
+  border-color: #23845f !important;
+  background: #e9f7ef !important;
+}
+
+.room-access-picker > button > i {
+  border-radius: 12px !important;
+  color: #176b4d !important;
+  background: #dff1e7 !important;
+}
+
+.room-access-picker > button.selected > i {
+  color: #fff !important;
+  background: #23845f !important;
+}
+
+.lobby-redesign .tile-picker {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 14px !important;
+}
+
+.lobby-redesign .player-tile {
+  flex: 0 0 78px !important;
+  width: 78px !important;
+  height: 104px !important;
+  min-width: 78px !important;
+  min-height: 104px !important;
+  padding: 13px 10px 10px !important;
+  justify-content: space-between !important;
+  border: 2px solid #dfe7e2 !important;
+  border-radius: 15px !important;
+  background: #fffdf8 !important;
+}
+
+.lobby-redesign .player-tile.selected {
+  border-color: #23845f !important;
+  background: #f4fff8 !important;
+  transform: translateY(-4px) !important;
+}
+
+.lobby-redesign .player-tile > b {
+  order: initial !important;
+  font-size: 34px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+}
+
+.lobby-redesign .player-tile-dot {
+  display: block !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  background: #2868d8 !important;
+}
+
+.lobby-redesign .tile-choice-3 > b {
+  color: #16945e !important;
+}
+
+.lobby-redesign .tile-choice-3 > .player-tile-dot {
+  background: #20a66a !important;
+}
+
+.lobby-redesign .tile-choice-4 > b {
+  color: #7b47d6 !important;
+}
+
+.lobby-redesign .tile-choice-4 > .player-tile-dot {
+  background: #8350dc !important;
+}
+
+.lobby-redesign :is(.room-rule-picker, .room-hands-picker) button {
+  height: 44px !important;
+  border: 2px solid #e1e9e4 !important;
+  border-radius: 14px !important;
+  font-weight: 750 !important;
+}
+
+.lobby-redesign :is(.room-rule-picker, .room-hands-picker) button.selected {
+  border-color: #23845f !important;
+  background: #eaf8f0 !important;
+}
+
+.lobby-redesign .create-button {
+  height: 51px !important;
+  border-radius: 16px !important;
+  background: #20a66a !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
+}
+
+.lobby-redesign .create-button:hover {
+  background: #188b58 !important;
+}
+
+.invite-code-box {
+  padding: 13px !important;
+  border: 2px solid #eadfc6 !important;
+  border-radius: 18px !important;
+  background: #fff !important;
+}
+
+.invite-code-box > div > button {
+  height: 48px !important;
+  border-radius: 14px !important;
+  background: #ee8d3b !important;
+  font-weight: 850 !important;
+}
+
+.nearby-rooms-head i {
+  background: #20a66a !important;
+}
+
+.lobby-redesign .room-row {
+  border: 2px solid #ecdfc4 !important;
+  border-radius: 17px !important;
+}
+
+.lobby-redesign .room-row:hover,
+.lobby-redesign .room-row:focus-visible {
+  border-color: #eea35e !important;
+  background: #fffaf0 !important;
+}
+
+.lobby-redesign .room-count {
+  color: #9a571b !important;
+  background: #ffebd2 !important;
+}
+
+.lobby-redesign .rooms-footnote {
+  border: 2px dashed #eadfc7 !important;
+  border-radius: 18px !important;
+}
+
+.lobby-redesign .lobby-back {
+  border: 2px solid #dce9e1 !important;
+  border-radius: 14px !important;
+  background: #fff !important;
+  font-weight: 800 !important;
+}
+
+@media (max-width: 820px) {
+  .lobby-redesign .lobby-content {
+    width: min(560px, calc(100% - 22px)) !important;
+    padding-top: 70px !important;
+  }
+
+  .lobby-redesign .create-panel,
+  .lobby-redesign .rooms-panel {
+    min-height: 0 !important;
+    padding: 20px !important;
+  }
+
+  .lobby-redesign .player-tile {
+    flex-basis: 74px !important;
+    width: 74px !important;
+    min-width: 74px !important;
+  }
+}
+
+/* Soft tema: seramik taşlar ve ahşap ıstaka. */
+.game-shell.game-theme-green .rack-grid {
+  border: 1px solid #bd8f60 !important;
+  border-radius: 12px !important;
+  background:
+    repeating-linear-gradient(2deg, transparent 0 8px, rgb(112 70 34 / 7%) 9px 10px),
+    repeating-linear-gradient(92deg, transparent 0 72px, rgb(255 255 255 / 7%) 73px 75px),
+    linear-gradient(180deg, #edc895 0%, #e4b77d 48%, #dca96f 100%) !important;
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 42%),
+    inset 0 -3px 0 rgb(126 78 37 / 16%),
+    0 3px 8px rgb(92 60 31 / 13%) !important;
+}
+
+.game-shell.game-theme-green .rack-grid::after {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  border-top: 2px solid rgb(126 80 41 / 32%) !important;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 28%) !important;
+}
+
+.game-shell.game-theme-green .rack-cell {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+/* Soft temada her oyun alaninin kendi hucreleri de okunur kalsin. */
+.game-shell.game-theme-green .table-matrix > .grid.series .grid-cell {
+  border: 1px dashed rgb(150 119 79 / 28%) !important;
+  background: rgb(255 252 243 / 5%) !important;
+}
+
+.game-shell.game-theme-green .table-matrix > .grid.pairs .grid-cell {
+  border: 1px dashed rgb(150 119 79 / 28%) !important;
+  background: rgb(255 248 235 / 5%) !important;
+}
+
+/* Soft tema el sonu: duz beyaz tablo yerine okunakli bir oyun karti. */
+.game-shell.game-theme-green > .round-result {
+  background: rgb(244 238 217 / 78%) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+html:has(.game-shell.game-theme-green),
+body:has(.game-shell.game-theme-green) {
+  min-height: 100% !important;
+  background: #f2ecd9 !important;
+}
+
+.game-shell.game-theme-green > .round-result .round-result-content {
+  width: 620px !important;
+  max-width: calc(100vw - 48px) !important;
+  padding: 28px !important;
+  border: 1px solid #dcc9aa !important;
+  border-radius: 24px !important;
+  background: #fffaf0 !important;
+  box-shadow: 0 18px 55px rgb(101 73 42 / 16%) !important;
+  box-sizing: border-box !important;
+}
+
+.game-shell.game-theme-green > .round-result .round-result-content > small {
+  display: inline-flex !important;
+  padding: 7px 13px !important;
+  border-radius: 999px !important;
+  background: #f2e6d2 !important;
+  color: #765f4e !important;
+  font-size: 15px !important;
+}
+
+.game-shell.game-theme-green > .round-result .round-result-content h2 {
+  margin: 16px 0 26px !important;
+  color: #30251f !important;
+  font-size: 34px !important;
+}
+
+.game-shell.game-theme-green > .round-result .round-score-list {
+  display: grid !important;
+  gap: 8px !important;
+  border: 0 !important;
+}
+
+.game-shell.game-theme-green > .round-result .round-score-list > div {
+  min-height: 58px !important;
+  padding: 0 18px !important;
+  border: 1px solid #eadcc6 !important;
+  border-radius: 14px !important;
+  background: #fffdf8 !important;
+}
+
+.game-shell.game-theme-green > .round-result .round-score-list > div.leader {
+  border-color: #9bc9bb !important;
+  background: #e7f5ee !important;
+}
+
+.game-shell.game-theme-green > .round-result .round-score-list > div.leader,
+.game-shell.game-theme-green > .round-result .round-score-list > div.leader > span,
+.game-shell.game-theme-green > .round-result .round-score-list > div.leader > small,
+.game-shell.game-theme-green > .round-result .round-score-list > div.leader > b {
+  color: #24785e !important;
+}
+
+.game-shell.game-theme-green > .round-result .next-hand-button {
+  height: 58px !important;
+  margin-top: 24px !important;
+  border: 1px solid #b8737e !important;
+  border-radius: 14px !important;
+  background: #d98694 !important;
+  color: #fffdf8 !important;
+  box-shadow: none !important;
+}
+
+.game-shell.game-theme-green > .round-result .next-hand-button:hover {
+  background: #ca7483 !important;
+  transform: none !important;
+}
+
+.game-shell.game-theme-green :is(
+  .rack-cell .tile,
+  .rack-discard .tile,
+  .grid .tile,
+  .indicator-tile .tile,
+  .draw-fly .tile
+),
+body:has(.game-shell.game-theme-green) > .rack-drag-ghost .tile {
+  border: 2px solid #aa906e !important;
+  border-radius: 8px !important;
+  background:
+    linear-gradient(110deg, rgb(255 255 255 / 80%), transparent 32%),
+    linear-gradient(180deg, #fffdf7 0%, #f7ecdc 100%) !important;
+  box-shadow:
+    0 2px 0 #bda485,
+    0 4px 7px rgb(79 56 34 / 16%) !important;
+}
+
+/* Masadaki kucuk taslarda disari tasan alt golge koseyi bozmamali. */
+.game-shell.game-theme-green .table-matrix .grid .tile.compact {
+  border-radius: 7px !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 78%),
+    inset 0 -1px 0 rgb(143 112 77 / 18%) !important;
+}
+
+.game-shell.game-theme-green .rack-grid .rack-cell .tile {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 78%),
+    inset 0 -1px 0 rgb(143 112 77 / 18%),
+    0 1px 3px rgb(79 56 34 / 14%) !important;
+}
+
+.game-shell.game-theme-green :is(
+  .rack-cell .tile,
+  .rack-discard .tile,
+  .grid .tile,
+  .indicator-tile .tile,
+  .draw-fly .tile
+) > span,
+body:has(.game-shell.game-theme-green) > .rack-drag-ghost .tile > span {
+  font-family: "Arial Rounded MT Bold", "DM Sans", ui-rounded, system-ui, sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -.05em !important;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 72%) !important;
+}
+
+.game-shell.game-theme-green :is(
+  .rack-cell .tile,
+  .rack-discard .tile,
+  .grid .tile,
+  .indicator-tile .tile,
+  .draw-fly .tile
+) > i,
+body:has(.game-shell.game-theme-green) > .rack-drag-ghost .tile > i {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 28%) !important;
+}
+
+.game-shell.game-theme-green .rack-cell.selected .tile {
+  border-color: #8a6d4d !important;
+  box-shadow:
+    0 0 0 3px rgb(255 244 211 / 82%),
+    0 3px 7px rgb(79 56 34 / 18%) !important;
+}
+
+.game-shell.game-theme-green .rack-pointer-tile:active .tile,
+body:has(.game-shell.game-theme-green) > .rack-drag-ghost .tile {
+  transform: none !important;
+}
+
+/* El sonu katmani olceklenen oyun tuvalinden bagimsiz, tum ekrani kaplar. */
+.round-result-portal {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100dvw !important;
+  height: 100dvh !important;
+  z-index: 1000000 !important;
+  display: grid !important;
+  place-items: center !important;
+}
+
+.round-result-portal .round-result-content {
+  width: 680px !important;
+  max-width: calc(100dvw - 48px) !important;
+}
+
+.round-result-portal .round-result-content > small,
+.round-result-portal .round-result-content p {
+  font-size: 18px !important;
+}
+
+.round-result-portal .round-result-content h2 {
+  margin: 14px 0 34px !important;
+  font-size: 42px !important;
+  line-height: 1.12 !important;
+}
+
+.round-result-portal .round-score-list > div {
+  grid-template-columns: 1fr 90px 110px !important;
+  min-height: 70px !important;
+  padding: 0 12px !important;
+  box-sizing: border-box !important;
+}
+
+.round-result-portal .round-score-list > div > :is(span, small, b) {
+  font-size: 20px !important;
+}
+
+.round-result-portal .next-hand-button {
+  width: 320px !important;
+  height: 64px !important;
+  margin-top: 34px !important;
+  font-size: 20px !important;
+  font-weight: 750 !important;
+}
+
+.round-result-portal.game-theme-green {
+  background: rgb(244 238 217 / 94%) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+.round-result-portal.game-theme-green .round-result-content {
+  width: 620px !important;
+  padding: 28px !important;
+  border: 1px solid #dcc9aa !important;
+  border-radius: 24px !important;
+  background: #fffaf0 !important;
+  color: #49372d !important;
+  box-shadow: 0 18px 55px rgb(101 73 42 / 16%) !important;
+  box-sizing: border-box !important;
+}
+
+.round-result-portal.game-theme-green .round-result-content > small {
+  display: inline-flex !important;
+  padding: 7px 13px !important;
+  border-radius: 999px !important;
+  background: #f2e6d2 !important;
+  color: #765f4e !important;
+  font-size: 15px !important;
+}
+
+.round-result-portal.game-theme-green .round-result-content h2 {
+  margin: 16px 0 26px !important;
+  color: #30251f !important;
+  font-size: 34px !important;
+}
+
+.round-result-portal.game-theme-green .round-score-list {
+  display: grid !important;
+  gap: 8px !important;
+  border: 0 !important;
+}
+
+.round-result-portal.game-theme-green .round-score-list > div {
+  min-height: 58px !important;
+  padding: 0 18px !important;
+  border: 1px solid #eadcc6 !important;
+  border-radius: 14px !important;
+  background: #fffdf8 !important;
+}
+
+.round-result-portal.game-theme-green .round-score-list > div.leader {
+  border-color: #9bc9bb !important;
+  background: #e7f5ee !important;
+}
+
+.round-result-portal.game-theme-green .round-score-list > div.leader,
+.round-result-portal.game-theme-green .round-score-list > div.leader > :is(span, small, b) {
+  color: #24785e !important;
+}
+
+.round-result-portal.game-theme-green .next-hand-button {
+  height: 58px !important;
+  margin-top: 24px !important;
+  border: 1px solid #b94f66 !important;
+  border-radius: 14px !important;
+  background: linear-gradient(180deg, #e2778c 0%, #cf5d75 100%) !important;
+  color: #fff !important;
+  opacity: 1 !important;
+  box-shadow: 0 5px 0 #aa455b, 0 10px 22px rgb(133 62 77 / 18%) !important;
+  appearance: none !important;
+}
+
+.round-result-portal.game-theme-green .next-hand-button:hover {
+  background: linear-gradient(180deg, #dc6b82 0%, #c9546d 100%) !important;
+}
+
+.round-result-portal.game-theme-blue .next-hand-button {
+  background: #2563eb !important;
+  color: #fff !important;
+  opacity: 1 !important;
+}
+
+.game-shell.game-theme-green .rack-board {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.game-shell.game-theme-green .rack-discard {
+  box-sizing: border-box !important;
+  border: 1px dashed #d8c4a5 !important;
+  border-radius: 10px !important;
+  background: rgb(255 250 239 / 84%) !important;
+}
+
+.game-shell.game-theme-green .rack-discard-right {
+  border-color: #b8ded3 !important;
+  background: rgb(231 248 242 / 84%) !important;
+}
+
+/* Sirasi gelen rakip profilinden aninda anlasilir. */
+.game-shell :is(.minimal-side-profile, .minimal-top-profile).active-turn-profile {
+  border: 2px solid #ffd76a !important;
+  box-shadow:
+    0 0 0 3px rgb(255 215 106 / 24%),
+    0 0 18px rgb(255 215 106 / 20%) !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).active-turn-profile {
+  border-color: #fff0bd !important;
+  box-shadow:
+    0 0 0 3px rgb(190 78 101 / 28%),
+    0 5px 18px rgb(132 61 76 / 20%) !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile),
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).opened-profile {
+  border-color: #bd6173 !important;
+  background: #d98694 !important;
+  color: #fff !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile) :is(
+  .minimal-side-profile-order,
+  .minimal-side-profile-opening,
+  .minimal-top-profile-order,
+  .minimal-top-profile-opening,
+  strong,
+  small
+) {
+  color: #fff !important;
+}
+
+/* Aktif profil: ince renkli cerceve, kalin halka yok. */
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).active-turn-profile,
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).opened-profile.active-turn-profile {
+  border: 2px solid #8f3c55 !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+@keyframes soft-turn-profile-pulse-thin {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgb(143 60 85 / 18%);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgb(143 60 85 / 34%);
+  }
+}
+
+/* Karanlik tema: Soft tasarimin yerlesimini koruyan koyu palet. */
+.game-shell.game-theme-blue {
+  --dark-bg: #12100f;
+  --dark-panel: #1d1917;
+  --dark-panel-soft: #28211e;
+  --dark-board: #30251f;
+  --dark-border: #705647;
+  --dark-rose: #c95770;
+  --dark-rose-strong: #e06d85;
+  --dark-text: #fff7ed;
+  --dark-muted: #c7b6aa;
+  background: var(--dark-bg) !important;
+  border-color: #342a26 !important;
+  color: var(--dark-text) !important;
+}
+
+html:has(.game-shell.game-theme-blue),
+body:has(.game-shell.game-theme-blue),
+html.game-mobile-portrait:has(.game-shell.game-theme-blue),
+html.game-mobile-landscape:has(.game-shell.game-theme-blue),
+html.game-mobile-portrait:has(.game-shell.game-theme-blue) body,
+html.game-mobile-landscape:has(.game-shell.game-theme-blue) body {
+  background: var(--dark-bg, #12100f) !important;
+}
+
+.game-shell.game-theme-blue .game-theme-button i {
+  background: #171311 !important;
+  border-color: #d9bcae !important;
+}
+
+.game-shell.game-theme-blue .table-matrix > .grid.series,
+.game-shell.game-theme-blue .table-matrix > .grid.pairs,
+.game-shell.game-theme-blue .table-matrix > .grid.active-zone {
+  border-color: var(--dark-border) !important;
+  background:
+    repeating-linear-gradient(3deg, rgb(213 166 128 / 4%) 0 1px, transparent 1px 9px),
+    linear-gradient(180deg, #302620 0%, #211b18 100%) !important;
+  box-shadow: inset 0 0 22px rgb(0 0 0 / 18%) !important;
+}
+
+.game-shell.game-theme-blue .table-matrix > .grid.active-zone {
+  border-color: var(--dark-rose) !important;
+  outline-color: rgb(201 87 112 / 38%) !important;
+}
+
+.game-shell.game-theme-blue .table-matrix > .grid .grid-cell {
+  border-color: rgb(210 170 139 / 16%) !important;
+  background: transparent !important;
+}
+
+.game-shell.game-theme-blue .table-head,
+.game-shell.game-theme-blue .table-head strong,
+.game-shell.game-theme-blue .rack-discard-label,
+.game-shell.game-theme-blue .rack-board-label {
+  color: var(--dark-text) !important;
+}
+
+.game-shell.game-theme-blue .rack-grid {
+  border-color: #8d684b !important;
+  background:
+    repeating-linear-gradient(2deg, transparent 0 8px, rgb(0 0 0 / 8%) 9px 10px),
+    repeating-linear-gradient(92deg, transparent 0 72px, rgb(255 255 255 / 3%) 73px 75px),
+    linear-gradient(180deg, #81583b 0%, #5b3928 100%) !important;
+  box-shadow: inset 0 0 0 3px rgb(255 215 169 / 8%) !important;
+}
+
+.game-shell.game-theme-blue .rack-board {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.game-shell.game-theme-blue .rack-grid::after {
+  border-top-color: rgb(238 194 150 / 24%) !important;
+  box-shadow: 0 1px 0 rgb(0 0 0 / 30%) !important;
+}
+
+.game-shell.game-theme-blue .rack-cell {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.game-shell.game-theme-blue .rack-grid .rack-cell .tile {
+  width: 64px !important;
+  min-width: 64px !important;
+  max-width: 64px !important;
+  height: 89px !important;
+  min-height: 89px !important;
+  max-height: 89px !important;
+  aspect-ratio: 64 / 89 !important;
+}
+
+.game-shell.game-theme-blue :is(
+  .rack-cell .tile,
+  .rack-discard .tile,
+  .grid .tile,
+  .indicator-tile .tile,
+  .draw-fly .tile
+),
+body:has(.game-shell.game-theme-blue) > .rack-drag-ghost .tile {
+  border: 2px solid #8d735e !important;
+  border-radius: 8px !important;
+  background:
+    linear-gradient(110deg, rgb(255 255 255 / 72%), transparent 32%),
+    linear-gradient(180deg, #fffaf0 0%, #eadfce 100%) !important;
+  box-shadow: 0 2px 0 #6f5847, 0 4px 8px rgb(0 0 0 / 28%) !important;
+}
+
+.game-shell.game-theme-blue .rack-cell.selected .tile {
+  border-color: #dc8194 !important;
+  box-shadow: 0 0 0 3px rgb(201 87 112 / 32%), 0 3px 8px rgb(0 0 0 / 30%) !important;
+}
+
+.game-shell.game-theme-blue .rack-pointer-tile:active .tile,
+body:has(.game-shell.game-theme-blue) > .rack-drag-ghost .tile {
+  transform: none !important;
+}
+
+.game-shell.game-theme-blue .table-matrix .grid .tile.compact,
+.game-shell.game-theme-blue .rack-grid .rack-cell .tile {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 65%),
+    inset 0 -1px 0 rgb(79 56 40 / 22%),
+    0 1px 3px rgb(0 0 0 / 24%) !important;
+}
+
+.game-shell.game-theme-blue :is(
+  .rack-cell .tile,
+  .rack-discard .tile,
+  .grid .tile,
+  .indicator-tile .tile,
+  .draw-fly .tile
+) > span,
+body:has(.game-shell.game-theme-blue) > .rack-drag-ghost .tile > span {
+  font-family: "Arial Rounded MT Bold", "DM Sans", ui-rounded, system-ui, sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -.05em !important;
+}
+
+.game-shell.game-theme-blue .rack-discard,
+.game-shell.game-theme-blue .rack-discard-right,
+.game-shell.game-theme-blue .opponent-discard-corner-left,
+.game-shell.game-theme-blue .opponent-discard-corner-right {
+  border-color: #73594c !important;
+  background: rgb(31 26 23 / 92%) !important;
+}
+
+.game-shell.game-theme-blue > .game-top-actions :is(.game-leave-button, .game-theme-button),
+.game-shell.game-theme-blue > .game-top-actions .game-sound-button,
+.game-shell.game-theme-blue > .game-top-info :is(.game-top-round, .rack-status) {
+  border-color: #5e4b43 !important;
+  background: #211c19 !important;
+  color: var(--dark-text) !important;
+  box-shadow: none !important;
+}
+
+.game-shell.game-theme-blue .center-deck-tile,
+.game-shell.game-theme-blue .center-deck-stack > i {
+  border-color: #8d735e !important;
+  background: #f7eddd !important;
+  color: #49372d !important;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 30%) !important;
+}
+
+.game-shell.game-theme-blue .table-controls :is(button, output) {
+  border-color: #665149 !important;
+  color: var(--dark-text) !important;
+  box-shadow: none !important;
+}
+
+.game-shell.game-theme-blue .table-mode-buttons button:nth-child(1),
+.game-shell.game-theme-blue .table-mode-buttons button:nth-child(2) {
+  border-color: #8c5360 !important;
+  background: #4a3036 !important;
+  color: #fbe9ed !important;
+}
+
+.game-shell.game-theme-blue .table-mode-buttons button.active {
+  border-color: var(--dark-rose-strong) !important;
+  background: var(--dark-rose) !important;
+  color: #fff !important;
+}
+
+.game-shell.game-theme-blue .table-action-buttons button:nth-child(1),
+.game-shell.game-theme-blue .table-action-buttons button:nth-child(2) {
+  border-color: #615049 !important;
+  background: #28221f !important;
+  color: var(--dark-text) !important;
+}
+
+.game-shell.game-theme-blue .table-controls button:disabled {
+  border-color: #3d3531 !important;
+  background: #2b2724 !important;
+  color: #776d67 !important;
+  opacity: 1 !important;
+}
+
+.game-shell.game-theme-blue .rack-actions button {
+  border-color: #9d5263 !important;
+  background: #432c32 !important;
+  color: #ffeef2 !important;
+  box-shadow: none !important;
+}
+
+.game-shell.game-theme-blue .rack-actions button:hover {
+  border-color: #d16b80 !important;
+  background: #593440 !important;
+  transform: none !important;
+}
+
+.game-shell.game-theme-blue :is(.minimal-side-profile, .minimal-top-profile),
+.game-shell.game-theme-blue :is(.minimal-side-profile, .minimal-top-profile).opened-profile {
+  border-color: #d26a80 !important;
+  background: #973e54 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+.game-shell.game-theme-blue :is(.minimal-side-profile, .minimal-top-profile) :is(
+  .minimal-side-profile-order,
+  .minimal-side-profile-opening,
+  .minimal-top-profile-order,
+  .minimal-top-profile-opening,
+  strong,
+  small
+) {
+  color: #fff !important;
+}
+
+.game-shell.game-theme-blue :is(.minimal-side-profile, .minimal-top-profile).active-turn-profile,
+.game-shell.game-theme-blue :is(.minimal-side-profile, .minimal-top-profile).opened-profile.active-turn-profile {
+  border: 2px solid #ffc1ce !important;
+  background: #b84b63 !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+.game-shell.game-theme-blue .turn-timer-track,
+.game-shell.game-theme-blue .rack-status {
+  background: #332a27 !important;
+}
+
+.game-shell.game-theme-blue .turn-timer-track span,
+.game-shell.game-theme-blue .rack-status > span {
+  background: var(--dark-rose) !important;
+}
+
+.game-shell.game-theme-blue > .game-center-info .opening-counter,
+.game-shell.game-theme-blue > .game-center-info .opening-counter.complete {
+  border-color: #d16b80 !important;
+  background: #983f54 !important;
+  color: #fff !important;
+}
+
+.game-shell.game-theme-blue .rack-board > .rack-opening-bubble,
+.game-shell.game-theme-blue .rack-board > .rack-opening-bubble.opened-profile {
+  --status-panel-bg: #1f1a18;
+  --status-panel-border: #a95a6b;
+  top: -58px !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(76px, 1fr)) !important;
+  gap: 6px !important;
+  width: 190px !important;
+  min-width: 190px !important;
+  height: 48px !important;
+  padding: 5px !important;
+  border: 1px solid var(--status-panel-border) !important;
+  border-radius: 14px !important;
+  background: var(--status-panel-bg) !important;
+  color: var(--dark-text) !important;
+  box-shadow: 0 7px 20px rgb(0 0 0 / 28%) !important;
+  box-sizing: border-box !important;
+}
+
+.game-shell.game-theme-blue .rack-board > .rack-opening-bubble > span {
+  display: grid !important;
+  grid-template-rows: 11px 18px !important;
+  place-items: center !important;
+  gap: 1px !important;
+  height: 36px !important;
+  padding: 3px 8px !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  background: #432b32 !important;
+  box-sizing: border-box !important;
+}
+
+.game-shell.game-theme-blue .rack-board > .rack-opening-bubble small {
+  color: #f39bad !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  line-height: 11px !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+}
+
+.game-shell.game-theme-blue .rack-board > .rack-opening-bubble b {
+  color: var(--dark-text) !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
+  line-height: 18px !important;
+}
+
+.game-shell.game-theme-blue .rack-board > .rack-opening-bubble::after {
+  right: 24px !important;
+  bottom: -6px !important;
+  width: 10px !important;
+  height: 10px !important;
+  border-color: var(--status-panel-border) !important;
+  background: var(--status-panel-bg) !important;
+}
+
+.round-result-portal.game-theme-blue {
+  background: rgb(13 11 10 / 95%) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+.round-result-portal.game-theme-blue .round-result-content {
+  width: 620px !important;
+  padding: 28px !important;
+  border: 1px solid #654d43 !important;
+  border-radius: 24px !important;
+  background: #211c19 !important;
+  color: #fff7ed !important;
+  box-shadow: 0 18px 55px rgb(0 0 0 / 44%) !important;
+}
+
+.round-result-portal.game-theme-blue .round-result-content > small {
+  display: inline-flex !important;
+  padding: 7px 13px !important;
+  border-radius: 999px !important;
+  background: #3a302b !important;
+  color: #d8c6bb !important;
+}
+
+.round-result-portal.game-theme-blue .round-result-content h2 {
+  color: #fff7ed !important;
+}
+
+.round-result-portal.game-theme-blue .round-score-list {
+  display: grid !important;
+  gap: 8px !important;
+  border: 0 !important;
+}
+
+.round-result-portal.game-theme-blue .round-score-list > div {
+  border: 1px solid #51423c !important;
+  border-radius: 14px !important;
+  background: #2a2421 !important;
+}
+
+.round-result-portal.game-theme-blue .round-score-list > div.leader {
+  border-color: #d2677c !important;
+  background: #63303d !important;
+}
+
+.round-result-portal.game-theme-blue .round-score-list > div.leader,
+.round-result-portal.game-theme-blue .round-score-list > div.leader > :is(span, small, b) {
+  color: #ffdce3 !important;
+}
+
+.round-result-portal.game-theme-blue .next-hand-button {
+  border: 1px solid #e1778c !important;
+  border-radius: 14px !important;
+  background: #c95770 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+/* Soft istaka hesap karti: iki okunakli mini bilgi alani. */
+.game-shell.game-theme-green .rack-board > .rack-opening-bubble,
+.game-shell.game-theme-green .rack-board > .rack-opening-bubble.opened-profile {
+  --status-panel-bg: #fff8ec;
+  --status-panel-border: #c66b7e;
+  top: -58px !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(76px, 1fr)) !important;
+  gap: 6px !important;
+  width: 190px !important;
+  min-width: 190px !important;
+  height: 48px !important;
+  padding: 5px !important;
+  border: 1px solid var(--status-panel-border) !important;
+  border-radius: 14px !important;
+  background: var(--status-panel-bg) !important;
+  color: #49372d !important;
+  box-shadow: 0 5px 14px rgb(105 66 48 / 14%) !important;
+  box-sizing: border-box !important;
+}
+
+.game-shell.game-theme-green .rack-board > .rack-opening-bubble > span {
+  display: grid !important;
+  grid-template-rows: 11px 18px !important;
+  place-items: center !important;
+  gap: 1px !important;
+  height: 36px !important;
+  padding: 3px 8px !important;
+  border-radius: 9px !important;
+  background: #f5e1e4 !important;
+  color: #49372d !important;
+  opacity: 1 !important;
+  box-sizing: border-box !important;
+}
+
+.game-shell.game-theme-green .rack-board > .rack-opening-bubble small {
+  color: #9a4055 !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  line-height: 11px !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+}
+
+.game-shell.game-theme-green .rack-board > .rack-opening-bubble b {
+  color: #49372d !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
+  line-height: 18px !important;
+}
+
+.game-shell.game-theme-green .rack-board > .rack-opening-bubble::after {
+  right: 24px !important;
+  bottom: -6px !important;
+  width: 10px !important;
+  height: 10px !important;
+  border-color: var(--status-panel-border) !important;
+  background: var(--status-panel-bg) !important;
+}
+
+/* Seri ve cift sayaclari okunakli, buton gorunumlu kontrol kartlaridir. */
+.game-shell.game-theme-green > .game-center-info .opening-counter {
+  display: grid !important;
+  place-items: center !important;
+  border: 2px solid #b95b70 !important;
+  border-radius: 10px !important;
+  background: #dc8999 !important;
+  color: #fff !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 28%) !important;
+}
+
+.game-shell.game-theme-green > .game-center-info .opening-counter.complete {
+  border-color: #8f3c55 !important;
+  background: #b94f68 !important;
+  color: #fff !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).active-turn-profile,
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).opened-profile.active-turn-profile {
+  border: 2px solid #8f3c55 !important;
+  box-shadow: 0 4px 14px rgb(143 60 85 / 22%) !important;
+  animation: soft-turn-profile-pulse 1.35s ease-in-out infinite !important;
+}
+
+@keyframes soft-turn-profile-pulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgb(143 60 85 / 18%);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgb(143 60 85 / 34%);
+  }
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).active-turn-profile {
+  border-color: #fff0bd !important;
+}
+
+/* Soft taslar ayni hucre merkezinde kalir, gorsel bosluk hafif azalir. */
+.game-shell.game-theme-green .rack-grid .rack-cell .tile {
+  width: 64px !important;
+  min-width: 64px !important;
+  max-width: 64px !important;
+  height: 89px !important;
+  min-height: 89px !important;
+  max-height: 89px !important;
+  aspect-ratio: 64 / 89 !important;
+}
+
+/* Soft tema: tek ve tutarli renk paleti. */
+.game-shell.game-theme-green {
+  --soft-cream: #f6f0df;
+  --soft-surface: #fffaf0;
+  --soft-board: #ead2ad;
+  --soft-wood: #dfad72;
+  --soft-rose: #d46179;
+  --soft-rose-dark: #9f4057;
+  --soft-rose-muted: #dfa0ad;
+  --soft-ink: #49372d;
+  background: var(--soft-cream) !important;
+  border-color: #ded0b8 !important;
+}
+
+html:has(.game-shell.game-theme-green),
+body:has(.game-shell.game-theme-green) {
+  background: var(--soft-cream, #f6f0df) !important;
+}
+
+.game-shell.game-theme-green .table-matrix > .grid.series,
+.game-shell.game-theme-green .table-matrix > .grid.series.active-zone,
+.game-shell.game-theme-green .table-matrix > .grid.pairs,
+.game-shell.game-theme-green .table-matrix > .grid.pairs.active-zone {
+  border-color: #c9a77e !important;
+  background:
+    repeating-linear-gradient(3deg, rgb(117 77 41 / 3%) 0 1px, transparent 1px 10px),
+    linear-gradient(180deg, #f3e3ca 0%, var(--soft-board) 100%) !important;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 52%) !important;
+}
+
+.game-shell.game-theme-green .table-matrix > .grid.active-zone,
+.game-shell.game-theme-green .table-matrix > .grid.series.active-zone,
+.game-shell.game-theme-green .table-matrix > .grid.pairs.active-zone {
+  border-color: var(--soft-rose) !important;
+  outline: 2px solid rgb(212 97 121 / 34%) !important;
+  outline-offset: -2px !important;
+}
+
+.game-shell.game-theme-green .rack-grid {
+  border-color: #b98250 !important;
+  background:
+    repeating-linear-gradient(2deg, transparent 0 8px, rgb(112 70 34 / 6%) 9px 10px),
+    repeating-linear-gradient(92deg, transparent 0 72px, rgb(255 255 255 / 7%) 73px 75px),
+    linear-gradient(180deg, #e9c18d 0%, var(--soft-wood) 100%) !important;
+}
+
+.game-shell.game-theme-green .rack-discard,
+.game-shell.game-theme-green .rack-discard-right,
+.game-shell.game-theme-green .opponent-discard-corner-left,
+.game-shell.game-theme-green .opponent-discard-corner-right {
+  border-color: #d8c4a5 !important;
+  background: rgb(255 250 239 / 86%) !important;
+}
+
+.game-shell.game-theme-green .table-mode-buttons button:nth-child(1),
+.game-shell.game-theme-green .table-mode-buttons button:nth-child(2) {
+  border-color: #cb7d8d !important;
+  background: #f2c5ce !important;
+  color: var(--soft-ink) !important;
+}
+
+.game-shell.game-theme-green .table-mode-buttons button.active {
+  border-color: var(--soft-rose-dark) !important;
+  background: var(--soft-rose) !important;
+  color: #fff !important;
+}
+
+.game-shell.game-theme-green .table-action-buttons button:nth-child(1),
+.game-shell.game-theme-green .table-action-buttons button:nth-child(2) {
+  border-color: #cfbba0 !important;
+  background: #fff8ec !important;
+  color: var(--soft-ink) !important;
+}
+
+.game-shell.game-theme-green .table-controls button:disabled {
+  border-color: #d8d0c4 !important;
+  background: #e8e2d8 !important;
+  color: #9a9389 !important;
+  opacity: 1 !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile),
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).opened-profile {
+  border-color: #c56f82 !important;
+  background: var(--soft-rose-muted) !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).opened-profile {
+  background: #d98294 !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).active-turn-profile {
+  border: 3px solid var(--soft-rose-dark) !important;
+  box-shadow:
+    0 0 0 3px rgb(255 245 226 / 78%),
+    0 6px 18px rgb(126 58 74 / 20%) !important;
+}
+
+.game-shell.game-theme-green .turn-timer-track span,
+.game-shell.game-theme-green .rack-status > span {
+  background: var(--soft-rose) !important;
+}
+
+.game-shell.game-theme-green .rack-opening-bubble.opened-profile,
+.game-shell.game-theme-green .opening-counter.complete {
+  border-color: #c9798a !important;
+  background: #f4ccd4 !important;
+  color: #8f3c51 !important;
+}
+
+/* Soft profil hiyerarsisi: normal, acmis ve sirasi gelen. */
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile) {
+  border-color: #d4b18d !important;
+  background: #f8ead5 !important;
+  color: #543e31 !important;
+  box-shadow: 0 4px 12px rgb(105 73 44 / 10%) !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile) :is(
+  .minimal-side-profile-order,
+  .minimal-side-profile-opening,
+  .minimal-top-profile-order,
+  .minimal-top-profile-opening,
+  strong,
+  small
+) {
+  color: #543e31 !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).opened-profile {
+  border-color: #bf6277 !important;
+  background: #da8496 !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).opened-profile :is(
+  .minimal-side-profile-order,
+  .minimal-side-profile-opening,
+  .minimal-top-profile-order,
+  .minimal-top-profile-opening,
+  strong,
+  small
+) {
+  color: #fff !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).active-turn-profile,
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).opened-profile.active-turn-profile {
+  border: 3px solid #fff0c8 !important;
+  background: #be526b !important;
+  box-shadow:
+    0 0 0 4px #923a50,
+    0 8px 22px rgb(114 46 62 / 28%) !important;
+  animation: soft-turn-profile-pulse 1.35s ease-in-out infinite !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).active-turn-profile :is(
+  .minimal-side-profile-order,
+  .minimal-side-profile-opening,
+  .minimal-top-profile-order,
+  .minimal-top-profile-opening,
+  strong,
+  small
+) {
+  color: #fff !important;
+}
+
+@keyframes soft-turn-profile-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px #923a50, 0 8px 18px rgb(114 46 62 / 22%);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgb(190 82 107 / 42%), 0 10px 26px rgb(114 46 62 / 34%);
+  }
+}
+
+/* Acilis durumu kart rengini degistirmez; yalnizca metinde gosterilir. */
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile),
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).opened-profile {
+  border-color: #bf6277 !important;
+  background: #da8496 !important;
+  color: #fff !important;
+}
+
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile) :is(
+  .minimal-side-profile-order,
+  .minimal-side-profile-opening,
+  .minimal-top-profile-order,
+  .minimal-top-profile-opening,
+  strong,
+  small
+) {
+  color: #fff !important;
+}
+
+/* Aktif profil: ince renkli cerceve, kalin halka yok. */
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).active-turn-profile,
+.game-shell.game-theme-green :is(.minimal-side-profile, .minimal-top-profile).opened-profile.active-turn-profile {
+  border: 2px solid #8f3c55 !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+@keyframes soft-turn-profile-pulse-thin {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgb(143 60 85 / 18%);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgb(143 60 85 / 34%);
+  }
 }

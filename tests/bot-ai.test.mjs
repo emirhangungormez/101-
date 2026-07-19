@@ -80,6 +80,42 @@ test("bot stacks a pair opening vertically and leaves processing to one plan", (
   assert.equal(new Set(plan.placements.map((item) => item.col)).size, 2);
 });
 
+test("automatic openings leave four empty cells around existing table tiles", () => {
+  const room = yeniOda(
+    "spaced-bot-room",
+    "Bot",
+    { socketId: "owner", kullaniciId: "owner" },
+    2,
+  );
+  const hand = [
+    tile("r11", "kirmizi", 11), tile("r12", "kirmizi", 12), tile("r13", "kirmizi", 13),
+    tile("b11", "mavi", 11), tile("b12", "mavi", 12), tile("b13", "mavi", 13),
+    tile("k10", "siyah", 10), tile("k11", "siyah", 11), tile("k12", "siyah", 12),
+    tile("spare", "sari", 1),
+  ];
+  const bot = {
+    socketId: "robot-spaced",
+    isim: "Robot",
+    bot: true,
+    koltukNo: 1,
+    eldekiTaslar: hand,
+    cekildiMi: true,
+    acilisTipi: null,
+  };
+  room.oyuncular = [bot];
+  room.gameState.gosterge = tile("indicator", "sari", 5);
+  room.gameState.masaZemini.seri = [
+    { zone: "series", row: 9, col: 19, tasId: "existing" },
+  ];
+  const plan = botMasaPlani(room, bot);
+  assert.equal(plan?.mode, "series");
+  assert.ok(
+    plan.placements.every(
+      (item) => Math.max(Math.abs(item.row - 9), Math.abs(item.col - 19)) >= 5,
+    ),
+  );
+});
+
 test("bot protects the real okey when choosing a discard", () => {
   const indicator = tile("indicator", "kirmizi", 5);
   const hand = [

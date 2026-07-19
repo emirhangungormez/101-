@@ -88,6 +88,13 @@ function gruplariYerlestir(oda, zone, groups) {
     ? oda.gameState.masaZemini.cift || []
     : oda.gameState.masaZemini.seri || [];
   const occupied = new Set(committed.map((cell) => key(cell.row, cell.col)));
+  // Diger oyuncularin perlerine iki yonden de tas islenebilmesi icin
+  // mevcut acilislarla yeni blok arasinda dort bos hucre korunur.
+  const hasOpeningClearance = (row, col) =>
+    committed.every(
+      (cell) =>
+        Math.max(Math.abs(cell.row - row), Math.abs(cell.col - col)) >= 5,
+    );
   const placements = [];
   const groupsPerBlock = 5;
   const blocks = Array.from(
@@ -145,7 +152,11 @@ function gruplariYerlestir(oda, zone, groups) {
             !occupied.has(key(groupRow, groupEnd));
           const cellsFree = group.tiles.every(
             (_, offset) =>
-              !occupied.has(key(groupRow, candidateColumn + offset)),
+              !occupied.has(key(groupRow, candidateColumn + offset)) &&
+              hasOpeningClearance(
+                groupRow,
+                candidateColumn + offset,
+              ),
           );
           return beforeFree && afterFree && cellsFree;
         }),
