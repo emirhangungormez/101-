@@ -11,7 +11,7 @@ import {
 } from "../shared/okey-rules.js";
 
 export const aktifOdalar = Object.create(null);
-export const MAKSIMUM_AKTIF_ODA_SAYISI = 5;
+export const MAKSIMUM_AKTIF_ODA_SAYISI = 50;
 
 export function yeniOdaOlusturulabilir() {
   return Object.keys(aktifOdalar).length < MAKSIMUM_AKTIF_ODA_SAYISI;

@@ -539,6 +539,8 @@ export default function Home() {
   const [sideDrawTileId, setSideDrawTileId] = useState<string | null>(null);
   const [turnPhase, setTurnPhase] = useState<"draw" | "discard">("draw");
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [isServerReady, setIsServerReady] = useState(false);
+  const pendingCreateRoomRef = useRef<any>(null);
   const requestMobileFullscreen = () => {
     if (
       typeof window === "undefined" ||
@@ -1126,6 +1128,11 @@ export default function Home() {
       );
     };
     s.on("connect", () => {
+      setIsServerReady(true);
+      if (pendingCreateRoomRef.current) {
+        s.emit("oda-olustur", pendingCreateRoomRef.current);
+        pendingCreateRoomRef.current = null;
+      }
       s.emit("oda-listesi-iste");
       const reconnectRoomId = window.localStorage.getItem("okey-joined-room");
       if (reconnectRoomId)
@@ -1135,6 +1142,12 @@ export default function Home() {
           avatar: profileEmoji,
           kullaniciId: userId,
         });
+    });
+    s.on("disconnect", () => {
+      setIsServerReady(false);
+    });
+    s.on("connect_error", () => {
+      setIsServerReady(false);
     });
     s.on("oda-listesi", mapRooms);
     s.on("oda-durum", (room) => {
@@ -2821,36 +2834,20 @@ export default function Home() {
   };
   const createRoom = () => {
     setJoinedRoom(false);
+    const params = {
+      odaAdi: roomName || "Yeni Masa",
+      maksimum: roomSize,
+      kullaniciId: userId,
+      kuralTipi: roomRule,
+      erisimTipi: roomAccess,
+      toplamEl: roomHands,
+    };
     if (socket?.connected) {
-      socket.emit("oda-olustur", {
-        odaAdi: roomName || "Yeni Masa",
-        maksimum: roomSize,
-        kullaniciId: userId,
-        kuralTipi: roomRule,
-        erisimTipi: roomAccess,
-        toplamEl: roomHands,
-      });
+      socket.emit("oda-olustur", params);
       return;
     }
-    const id = Date.now();
-    setRooms((old) => [
-      ...old,
-      {
-        id,
-        name: roomName || "Yeni Masa",
-        owner: "Siz",
-        players: 0,
-        max: roomSize,
-        status: "",
-        rule: roomRule,
-        access: roomAccess,
-        hands: roomHands,
-        started: false,
-      },
-    ]);
-    setSelectedRoom(id);
-    setBots(0);
-    setScreen("room");
+    pendingCreateRoomRef.current = params;
+    setNotice("Sunucu kuruluyor/bağlanılıyor... Bağlantı kurulduğunda odanız otomatik oluşturulacak.");
   };
   const deleteRoom = (id: number) => {
     socket?.emit("oda-sil", { odaId: id, kullaniciId: userId });
@@ -2875,7 +2872,11 @@ export default function Home() {
       kullaniciId: userId,
     });
   const joinSeat = (seat = 0) => {
-    socket?.emit("oda-katil", {
+    if (!socket?.connected) {
+      setNotice("Sunucu kuruluyor, lütfen bağlantı kurulunca tekrar deneyin.");
+      return;
+    }
+    socket.emit("oda-katil", {
       odaId: selectedRoom,
       koltukNo: seat,
       isim: profileName,
@@ -2955,14 +2956,12 @@ export default function Home() {
       <Lobby
         rooms={rooms}
         joinedRoomId={joinedRoomId}
+        isServerReady={isServerReady}
+        notice={notice}
         roomName={roomName}
         setRoomName={setRoomName}
         roomSize={roomSize}
         setRoomSize={setRoomSize}
-        roomRule={roomRule}
-        setRoomRule={setRoomRule}
-        roomAccess={roomAccess}
-        setRoomAccess={setRoomAccess}
         roomHands={roomHands}
         setRoomHands={setRoomHands}
         onCreate={createRoom}
@@ -3973,6 +3972,8 @@ function RedesignedLobby({
     currentHand?: number;
   }[];
   joinedRoomId: number | string | null;
+  isServerReady?: boolean;
+  notice?: string;
   roomName: string;
   setRoomName: (v: string) => void;
   roomSize: 2 | 3 | 4;
@@ -4227,6 +4228,8 @@ function Lobby(props: Parameters<typeof RedesignedLobby>[0]) {
   const {
     rooms,
     joinedRoomId,
+    isServerReady,
+    notice,
     roomName,
     setRoomName,
     roomSize,
@@ -4251,8 +4254,16 @@ function Lobby(props: Parameters<typeof RedesignedLobby>[0]) {
     const room = rooms.find(
       (item) => String(item.id).toLowerCase() === normalized,
     );
-    if (!value || !room) {
+    if (!value) {
       setInviteError("Geçerli bir davet kodu yaz");
+      return;
+    }
+    if (!isServerReady) {
+      setInviteError("Sunucu kuruluyor, bağlantı sağlanınca tekrar deneyin");
+      return;
+    }
+    if (!room) {
+      setInviteError("Bu davet koduna ait masa bulunamadı");
       return;
     }
     setInviteError("");
@@ -4264,9 +4275,23 @@ function Lobby(props: Parameters<typeof RedesignedLobby>[0]) {
         <span aria-hidden="true">←</span>
         Geri
       </button>
+      <div className="lobby-top-status">
+        <span
+          className={`server-status-indicator ${
+            isServerReady ? "ready" : "connecting"
+          }`}
+        >
+          <span className="status-dot" aria-hidden="true" />
+          <b>{isServerReady ? "Sunucu hazır" : "Sunucu kuruluyor..."}</b>
+          {!isServerReady && (
+            <small>(İlk açılışta 15-30 sn sürebilir)</small>
+          )}
+        </span>
+      </div>
       <section className="lobby-content">
         <div className="create-panel">
           <h1>Oyun oluştur</h1>
+          {notice && <div className="lobby-notice-banner">{notice}</div>}
           <span className="create-field-label">Oda adı</span>
           <input
             aria-label="Oda adı"

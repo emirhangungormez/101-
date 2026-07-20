@@ -11992,3 +11992,102 @@ body:has(.game-shell.game-theme-green) {
     box-shadow: 0 4px 16px rgb(143 60 85 / 34%);
   }
 }
+
+/* Server Status Badge */
+.lobby-top-status {
+  position: absolute;
+  top: 28px;
+  right: 28px;
+  z-index: 10;
+}
+
+.lobby-notice-banner {
+  margin: 12px 0 8px;
+  padding: 8px 14px;
+  border-radius: 9px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .lobby-top-status {
+    top: 20px;
+    right: 16px;
+  }
+}
+
+.server-status-pill {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0 16px;
+  width: 100%;
+}
+
+.server-status-indicator {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 14px !important;
+  border-radius: 11px !important;
+  box-shadow: none !important;
+  font: 750 13px/1 "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+  letter-spacing: 0 !important;
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease !important;
+}
+
+.server-status-indicator.connecting {
+  border: 1px solid #ffe58f !important;
+  background: #fffbe6 !important;
+  color: #d48806 !important;
+}
+
+.server-status-indicator.ready {
+  border: 1px solid #b7eb8f !important;
+  background: #f6ffed !important;
+  color: #389e0d !important;
+}
+
+.server-status-indicator .status-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  display: inline-block !important;
+  flex-shrink: 0 !important;
+}
+
+.server-status-indicator.connecting .status-dot {
+  background-color: #faad14 !important;
+  box-shadow: 0 0 0 3px rgba(250, 173, 20, 0.25) !important;
+  animation: serverDotPulse 1.4s infinite ease-in-out !important;
+}
+
+.server-status-indicator.ready .status-dot {
+  background-color: #52c41a !important;
+  box-shadow: 0 0 0 3px rgba(82, 196, 26, 0.25) !important;
+}
+
+.server-status-indicator small {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  opacity: 0.85 !important;
+  margin-left: 2px !important;
+}
+
+@keyframes serverDotPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.5;
+  }
+}
