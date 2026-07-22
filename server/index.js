@@ -198,7 +198,6 @@ const eliBitir = (oda, oyuncu, atilan, options = {}) => {
   });
   oyunDurumu(oda);
   odaDurumu(oda);
-  if (sonuc.macBitti) odayiSil(oda);
   odaListesi();
 };
 const eliBerabereBitir = (oda) => {
@@ -215,7 +214,6 @@ const eliBerabereBitir = (oda) => {
   });
   oyunDurumu(oda);
   odaDurumu(oda);
-  if (sonuc.macBitti) odayiSil(oda);
   odaListesi();
 };
 const desteBittiBildir = (oda, sonOyuncu = null) => {

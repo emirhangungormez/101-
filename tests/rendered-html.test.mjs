@@ -33,6 +33,8 @@ test("keeps the multiplayer match controls in the application source", async () 
   ]);
   assert.match(page, /\[5, 10, 20\]/);
   assert.match(page, /Eli Oyna/);
+  assert.match(page, /Yeni Oyuna Başla/);
+  assert.match(page, /const prepareGame[\s\S]*?applyGame\(room\)/);
   assert.match(page, /dealAnimationKey/);
   assert.match(page, /round-complete/);
   assert.match(page, /round-result/);

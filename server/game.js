@@ -339,6 +339,8 @@ export function eliTamamla(
   const macBitti = g.tamamlananEl >= Number(oda.toplamEl || 5);
   g.elDurumu = macBitti ? "mac-tamamlandi" : "tamamlandi";
   if (macBitti) {
+    // Mac tamamlaninca oda korunur; ayni oyuncular yeni maca baslayabilir.
+    g.macAktif = false;
     const enDusuk = Math.min(...oda.koltukPuanlari);
     g.macKazananlari = oda.oyuncular
       .filter((oyuncu) => oda.koltukPuanlari[oyuncu.koltukNo] === enDusuk)
@@ -385,6 +387,8 @@ export function eliBerabereTamamla(oda) {
   const macBitti = g.tamamlananEl >= Number(oda.toplamEl || 5);
   g.elDurumu = macBitti ? "mac-tamamlandi" : "tamamlandi";
   if (macBitti) {
+    // Mac tamamlaninca oda korunur; ayni oyuncular yeni maca baslayabilir.
+    g.macAktif = false;
     const enDusuk = Math.min(...oda.koltukPuanlari);
     g.macKazananlari = oda.oyuncular
       .filter((oyuncu) => oda.koltukPuanlari[oyuncu.koltukNo] === enDusuk)

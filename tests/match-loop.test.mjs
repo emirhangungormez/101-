@@ -124,6 +124,7 @@ test("scores a hand, rotates the starter and declares the lowest score winner", 
     { id: "discard-2", renk: "mavi", deger: 4 },
   );
   assert.equal(final.macBitti, true);
+  assert.equal(room.gameState.macAktif, false);
   assert.equal(room.gameState.macKazananlari[0].koltukNo, 0);
 });
 

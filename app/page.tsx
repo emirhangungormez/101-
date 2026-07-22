@@ -1061,6 +1061,7 @@ export default function Home() {
       );
     };
     const prepareGame = (odaId: any, room: any) => {
+      applyGame(room);
       const mine = (room?.oyuncular || []).find(
         (p: any) => p.socketId === s.id || p.kullaniciId === userId,
       );
@@ -3098,17 +3099,19 @@ export default function Home() {
               game.roomOwnerSocketId !== socket?.id && (
                 <p>Oda kurucusu yeni eli başlatacak.</p>
               )}
-            {game.elSonucu.macBitti && (
+            {game.elSonucu.macBitti &&
+              game.roomOwnerSocketId === socket?.id && (
               <button
                 className="next-hand-button menu-return-button"
-                onClick={() => {
-                  leaveRoom();
-                  setScreen("menu");
-                }}
+                onClick={() => socket?.emit("oyun-baslat")}
               >
-                Menüye dön
+                Yeni Oyuna Başla
               </button>
             )}
+            {game.elSonucu.macBitti &&
+              game.roomOwnerSocketId !== socket?.id && (
+                <p>Oda kurucusu yeni oyunu başlatacak.</p>
+              )}
           </div>
         </section>,
         document.body,
